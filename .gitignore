@@ -1,0 +1,44 @@
+# Dependencies
+/node_modules/
+/.pnp/
+.pnp.*
+
+# Expo generated files
+/.expo/
+/dist/
+/web-build/
+expo-env.d.ts
+
+# Local package-manager data
+/.pnpm-store/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Tests and tooling
+/coverage/
+*.tsbuildinfo
+.metro-health-check*
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Native signing and generated files
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Hosting output
+/.vercel/
+
+# Operating-system files
+.DS_Store

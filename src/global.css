@@ -1,0 +1,129 @@
+@import "tailwindcss";
+@import "uniwind";
+
+@theme {
+    --color-background: hsl(var(--background));
+    --color-foreground: hsl(var(--foreground));
+    --color-card: hsl(var(--card));
+    --color-card-foreground: hsl(var(--card-foreground));
+    --color-popover: hsl(var(--popover));
+    --color-popover-foreground: hsl(var(--popover-foreground));
+    --color-primary: hsl(var(--primary));
+    --color-primary-foreground: hsl(var(--primary-foreground));
+    --color-secondary: hsl(var(--secondary));
+    --color-secondary-foreground: hsl(var(--secondary-foreground));
+    --color-muted: hsl(var(--muted));
+    --color-muted-foreground: hsl(var(--muted-foreground));
+    --color-accent: hsl(var(--accent));
+    --color-accent-foreground: hsl(var(--accent-foreground));
+    --color-destructive: hsl(var(--destructive));
+    --color-destructive-foreground: hsl(var(--destructive-foreground));
+    --color-border: hsl(var(--border));
+    --color-input: hsl(var(--input));
+    --color-ring: hsl(var(--ring));
+    --color-rating: hsl(var(--rating));
+    --color-rating-foreground: hsl(var(--rating-foreground));
+    --color-success: hsl(var(--success));
+    --color-success-foreground: hsl(var(--success-foreground));
+    --color-warning: hsl(var(--warning));
+    --color-warning-foreground: hsl(var(--warning-foreground));
+    --color-disabled: hsl(var(--disabled));
+    --color-selected: hsl(var(--selected));
+    --color-elevated: hsl(var(--elevated));
+    --color-scrim: hsl(var(--scrim));
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+}
+
+:root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 218 18% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 218 18% 9%;
+    --primary: 225 58% 46%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 96%;
+    --secondary-foreground: 0 0% 5%;
+    --muted: 220 20% 96%;
+    --muted-foreground: 220 9% 42%;
+    --accent: 220 20% 96%;
+    --accent-foreground: 225 58% 46%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 14% 86%;
+    --input: 220 14% 86%;
+    --ring: 225 58% 46%;
+    --rating: 42.58 100% 42.55%;
+    --rating-foreground: 0 0% 100%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 95% 44%;
+    --warning-foreground: 218 18% 9%;
+    --disabled: 219 9% 64%;
+    --selected: 220 20% 96%;
+    --elevated: 220 20% 96%;
+    --scrim: 0 0% 5%;
+}
+
+:root {
+  &:where(.dark) {
+    --background: 225 18% 4%;
+    --foreground: 216 33% 97%;
+    --card: 223 17% 8%;
+    --card-foreground: 216 33% 97%;
+    --popover: 223 18% 11%;
+    --popover-foreground: 216 33% 97%;
+    --primary: 225 58% 46%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 215 33% 16%;
+    --secondary-foreground: 216 33% 97%;
+    --muted: 223 18% 11%;
+    --muted-foreground: 221 10% 61%;
+    --accent: 215 33% 16%;
+    --accent-foreground: 216 33% 97%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 222 14% 19%;
+    --input: 222 14% 19%;
+    --ring: 225 66% 64%;
+    --rating: 42.58 100% 42.55%;
+    --rating-foreground: 225 18% 4%;
+    --success: 142 71% 45%;
+    --success-foreground: 225 18% 4%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 225 18% 4%;
+    --disabled: 220 9% 42%;
+    --selected: 215 33% 16%;
+    --elevated: 223 18% 11%;
+    --scrim: 0 0% 0%;
+  }
+}
+
+:root:where(.dark) .sidebar-shell,
+:root:where(.dark) .auth-brand-gradient {
+    background-image:
+        radial-gradient(ellipse 85% 34% at 100% 0%, rgb(196 54 250 / 13%), transparent 100%),
+        radial-gradient(ellipse 88% 26% at 0% 100%, rgb(33 124 252 / 12%), transparent 100%);
+}
+
+.sidebar-nav-item-active {
+    --glass-alpha: 24%;
+    background-image: linear-gradient(
+        100deg in oklab,
+        rgb(1 177 251 / var(--glass-alpha)) 0%,
+        rgb(33 124 252 / var(--glass-alpha)) 28%,
+        rgb(196 54 250 / var(--glass-alpha)) 66%,
+        rgb(251 37 131 / var(--glass-alpha)) 100%
+    );
+    -webkit-backdrop-filter: blur(14px) saturate(155%);
+    backdrop-filter: blur(14px) saturate(155%);
+}
+
+:root:where(.dark) .sidebar-nav-item-active {
+    --glass-alpha: 36%;
+    box-shadow: 0 4px 14px rgb(8 6 24 / 20%);
+}
