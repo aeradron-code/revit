@@ -99,7 +99,7 @@ function EntityDetails({ entityId }: { entityId: string }) {
     <>
       <FlatList
         className="flex-1"
-        contentContainerClassName="w-full gap-3 px-6 py-6 md:mx-auto md:max-w-5xl md:px-6 md:py-6"
+        contentContainerClassName="w-full py-1 md:mx-auto md:max-w-5xl md:px-6 md:py-6"
         data={sharePosts}
         keyExtractor={(post) => post.id}
         ListHeaderComponent={

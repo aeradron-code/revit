@@ -1,13 +1,12 @@
 import { Link, router, Stack } from "expo-router";
 import { useEffect, useRef } from "react";
-import { View } from "react-native";
+import { FlatList, View } from "react-native";
 
 import type { ActivityNotification } from "@/api/notifications";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
-import { PageScrollView } from "@/components/ui/page-scroll-view";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { shouldAutoMarkRead } from "@/features/activity/mark-read";
@@ -79,30 +78,40 @@ export default function ActivityScreen() {
           ),
         }}
       />
-      <PageScrollView contentContainerClassName="gap-5" contentWidth="narrow">
-        <Text variant="muted">Your latest social activity.</Text>
-        {notifications.isLoading ? <ContentSkeleton /> : null}
-        {notifications.isError ? (
-          <FeedbackState
-            actionLabel="Retry"
-            onAction={() => void notifications.refetch()}
-            title="Couldn’t load activity."
-            variant="error"
-          />
-        ) : null}
-        {markRead.isError && unreadKey ? (
-          <FeedbackState
-            actionLabel="Retry"
-            onAction={() => markReadNow()}
-            title="Couldn’t mark activity as read."
-            variant="error"
-          />
-        ) : null}
-        {notifications.data?.length === 0 ? <EmptyActivity /> : null}
-        {notifications.data?.map((notification) => (
-          <ActivityItem key={notification.id} notification={notification} />
-        ))}
-      </PageScrollView>
+      <FlatList
+        className="flex-1"
+        contentContainerClassName="mx-auto w-full max-w-2xl gap-3 px-2 py-3 md:py-6"
+        data={notifications.data ?? []}
+        keyExtractor={(notification) => notification.id}
+        ListHeaderComponent={
+          <View className="gap-4">
+            <Text variant="muted">Your latest social activity.</Text>
+            {notifications.isLoading ? <ContentSkeleton /> : null}
+            {notifications.isError ? (
+              <FeedbackState
+                actionLabel="Retry"
+                onAction={() => void notifications.refetch()}
+                title="Couldn’t load activity."
+                variant="error"
+              />
+            ) : null}
+            {markRead.isError && unreadKey ? (
+              <FeedbackState
+                actionLabel="Retry"
+                onAction={() => markReadNow()}
+                title="Couldn’t mark activity as read."
+                variant="error"
+              />
+            ) : null}
+          </View>
+        }
+        ListEmptyComponent={
+          !notifications.isLoading && !notifications.isError ? (
+            <EmptyActivity />
+          ) : undefined
+        }
+        renderItem={({ item }) => <ActivityItem notification={item} />}
+      />
     </SafeAreaView>
   );
 }

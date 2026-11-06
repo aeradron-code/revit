@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 
 import { ImageCarouselViewer } from "@/components/media/image-carousel-viewer";
 import { FORUM_COVER_PRESENTATION } from "@/components/media/image-presentation";
@@ -16,6 +16,12 @@ export function ForumCoverDisplay({
   imageUrl?: string | null;
   className?: string;
 }) {
+  const { width } = useWindowDimensions();
+  const presentation =
+    width < 768
+      ? { ...FORUM_COVER_PRESENTATION, aspectRatio: 3 }
+      : FORUM_COVER_PRESENTATION;
+
   if (imageUrl) {
     return (
       <ImageCarouselViewer
@@ -26,7 +32,7 @@ export function ForumCoverDisplay({
             accessibilityLabel: `${forumName} cover image`,
           },
         ]}
-        presentation={FORUM_COVER_PRESENTATION}
+        presentation={presentation}
         className={className}
         showDots={false}
         showCounter={false}
@@ -38,7 +44,7 @@ export function ForumCoverDisplay({
     <View
       accessibilityLabel={`${forumName} has no cover image`}
       className={cn("relative w-full overflow-hidden bg-selected", className)}
-      style={{ aspectRatio: FORUM_COVER_PRESENTATION.aspectRatio }}
+      style={{ aspectRatio: presentation.aspectRatio }}
     >
       <View className="absolute -left-10 -top-14 size-32 rounded-full bg-primary/15" />
       <View className="absolute left-1/4 top-5 h-24 w-24 rotate-45 rounded-lg bg-primary/10" />

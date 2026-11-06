@@ -3,6 +3,7 @@ import { MoreVertical, Pencil, Trash2 } from "lucide-react-native";
 import { useRef, useState } from "react";
 import {
   Modal,
+  FlatList,
   Pressable,
   RefreshControl,
   useWindowDimensions,
@@ -130,33 +131,43 @@ function SharePostDetail({
 
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View className="flex-1 gap-4 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:gap-6 md:px-6 md:py-6">
-        <SharePostCard
-          isDetail
-          post={{ ...post, ratingScore: score }}
-          entity={entity.data}
-        />
+      <View className="min-h-0 flex-1 py-1 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-2">
         <CommentSection
-          comments={comments}
-          postId={post.id}
-          refreshControl={
-            <RefreshControl
-              refreshing={
-                isPostRefetching ||
-                entity.isRefetching ||
-                ratingScore.isRefetching ||
-                comments.isRefetching
-              }
-              onRefresh={() =>
-                void Promise.all([
-                  refetchPost(),
-                  entity.refetch(),
-                  ratingScore.refetch(),
-                  comments.refetch(),
-                ])
-              }
+          listHeader={
+            <SharePostCard
+              isDetail
+              post={{ ...post, ratingScore: score }}
+              entity={entity.data}
             />
           }
+          comments={comments}
+          postId={post.id}
+          renderList={(content) => (
+            <FlatList
+              {...content}
+              className="flex-1"
+              contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
+              keyboardShouldPersistTaps="handled"
+              refreshControl={
+                <RefreshControl
+                  refreshing={
+                    isPostRefetching ||
+                    entity.isRefetching ||
+                    ratingScore.isRefetching ||
+                    comments.isRefetching
+                  }
+                  onRefresh={() =>
+                    void Promise.all([
+                      refetchPost(),
+                      entity.refetch(),
+                      ratingScore.refetch(),
+                      comments.refetch(),
+                    ])
+                  }
+                />
+              }
+            />
+          )}
         />
       </View>
     </PostDetailFrame>
@@ -178,23 +189,35 @@ function AskPostDetail({
 
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View className="flex-1 gap-4 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:gap-6 md:px-6 md:py-6">
-        <AskPostCard
-          isDetail
-          post={post}
-          ownerActions={isAuthor ? <AuthorActions post={post} /> : undefined}
-        />
+      <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
         <CommentSection
-          comments={comments}
-          postId={post.id}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetching || comments.isRefetching}
-              onRefresh={() =>
-                void Promise.all([refetch(), comments.refetch()])
+          listHeader={
+            <AskPostCard
+              isDetail
+              post={post}
+              ownerActions={
+                isAuthor ? <AuthorActions post={post} /> : undefined
               }
             />
           }
+          comments={comments}
+          postId={post.id}
+          renderList={(content) => (
+            <FlatList
+              {...content}
+              className="flex-1"
+              contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
+              keyboardShouldPersistTaps="handled"
+              refreshControl={
+                <RefreshControl
+                  refreshing={isRefetching || comments.isRefetching}
+                  onRefresh={() =>
+                    void Promise.all([refetch(), comments.refetch()])
+                  }
+                />
+              }
+            />
+          )}
         />
       </View>
     </PostDetailFrame>

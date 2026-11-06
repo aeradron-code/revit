@@ -15,6 +15,7 @@ type PostEngagementActionsProps = {
   postId: string;
   forumId?: string | null;
   isDetail?: boolean;
+  canInteract?: boolean;
   commentsExpanded?: boolean;
   onCommentPress?: () => void;
   onRatingPress?: () => void;
@@ -30,6 +31,7 @@ export function PostEngagementActions({
   commentsExpanded = false,
   forumId,
   isDetail = false,
+  canInteract = true,
   onCommentPress,
   onRatingPress,
   postId,
@@ -54,6 +56,7 @@ export function PostEngagementActions({
         <Button
           accessibilityLabel="Rate this post"
           accessibilityState={{ expanded: ratingExpanded }}
+          disabled={!canInteract}
           className={`gap-1.5 border px-3 ${ratingExpanded ? "border-primary bg-selected" : "border-transparent"}`}
           onPress={onRatingPress}
           variant="ghost"
@@ -99,6 +102,7 @@ export function PostEngagementActions({
               : `View ${commentCount} ${commentCount === 1 ? "comment" : "comments"}`
           }
           accessibilityState={{ expanded: commentsExpanded }}
+          disabled={!canInteract}
           className={`h-8 gap-1.5 border ${commentsExpanded ? "border-primary bg-selected" : "border-transparent"}`}
           onPress={onCommentPress}
           variant="ghost"

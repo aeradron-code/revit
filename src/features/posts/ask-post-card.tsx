@@ -20,6 +20,7 @@ import { PostAuthorHeader } from "./post-author-header";
 import { PostMediaGallery } from "./post-media-gallery";
 
 type AskPostCardProps = {
+  canInteract?: boolean;
   isDetail?: boolean;
   ownerActions?: ReactNode;
   post: PostWithDetails;
@@ -27,6 +28,7 @@ type AskPostCardProps = {
 
 export function AskPostCard({
   isDetail = false,
+  canInteract = true,
   post,
   ownerActions,
 }: AskPostCardProps) {
@@ -85,6 +87,7 @@ export function AskPostCard({
         <View className="flex-row items-start p-2">
           <PostEngagementActions
             commentsExpanded={!isDetail && isCommentsExpanded}
+            canInteract={canInteract}
             forumId={post.forum_id}
             isDetail={isDetail}
             onCommentPress={
@@ -105,13 +108,13 @@ export function AskPostCard({
             engagement={post.engagement}
           />
         </View>
-        {isRatingExpanded ? (
+        {isRatingExpanded && canInteract ? (
           <AskRatingControl
             onClose={() => setExpandedDrawer(null)}
             postId={post.id}
           />
         ) : null}
-        {!isDetail && isCommentsExpanded ? (
+        {!isDetail && isCommentsExpanded && canInteract ? (
           <InlineCommentDrawer postId={post.id} />
         ) : null}
       </CardFooter>

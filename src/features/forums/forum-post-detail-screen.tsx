@@ -1,6 +1,6 @@
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import type { ReactNode } from "react";
-import { RefreshControl, View } from "react-native";
+import { FlatList, RefreshControl, View } from "react-native";
 
 import type { PostWithDetails } from "@/api/posts";
 import type { SharePostWithDetails } from "@/api/shares";
@@ -15,6 +15,7 @@ import { useTopLevelComments } from "@/queries/comments";
 import { useEntity } from "@/queries/entities";
 import { usePost } from "@/queries/posts";
 import { useShareRatingScore } from "@/queries/shares";
+import { useForum } from "@/queries/forums";
 import { PostDetailFrame } from "@/features/posts/post-detail-frame";
 
 export function ForumPostDetailScreen() {
@@ -28,6 +29,10 @@ export function ForumPostDetailScreen() {
     : (params.postId ?? "");
   const user = useAuthUser();
   const viewerId = user?.id ?? "";
+  const forum = useForum(forumId, viewerId);
+  const canInteract = Boolean(
+    forum.data && (forum.data.isMember || forum.data.owner_id === user?.id),
+  );
   const post = usePost(postId, viewerId);
   const comments = useTopLevelComments(postId, { viewerId });
 
@@ -73,6 +78,7 @@ export function ForumPostDetailScreen() {
   if (post.data.post_type === "SHARE") {
     return (
       <ForumSharePostDetail
+        canInteract={canInteract}
         comments={comments}
         isPostRefetching={post.isRefetching}
         post={post.data}
@@ -83,19 +89,30 @@ export function ForumPostDetailScreen() {
 
   return (
     <ForumPostFrame forumId={forumId}>
-      <View className="flex-1 gap-4 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:gap-6 md:px-6 md:py-6">
-        <AskPostCard isDetail post={post.data} />
+      <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
         <CommentSection
+          canInteract={canInteract}
+          listHeader={
+            <AskPostCard canInteract={canInteract} isDetail post={post.data} />
+          }
           comments={comments}
           postId={post.data.id}
-          refreshControl={
-            <RefreshControl
-              refreshing={post.isRefetching || comments.isRefetching}
-              onRefresh={() =>
-                void Promise.all([post.refetch(), comments.refetch()])
+          renderList={(content) => (
+            <FlatList
+              {...content}
+              className="flex-1"
+              contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
+              keyboardShouldPersistTaps="handled"
+              refreshControl={
+                <RefreshControl
+                  refreshing={post.isRefetching || comments.isRefetching}
+                  onRefresh={() =>
+                    void Promise.all([post.refetch(), comments.refetch()])
+                  }
+                />
               }
             />
-          }
+          )}
         />
       </View>
     </ForumPostFrame>
@@ -103,11 +120,13 @@ export function ForumPostDetailScreen() {
 }
 
 function ForumSharePostDetail({
+  canInteract,
   comments,
   isPostRefetching,
   post,
   refetchPost,
 }: {
+  canInteract: boolean;
   comments: ReturnType<typeof useTopLevelComments>;
   isPostRefetching: boolean;
   post: PostWithDetails;
@@ -147,29 +166,45 @@ function ForumSharePostDetail({
 
   return (
     <ForumPostFrame forumId={post.forum_id ?? ""}>
-      <View className="flex-1 gap-4 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:gap-6 md:px-6 md:py-6">
-        <SharePostCard isDetail post={sharePost} entity={entity.data} />
+      <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
         <CommentSection
-          comments={comments}
-          postId={post.id}
-          refreshControl={
-            <RefreshControl
-              refreshing={
-                isPostRefetching ||
-                entity.isRefetching ||
-                score.isRefetching ||
-                comments.isRefetching
-              }
-              onRefresh={() =>
-                void Promise.all([
-                  refetchPost(),
-                  entity.refetch(),
-                  score.refetch(),
-                  comments.refetch(),
-                ])
-              }
+          canInteract={canInteract}
+          listHeader={
+            <SharePostCard
+              canInteract={canInteract}
+              isDetail
+              post={sharePost}
+              entity={entity.data}
             />
           }
+          comments={comments}
+          postId={post.id}
+          renderList={(content) => (
+            <FlatList
+              {...content}
+              className="flex-1"
+              contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
+              keyboardShouldPersistTaps="handled"
+              refreshControl={
+                <RefreshControl
+                  refreshing={
+                    isPostRefetching ||
+                    entity.isRefetching ||
+                    score.isRefetching ||
+                    comments.isRefetching
+                  }
+                  onRefresh={() =>
+                    void Promise.all([
+                      refetchPost(),
+                      entity.refetch(),
+                      score.refetch(),
+                      comments.refetch(),
+                    ])
+                  }
+                />
+              }
+            />
+          )}
         />
       </View>
     </ForumPostFrame>

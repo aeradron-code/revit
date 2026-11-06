@@ -137,8 +137,7 @@ export function signIn(email: string, password: string) {
 export function signInWithGoogle() {
   return runApiRequest(
     async () => {
-      const redirectTo =
-        Platform.OS === "web" ? Linking.createURL("auth") : "revit://auth";
+      const redirectTo = Linking.createURL("auth");
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {

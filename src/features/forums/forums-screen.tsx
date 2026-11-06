@@ -1,7 +1,7 @@
 import { Link } from "expo-router";
 import { Users } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, View } from "react-native";
+import { FlatList, Pressable, View } from "react-native";
 
 import type { ForumSummary } from "@/api/forums";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,6 @@ import { Card } from "@/components/ui/card";
 import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
-import { PageScrollView } from "@/components/ui/page-scroll-view";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
@@ -49,90 +48,99 @@ export function ForumsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
-      <PageScrollView contentWidth="standard" contentContainerClassName="gap-5">
-        <View className="w-full gap-4">
-          <Text variant="muted" className="leading-5">
-            Explore forums, share common experiences, and get real insights.
-          </Text>
+      <FlatList
+        className="flex-1"
+        contentContainerClassName="mx-auto w-full gap-5 px-2 py-3 md:max-w-3xl md:py-6"
+        data={!forums.isLoading && !forums.isError ? visibleForums : []}
+        keyExtractor={(forum) => forum.id}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={
+          <View className="w-full gap-4">
+            <Text variant="muted" className="leading-5">
+              Explore forums, share common experiences, and get real insights.
+            </Text>
 
-          <SearchInput
-            accessibilityLabel="Search forums"
-            placeholder="Search forums…"
-            value={search}
-            onChangeText={setSearch}
-          />
+            <SearchInput
+              accessibilityLabel="Search forums"
+              placeholder="Search forums…"
+              value={search}
+              onChangeText={setSearch}
+            />
 
-          <View className="flex-row flex-wrap gap-2">
-            {(
-              [
-                ["your", "Your"],
-                ["joined", "Joined"],
-                ["popular", "Popular"],
-              ] as const
-            ).map(([value, label]) => (
-              <Button
-                key={value}
-                size="sm"
-                variant={filter === value ? "default" : "outline"}
-                onPress={() => setFilter(value)}
-              >
-                <Text>{label}</Text>
-              </Button>
-            ))}
-          </View>
-
-          {forums.isLoading ? <ContentSkeleton /> : null}
-          {forums.isError ? (
-            <FeedbackState
-              actionLabel="Retry"
-              onAction={() => void forums.refetch()}
-              title="Couldn’t load forums."
-              variant="error"
-            />
-          ) : null}
-          {!forums.isLoading && !forums.isError && allForums.length === 0 ? (
-            <FeedbackState
-              description={
-                filter === "popular"
-                  ? undefined
-                  : "Start a community around something you care about."
-              }
-              title={
-                filter === "popular"
-                  ? search.trim()
-                    ? "No forums match your search"
-                    : "Search forums to explore"
-                  : "No forums yet"
-              }
-            />
-          ) : null}
-          {!forums.isLoading &&
-          !forums.isError &&
-          allForums.length > 0 &&
-          visibleForums.length === 0 ? (
-            <FeedbackState
-              title={
-                filter === "popular" && search.trim().length === 0
-                  ? "Search forums to explore"
-                  : filter === "your" && search.trim().length === 0
-                    ? "You haven’t created any forums yet"
-                    : filter === "joined" && search.trim().length === 0
-                      ? "You haven’t joined any forums yet"
-                      : "No forums match your search"
-              }
-            />
-          ) : null}
-          {visibleForums.length > 0 ? (
-            <View className="gap-2">
-              {visibleForums.map((forum) => (
-                <ForumListItem key={forum.id} forum={forum} />
+            <View className="flex-row flex-wrap gap-2">
+              {(
+                [
+                  ["your", "Your"],
+                  ["joined", "Joined"],
+                  ["popular", "Popular"],
+                ] as const
+              ).map(([value, label]) => (
+                <Button
+                  key={value}
+                  size="sm"
+                  variant={filter === value ? "default" : "outline"}
+                  onPress={() => setFilter(value)}
+                >
+                  <Text>{label}</Text>
+                </Button>
               ))}
             </View>
-          ) : null}
-        </View>
-      </PageScrollView>
+
+            {forums.isLoading ? <ContentSkeleton /> : null}
+            {forums.isError ? (
+              <FeedbackState
+                actionLabel="Retry"
+                onAction={() => void forums.refetch()}
+                title="Couldn’t load forums."
+                variant="error"
+              />
+            ) : null}
+          </View>
+        }
+        ListEmptyComponent={
+          !forums.isLoading && !forums.isError ? (
+            <FeedbackState
+              description={
+                allForums.length === 0 && filter !== "popular"
+                  ? "Start a community around something you care about."
+                  : undefined
+              }
+              title={getEmptyMessage({
+                allForums,
+                filter,
+                search,
+              })}
+            />
+          ) : undefined
+        }
+        renderItem={({ item }) => <ForumListItem forum={item} />}
+      />
     </SafeAreaView>
   );
+}
+
+function getEmptyMessage({
+  allForums,
+  filter,
+  search,
+}: {
+  allForums: ForumSummary[];
+  filter: ForumFilter;
+  search: string;
+}) {
+  if (allForums.length === 0) {
+    return filter === "popular"
+      ? search.trim()
+        ? "No forums match your search"
+        : "Search forums to explore"
+      : "No forums yet";
+  }
+  if (filter === "popular" && !search.trim()) return "Search forums to explore";
+  if (filter === "your" && !search.trim())
+    return "You haven’t created any forums yet";
+  if (filter === "joined" && !search.trim())
+    return "You haven’t joined any forums yet";
+  return "No forums match your search";
 }
 
 function ForumListItem({ forum }: { forum: ForumSummary }) {

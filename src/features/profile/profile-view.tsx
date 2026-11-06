@@ -66,7 +66,7 @@ export function ProfileView({
     >
       <FlatList
         className="flex-1"
-        contentContainerClassName="w-full md:gap-6 gap-1 md:mx-auto md:max-w-4xl md:px-6 md:py-6"
+        contentContainerClassName="w-full gap-1 md:mx-auto md:max-w-4xl md:px-6 md:py-6"
         data={postItems}
         keyExtractor={(post) => post.id}
         keyboardShouldPersistTaps="handled"

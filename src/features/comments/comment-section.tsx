@@ -1,9 +1,10 @@
 import { Link } from "expo-router";
 import { MessageCircle } from "lucide-react-native";
 import { memo, useCallback } from "react";
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { useRef, useState } from "react";
-import { FlatList, View } from "react-native";
+import type { ListRenderItem } from "react-native";
+import { View } from "react-native";
 
 import type { CommentThread, CommentWithAuthor } from "@/api/comments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -33,15 +34,31 @@ import {
 } from "@/queries/comments";
 
 type CommentSectionProps = {
+  canInteract?: boolean;
   comments: ReturnType<typeof useTopLevelComments>;
   postId: string;
-  refreshControl?: ReactElement;
+  listHeader?: ReactNode;
+  renderList: (content: CommentListContent) => ReactNode;
 };
 
+export type CommentListContent = {
+  data: CommentListRow[];
+  keyExtractor: (item: CommentListRow) => string;
+  ListHeaderComponent: ReactElement;
+  ListFooterComponent: ReactElement;
+  renderItem: ListRenderItem<CommentListRow>;
+};
+
+export type CommentListRow =
+  | { kind: "thread"; comment: CommentThread }
+  | { kind: "reply"; parentId: string; comment: CommentWithAuthor };
+
 export function CommentSection({
+  canInteract = true,
   comments,
   postId,
-  refreshControl,
+  listHeader: pageHeader,
+  renderList,
 }: CommentSectionProps) {
   const user = useAuthUser();
   const [body, setBody] = useState("");
@@ -57,12 +74,22 @@ export function CommentSection({
   const updateComment = useUpdateComment(postId);
   const deleteComment = useDeleteComment(postId);
   const items = comments.data?.pages.flatMap((page) => page.items) ?? [];
+  const listItems: CommentListRow[] = items.flatMap((comment) => [
+    { kind: "thread", comment },
+    ...comment.replies.map((reply) => ({
+      kind: "reply" as const,
+      parentId: comment.id,
+      comment: reply,
+    })),
+  ]);
   const totalCount = comments.data?.pages[0]?.totalCount ?? 0;
-  const canPost = body.trim().length > 0 && !createComment.isPending;
-  const canSave = editBody.trim().length > 0 && !updateComment.isPending;
+  const canPost =
+    canInteract && body.trim().length > 0 && !createComment.isPending;
+  const canSave =
+    canInteract && editBody.trim().length > 0 && !updateComment.isPending;
 
   const submit = async () => {
-    if (!canPost || commentInFlight.current) return;
+    if (!canInteract || !canPost || commentInFlight.current) return;
     commentInFlight.current = true;
     const submittedBody = body;
 
@@ -86,25 +113,26 @@ export function CommentSection({
 
   const openEditor = useCallback(
     (comment: CommentWithAuthor) => {
+      if (!canInteract) return;
       updateComment.reset();
       setEditBody(comment.body);
       setEditing(comment);
     },
-    [updateComment.reset],
+    [canInteract, updateComment.reset],
   );
 
   const openReply = useCallback(
     (comment: CommentWithAuthor) => {
-      if (replyInFlight.current) return;
+      if (!canInteract || replyInFlight.current) return;
       createReply.reset();
       setReplyingTo(comment);
     },
-    [createReply.reset],
+    [canInteract, createReply.reset],
   );
 
   const submitReply = useCallback(
     async (target: CommentWithAuthor, replyBody: string) => {
-      if (!replyBody.trim() || replyInFlight.current) return;
+      if (!canInteract || !replyBody.trim() || replyInFlight.current) return;
       replyInFlight.current = true;
 
       try {
@@ -119,20 +147,21 @@ export function CommentSection({
         replyInFlight.current = false;
       }
     },
-    [createReply.mutateAsync],
+    [canInteract, createReply.mutateAsync],
   );
 
   const cancelReply = useCallback(() => setReplyingTo(null), []);
   const openDelete = useCallback(
     (comment: CommentWithAuthor) => {
+      if (!canInteract) return;
       deleteComment.reset();
       setDeleting(comment);
     },
-    [deleteComment.reset],
+    [canInteract, deleteComment.reset],
   );
 
   const save = async () => {
-    if (!editing || !canSave) return;
+    if (!canInteract || !editing || !canSave) return;
 
     try {
       await updateComment.mutateAsync({
@@ -146,7 +175,7 @@ export function CommentSection({
   };
 
   const remove = async () => {
-    if (!deleting) return;
+    if (!canInteract || !deleting) return;
 
     try {
       await deleteComment.mutateAsync(deleting.id);
@@ -156,117 +185,136 @@ export function CommentSection({
     }
   };
 
-  return (
-    <View className="min-h-0 flex-1">
-      <FlatList
-        className="flex-1"
-        contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 px-1 pb-6"
-        data={items}
-        keyExtractor={(comment) => comment.id}
-        keyboardShouldPersistTaps="handled"
-        refreshControl={refreshControl}
-        ListHeaderComponent={
-          <View className="gap-3 pb-3">
-            <View className="flex-row items-baseline justify-between gap-3">
-              <Text className="text-xl font-semibold">Comments</Text>
-              <Text className="rounded-md bg-secondary px-2 py-1 text-sm text-secondary-foreground">
-                {totalCount} {totalCount === 1 ? "comment" : "comments"}
-              </Text>
-            </View>
-            <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
-              <Textarea
-                accessibilityLabel="Write a comment"
-                editable={!createComment.isPending}
-                maxLength={2000}
-                onChangeText={changeBody}
-                placeholder="Add to the conversation…"
-                value={body}
-              />
-              <View className="flex-row items-center justify-between gap-3">
-                <Text variant="muted">{body.length}/2000</Text>
-                <Button disabled={!canPost} onPress={() => void submit()}>
-                  <Text>
-                    {createComment.isPending ? "Posting…" : "Post comment"}
-                  </Text>
-                </Button>
-              </View>
-              {createComment.isError ? (
-                <Text className="text-destructive" variant="small">
-                  {createComment.error.message}
-                </Text>
-              ) : null}
-            </View>
-            {comments.isLoading ? <CommentListLoading /> : null}
-            {comments.isError && items.length === 0 ? (
-              <FeedbackState
-                actionLabel="Retry"
-                onAction={() => void comments.refetch()}
-                title="Couldn’t load comments."
-                variant="error"
-              />
-            ) : null}
-            {!comments.isLoading && !comments.isError && items.length === 0 ? (
-              <View className="items-center gap-2 rounded-lg border border-border bg-card px-4 py-6">
-                <View className="size-10 items-center justify-center rounded-full bg-muted">
-                  <Icon as={MessageCircle} className="size-5 text-foreground" />
-                </View>
-                <Text className="font-semibold">No comments yet</Text>
-                <Text variant="muted">Start the conversation.</Text>
-              </View>
-            ) : null}
-          </View>
-        }
-        ListFooterComponent={
-          <View className="gap-2">
-            {comments.hasNextPage ? (
-              <Button
-                disabled={comments.isFetchingNextPage}
-                variant="outline"
-                onPress={() => void comments.fetchNextPage()}
-              >
-                <Text>
-                  {comments.isFetchingNextPage
-                    ? "Loading…"
-                    : "Load more comments"}
-                </Text>
-              </Button>
-            ) : null}
-            {comments.isFetchNextPageError ? (
-              <View className="items-start gap-2">
-                <Text className="text-destructive" variant="small">
-                  More comments could not be loaded.
-                </Text>
-                <Button
-                  variant="link"
-                  onPress={() => void comments.fetchNextPage()}
-                >
-                  <Text>Try again</Text>
-                </Button>
-              </View>
-            ) : null}
-          </View>
-        }
-        renderItem={({ item: comment }) => (
-          <CommentThreadItem
-            comment={comment}
-            currentUserId={user?.id}
-            onDelete={openDelete}
-            onEdit={openEditor}
-            onReply={openReply}
-            isReplyingTo={replyingTo?.id === comment.id}
-            isReplyPending={
-              replyingTo?.id === comment.id && createReply.isPending
+  const listHeader = (
+    <View className="gap-3 md:gap-6">
+      {pageHeader}
+      <View className="gap-3">
+        <View className="flex-row items-center justify-between gap-3 pl-1">
+          <Text className="text-xl font-semibold">Comments</Text>
+          <Text className="rounded-md bg-secondary px-2 py-1 text-sm text-secondary-foreground">
+            {totalCount} {totalCount === 1 ? "comment" : "comments"}
+          </Text>
+        </View>
+        <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
+          <Textarea
+            accessibilityLabel="Write a comment"
+            editable={canInteract && !createComment.isPending}
+            maxLength={2000}
+            onChangeText={changeBody}
+            placeholder={
+              canInteract
+                ? "Add to the conversation…"
+                : "Join this forum to comment"
             }
-            replyError={
-              replyingTo?.id === comment.id
-                ? createReply.error?.message
-                : undefined
-            }
-            onCancelReply={cancelReply}
-            onSubmitReply={submitReply}
+            value={body}
           />
-        )}
+          <View className="flex-row items-center justify-between gap-3">
+            <Text variant="muted">{body.length}/2000</Text>
+            <Button disabled={!canPost} onPress={() => void submit()}>
+              <Text>
+                {createComment.isPending ? "Posting…" : "Post comment"}
+              </Text>
+            </Button>
+          </View>
+          {createComment.isError ? (
+            <Text className="text-destructive" variant="small">
+              {createComment.error.message}
+            </Text>
+          ) : null}
+        </View>
+        {comments.isLoading ? <CommentListLoading /> : null}
+        {comments.isError && items.length === 0 ? (
+          <FeedbackState
+            actionLabel="Retry"
+            onAction={() => void comments.refetch()}
+            title="Couldn’t load comments."
+            variant="error"
+          />
+        ) : null}
+        {!comments.isLoading && !comments.isError && items.length === 0 ? (
+          <View className="items-center gap-2 rounded-lg border border-border bg-card px-4 py-6">
+            <View className="size-10 items-center justify-center rounded-full bg-muted">
+              <Icon as={MessageCircle} className="size-5 text-foreground" />
+            </View>
+            <Text className="font-semibold">No comments yet</Text>
+            <Text variant="muted">Start the conversation.</Text>
+          </View>
+        ) : null}
+      </View>
+    </View>
+  );
+
+  const listFooter = (
+    <View className="gap-2">
+      {comments.hasNextPage ? (
+        <Button
+          disabled={comments.isFetchingNextPage}
+          variant="outline"
+          onPress={() => void comments.fetchNextPage()}
+        >
+          <Text>
+            {comments.isFetchingNextPage ? "Loading…" : "Load more comments"}
+          </Text>
+        </Button>
+      ) : null}
+      {comments.isFetchNextPageError ? (
+        <View className="items-start gap-2">
+          <Text className="text-destructive" variant="small">
+            More comments could not be loaded.
+          </Text>
+          <Button variant="link" onPress={() => void comments.fetchNextPage()}>
+            <Text>Try again</Text>
+          </Button>
+        </View>
+      ) : null}
+    </View>
+  );
+
+  const renderComment: ListRenderItem<CommentListRow> = ({ item }) => {
+    if (item.kind === "reply") {
+      return (
+        <View className="ml-4 border-l-2 border-secondary pl-3 sm:ml-8 sm:pl-4">
+          <CommentItem
+            comment={item.comment}
+            isOwn={item.comment.author_id === user?.id}
+            onDelete={() => openDelete(item.comment)}
+            onEdit={() => openEditor(item.comment)}
+            canInteract={canInteract}
+            isReply
+          />
+        </View>
+      );
+    }
+
+    const comment = item.comment;
+    return (
+      <CommentThreadItem
+        comment={comment}
+        currentUserId={user?.id}
+        onDelete={openDelete}
+        onEdit={openEditor}
+        onReply={openReply}
+        isReplyingTo={replyingTo?.id === comment.id}
+        isReplyPending={replyingTo?.id === comment.id && createReply.isPending}
+        replyError={
+          replyingTo?.id === comment.id ? createReply.error?.message : undefined
+        }
+        onCancelReply={cancelReply}
+        onSubmitReply={submitReply}
+        canInteract={canInteract}
       />
+    );
+  };
+
+  return (
+    <>
+      {renderList({
+        data: listItems,
+        keyExtractor: (item) => `${item.kind}:${item.comment.id}`,
+        ListHeaderComponent: listHeader,
+        ListFooterComponent: listFooter,
+        renderItem: renderComment,
+      })}
 
       <Dialog
         open={editing !== null}
@@ -279,7 +327,7 @@ export function CommentSection({
           </DialogHeader>
           <View className="gap-2">
             <Textarea
-              editable={!updateComment.isPending}
+              editable={canInteract && !updateComment.isPending}
               maxLength={2000}
               onChangeText={setEditBody}
               value={editBody}
@@ -328,14 +376,14 @@ export function CommentSection({
           ) : null}
           <DialogFooter>
             <Button
-              disabled={deleteComment.isPending}
+              disabled={!canInteract || deleteComment.isPending}
               onPress={() => setDeleting(null)}
               variant="secondary"
             >
               <Text>Cancel</Text>
             </Button>
             <Button
-              disabled={deleteComment.isPending}
+              disabled={!canInteract || deleteComment.isPending}
               onPress={() => void remove()}
               variant="destructive"
             >
@@ -346,7 +394,7 @@ export function CommentSection({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </View>
+    </>
   );
 }
 
@@ -361,6 +409,7 @@ const CommentThreadItem = memo(function CommentThreadItem({
   replyError,
   onCancelReply,
   onSubmitReply,
+  canInteract,
 }: {
   comment: CommentThread;
   currentUserId?: string;
@@ -372,18 +421,20 @@ const CommentThreadItem = memo(function CommentThreadItem({
   replyError?: string;
   onCancelReply: () => void;
   onSubmitReply: (comment: CommentWithAuthor, body: string) => Promise<void>;
+  canInteract: boolean;
 }) {
   return (
-    <View className="gap-2">
+    <View className="gap-1">
       <CommentItem
         comment={comment}
         isOwn={comment.author_id === currentUserId}
         onDelete={() => onDelete(comment)}
         onEdit={() => onEdit(comment)}
         onReply={() => onReply(comment)}
-        replyDisabled={isReplyPending}
+        replyDisabled={isReplyPending || !canInteract}
+        canInteract={canInteract}
       />
-      {isReplyingTo ? (
+      {isReplyingTo && canInteract ? (
         <ReplyComposer
           comment={comment}
           error={replyError}
@@ -391,20 +442,6 @@ const CommentThreadItem = memo(function CommentThreadItem({
           onCancel={onCancelReply}
           onSubmit={onSubmitReply}
         />
-      ) : null}
-      {comment.replies.length > 0 ? (
-        <View className="ml-4 gap-2 border-l-2 border-secondary pl-3 sm:ml-8 sm:pl-4">
-          {comment.replies.map((reply) => (
-            <CommentItem
-              key={reply.id}
-              comment={reply}
-              isOwn={reply.author_id === currentUserId}
-              onDelete={() => onDelete(reply)}
-              onEdit={() => onEdit(reply)}
-              isReply
-            />
-          ))}
-        </View>
       ) : null}
     </View>
   );
@@ -470,6 +507,7 @@ function CommentItem({
   onEdit,
   onReply,
   replyDisabled = false,
+  canInteract = true,
 }: {
   comment: CommentWithAuthor;
   isReply?: boolean;
@@ -478,6 +516,7 @@ function CommentItem({
   onEdit: () => void;
   onReply?: () => void;
   replyDisabled?: boolean;
+  canInteract?: boolean;
 }) {
   return (
     <View
@@ -524,10 +563,20 @@ function CommentItem({
         </Link>
         {isOwn ? (
           <View className="flex-row gap-1">
-            <Button onPress={onEdit} size="sm" variant="ghost">
+            <Button
+              disabled={!canInteract}
+              onPress={onEdit}
+              size="sm"
+              variant="ghost"
+            >
               <Text>Edit</Text>
             </Button>
-            <Button onPress={onDelete} size="sm" variant="ghost">
+            <Button
+              disabled={!canInteract}
+              onPress={onDelete}
+              size="sm"
+              variant="ghost"
+            >
               <Text className="text-destructive">Delete</Text>
             </Button>
           </View>
@@ -537,7 +586,7 @@ function CommentItem({
       {onReply ? (
         <Button
           className="self-start"
-          disabled={replyDisabled}
+          disabled={replyDisabled || !canInteract}
           onPress={onReply}
           size="sm"
           variant="ghost"

@@ -6,8 +6,12 @@
 # Expo generated files
 /.expo/
 /dist/
+/build/
 /web-build/
 expo-env.d.ts
+
+# Other web build output
+/.next/
 
 # Local package-manager data
 /.pnpm-store/
@@ -19,6 +23,9 @@ expo-env.d.ts
 
 # Tests and tooling
 /coverage/
+/playwright-report/
+/test-results/
+/blob-report/
 *.tsbuildinfo
 .metro-health-check*
 

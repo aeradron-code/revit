@@ -26,12 +26,14 @@ import { PostMediaGallery } from "./post-media-gallery";
 import { PostAuthorHeader } from "./post-author-header";
 
 type SharePostCardProps = {
+  canInteract?: boolean;
   isDetail?: boolean;
   post: SharePostWithDetails;
   entity: Entity;
 };
 
 export function SharePostCard({
+  canInteract = true,
   isDetail = false,
   post,
   entity,
@@ -140,9 +142,14 @@ export function SharePostCard({
               <Button
                 accessibilityLabel={`View ${commentCount} ${commentCount === 1 ? "comment" : "comments"}`}
                 accessibilityState={{ expanded: commentsExpanded }}
+                disabled={!canInteract}
                 className={`h-8 gap-1.5 border ${commentsExpanded ? "border-primary bg-selected" : "border-transparent"}`}
                 variant="ghost"
-                onPress={() => setCommentsExpanded((expanded) => !expanded)}
+                onPress={() => {
+                  if (canInteract) {
+                    setCommentsExpanded((expanded) => !expanded);
+                  }
+                }}
               >
                 <Icon
                   as={MessageCircle}
@@ -155,7 +162,7 @@ export function SharePostCard({
             )}
           </View>
         </View>
-        {!isDetail && commentsExpanded ? (
+        {!isDetail && commentsExpanded && canInteract ? (
           <InlineCommentDrawer postId={post.id} />
         ) : null}
       </CardFooter>

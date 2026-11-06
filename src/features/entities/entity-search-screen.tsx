@@ -2,7 +2,7 @@ import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { randomUUID } from "expo-crypto";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { FlatList, View } from "react-native";
 
 import type { Entity } from "@/api/entities";
 import type { ResourceCreationAttempt } from "@/api/creation-recovery";
@@ -89,95 +89,102 @@ function EntitySearchForm({
           ),
         }}
       />
-      <ScrollView
+      <FlatList
+        className="flex-1"
+        contentContainerClassName="mx-auto w-full gap-6 px-4 py-4 md:max-w-3xl md:px-6 md:py-6"
+        data={
+          !creationLocked &&
+          hasSearchTerm &&
+          !isDebouncing &&
+          !search.isLoading &&
+          !search.isError
+            ? finds
+            : []
+        }
+        keyExtractor={(entity) => entity.id}
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="w-full gap-6 px-6 md:mx-auto md:max-w-3xl md:px-6 md:py-6"
-      >
-        <View className="gap-1">
-          <Text variant="h1" className="text-left">
-            Find something
-          </Text>
-          <Text className="text-sm" variant="muted">
-            Search existing finds before adding a new one.
-          </Text>
-        </View>
-
-        <SearchInput
-          accessibilityLabel="Search finds"
-          autoCapitalize="words"
-          placeholder="Name or locality"
-          value={query}
-          editable={!creationLocked}
-          onChangeText={setQuery}
-        />
-
-        {!hasSearchTerm ? (
-          <SearchState
-            description="Enter at least two characters to search by name, locality, or address."
-            title="Search finds"
-          />
-        ) : null}
-
-        {hasSearchTerm && (isDebouncing || search.isLoading) ? (
-          <ContentSkeleton rows={2} />
-        ) : null}
-
-        {hasSearchTerm && !isDebouncing && search.isError ? (
-          <FeedbackState
-            actionLabel="Retry"
-            onAction={() => void search.refetch()}
-            title="Couldn’t load finds."
-            variant="error"
-          />
-        ) : null}
-
-        {!creationLocked &&
-        hasSearchTerm &&
-        !isDebouncing &&
-        !search.isLoading &&
-        !search.isError ? (
-          finds.length > 0 ? (
-            <View className="gap-2">
-              {finds.map((entity) => (
-                <EntityResult
-                  key={entity.id}
-                  entity={entity}
-                  returnToShare={returnToShare}
-                />
-              ))}
+        ListHeaderComponent={
+          <View className="gap-6">
+            <View className="gap-1">
+              <Text variant="h1" className="text-left">
+                Find something
+              </Text>
+              <Text className="text-sm" variant="muted">
+                Search existing finds before adding a new one.
+              </Text>
             </View>
-          ) : (
+
+            <SearchInput
+              accessibilityLabel="Search finds"
+              autoCapitalize="words"
+              placeholder="Name or locality"
+              value={query}
+              editable={!creationLocked}
+              onChangeText={setQuery}
+            />
+
+            {!hasSearchTerm ? (
+              <SearchState
+                description="Enter at least two characters to search by name, locality, or address."
+                title="Search finds"
+              />
+            ) : null}
+
+            {hasSearchTerm && (isDebouncing || search.isLoading) ? (
+              <ContentSkeleton rows={2} />
+            ) : null}
+
+            {hasSearchTerm && !isDebouncing && search.isError ? (
+              <FeedbackState
+                actionLabel="Retry"
+                onAction={() => void search.refetch()}
+                title="Couldn’t load finds."
+                variant="error"
+              />
+            ) : null}
+          </View>
+        }
+        ListEmptyComponent={
+          !creationLocked &&
+          hasSearchTerm &&
+          !isDebouncing &&
+          !search.isLoading &&
+          !search.isError ? (
             <SearchState
               description="No existing find matches that search. Check the name and locality before adding one."
               title="No matches found"
             />
-          )
-        ) : null}
-
-        {creationLocked ||
-        (hasSearchTerm &&
-          !isDebouncing &&
-          !search.isLoading &&
-          !search.isError &&
-          finds.length === 0) ? (
-          isAddingEntity ? (
-            <AddEntityForm
-              initialName={query}
-              onCancel={() => setIsAddingEntity(false)}
-              returnToShare={returnToShare}
-              userId={userId}
-              onLockChange={setCreationLocked}
-            />
-          ) : (
-            <Button
-              className="self-start rounded-md"
-              onPress={() => setIsAddingEntity(true)}
-            >
-              <Text>Add find</Text>
-            </Button>
-          )
-        ) : null}
-      </ScrollView>
+          ) : undefined
+        }
+        ListFooterComponent={
+          creationLocked ||
+          (hasSearchTerm &&
+            !isDebouncing &&
+            !search.isLoading &&
+            !search.isError &&
+            finds.length === 0) ? (
+            isAddingEntity ? (
+              <AddEntityForm
+                initialName={query}
+                onCancel={() => setIsAddingEntity(false)}
+                returnToShare={returnToShare}
+                userId={userId}
+                onLockChange={setCreationLocked}
+              />
+            ) : (
+              <Button
+                className="self-start rounded-md"
+                onPress={() => setIsAddingEntity(true)}
+              >
+                <Text>Add find</Text>
+              </Button>
+            )
+          ) : undefined
+        }
+        renderItem={({ item }) => (
+          <EntityResult entity={item} returnToShare={returnToShare} />
+        )}
+      />
     </SafeAreaView>
   );
 }
