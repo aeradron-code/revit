@@ -11,13 +11,13 @@ import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/features/ratings/star-rating";
+import { FindSearchSkeleton } from "@/features/entities/find-search-skeleton";
 import { PostRecoveryGate } from "@/features/create/post-recovery-gate";
 import { successFeedback } from "@/lib/feedback";
 import type { LocalImage } from "@/lib/media/read-local-image";
@@ -26,7 +26,7 @@ import { useAuthUser } from "@/providers/auth-provider";
 import { useResolvePostRecovery } from "@/queries/creation-recovery";
 import { useForum } from "@/queries/forums";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { useEntityCategories, useEntitySearch } from "@/queries/entities";
+import { useEntitySearch } from "@/queries/entities";
 import {
   useCreateForumAskPost,
   useCreateForumSharePost,
@@ -35,7 +35,7 @@ import {
 export function ForumPostComposerScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuthUser();
-  if (!user) return null;
+  if (!user || !id) return null;
   return (
     <PostRecoveryGate
       key={user.id}
@@ -57,7 +57,6 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
   const [body, setBody] = useState("");
   const [entity, setEntity] = useState<Entity | null>(null);
   const [score, setScore] = useState<number | null>(null);
-  const [categorySlug, setCategorySlug] = useState("place");
   const [search, setSearch] = useState("");
   const forum = useForum(id, userId);
   const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
@@ -75,10 +74,9 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
       mounted.current = false;
     };
   }, []);
-  const categories = useEntityCategories();
   const debouncedSearch = useDebouncedValue(search);
   const isDebouncing = search.trim() !== debouncedSearch.trim();
-  const results = useEntitySearch(debouncedSearch, categorySlug);
+  const results = useEntitySearch(debouncedSearch);
   const createAsk = useCreateForumAskPost(id);
   const createShare = useCreateForumSharePost(id);
   const resolveRecovery = useResolvePostRecovery();
@@ -263,26 +261,6 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
             </View>
             {type === "SHARE" ? (
               <View className="gap-2">
-                <Text variant="small">Category</Text>
-                {!entity ? (
-                  <View className="flex-row flex-wrap gap-2">
-                    {(categories.data ?? []).map((category) => (
-                      <Button
-                        key={category.slug}
-                        size="xs"
-                        variant={
-                          categorySlug === category.slug ? "default" : "outline"
-                        }
-                        onPress={() => {
-                          setCategorySlug(category.slug);
-                          setSearch("");
-                        }}
-                      >
-                        <Text>{category.label}</Text>
-                      </Button>
-                    ))}
-                  </View>
-                ) : null}
                 <Text variant="small">Find</Text>
                 {entity ? (
                   <Button
@@ -304,7 +282,7 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
                     />
                     {search.trim().length >= 2 &&
                     (isDebouncing || results.isLoading) ? (
-                      <ContentSkeleton rows={1} />
+                      <FindSearchSkeleton rows={1} />
                     ) : null}
                     {!isDebouncing && results.isError ? (
                       <Text className="text-destructive" variant="small">
@@ -324,9 +302,19 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
                               setSearch("");
                             }}
                           >
-                            <Text>
-                              {item.name} · {item.category.label}
-                            </Text>
+                            <View className="min-w-0 flex-1 gap-0.5">
+                              <Text className="text-left font-medium">
+                                {item.name}
+                              </Text>
+                              <Text
+                                className="text-left text-xs"
+                                variant="muted"
+                              >
+                                {[item.category.label, item.locality]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </Text>
+                            </View>
                           </Button>
                         ))
                       : null}
@@ -335,9 +323,29 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
                     !results.isLoading &&
                     !results.isError &&
                     results.data?.length === 0 ? (
-                      <Text variant="muted">
-                        No finds in this category yet.
-                      </Text>
+                      <View className="gap-2 border-t border-border pt-3">
+                        <Text variant="muted">
+                          Can’t find it? Ask the forum for a recommendation in a
+                          post.
+                        </Text>
+                        <Button
+                          className="self-start px-0"
+                          size="sm"
+                          variant="link"
+                          onPress={() => {
+                            selectType("ASK");
+                            setBody(
+                              search.trim()
+                                ? `Can anyone recommend ${search.trim()}?`
+                                : "",
+                            );
+                          }}
+                        >
+                          <Text className="text-primary">
+                            Create an Ask post
+                          </Text>
+                        </Button>
+                      </View>
                     ) : null}
                   </>
                 )}

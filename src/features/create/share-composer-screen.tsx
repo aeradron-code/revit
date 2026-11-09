@@ -7,47 +7,30 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 
 import type { Entity } from "@/api/entities";
 import type { AskCreationAttempt } from "@/api/posts";
-import type { ResourceCreationAttempt } from "@/api/creation-recovery";
-import {
-  API_ERROR_MESSAGES,
-  normalizeApiError,
-  validationError,
-} from "@/api/errors";
+import { API_ERROR_MESSAGES, normalizeApiError } from "@/api/errors";
 import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
-import { ENTITY_IMAGE_PRESENTATION } from "@/components/media/image-presentation";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
-import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/features/ratings/star-rating";
 import { PostRecoveryGate } from "@/features/create/post-recovery-gate";
-import { ResourceRecoveryGate } from "@/features/create/resource-recovery-gate";
+import { FindSearchSkeleton } from "@/features/entities/find-search-skeleton";
 import {
   canPublishShare,
   initializeShareDraft,
 } from "@/features/create/share-draft";
 import { selectionFeedback, successFeedback } from "@/lib/feedback";
-import { readLocalImage } from "@/lib/media/read-local-image";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import {
-  useResolvePostRecovery,
-  useResolveResourceRecovery,
-} from "@/queries/creation-recovery";
-import {
-  useCreateEntity,
-  useEntity,
-  useEntityCategories,
-  useEntitySearch,
-} from "@/queries/entities";
+import { useResolvePostRecovery } from "@/queries/creation-recovery";
+import { useEntity, useEntitySearch } from "@/queries/entities";
 import {
   useCreateShareRating,
   useMyEntityRating,
@@ -55,31 +38,19 @@ import {
 } from "@/queries/shares";
 
 const MAX_IMAGES = 3;
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
 export function ShareComposerScreen() {
   const user = useAuthUser();
   if (!user) return null;
   return (
-    <ResourceRecoveryGate
-      key={`find:${user.id}`}
+    <PostRecoveryGate
+      key={user.id}
       userId={user.id}
-      kind="FIND"
+      kinds={["GLOBAL_SHARE"]}
       closeRoute={routes.create}
-      resultRoute={(id) => ({
-        pathname: "/create/share",
-        params: { entityId: id },
-      })}
     >
-      <PostRecoveryGate
-        key={user.id}
-        userId={user.id}
-        kinds={["GLOBAL_SHARE"]}
-        closeRoute={routes.create}
-      >
-        <ShareComposerForm key={user.id} userId={user.id} />
-      </PostRecoveryGate>
-    </ResourceRecoveryGate>
+      <ShareComposerForm key={user.id} userId={user.id} />
+    </PostRecoveryGate>
   );
 }
 
@@ -87,23 +58,6 @@ function ShareComposerForm({ userId }: { userId: string }) {
   const { entityId } = useLocalSearchParams<{ entityId?: string }>();
   const [search, setSearch] = useState("");
   const [entity, setEntity] = useState<Entity | null>(null);
-  const [categorySlug, setCategorySlug] = useState("place");
-  const [newName, setNewName] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [newLocation, setNewLocation] = useState("");
-  const [entityImage, setEntityImage] =
-    useState<ImagePicker.ImagePickerAsset | null>(null);
-  const [entityDraftError, setEntityDraftError] = useState<string | null>(null);
-  const [isPreparingEntity, setIsPreparingEntity] = useState(false);
-  const entitySubmissionInFlight = useRef(false);
-  const entityAttempt = useRef<
-    (ResourceCreationAttempt & { signature: string }) | null
-  >(null);
-  const [findUncertain, setFindUncertain] = useState(false);
-  const [checkingFind, setCheckingFind] = useState(false);
-  const [findLookupMessage, setFindLookupMessage] = useState<string | null>(
-    null,
-  );
   const [score, setScore] = useState<number | null>(null);
   const [body, setBody] = useState("");
   const initializedEntityId = useRef<string | null>(null);
@@ -124,14 +78,10 @@ function ShareComposerForm({ userId }: { userId: string }) {
     };
   }, []);
   const entityFromRoute = useEntity(entityId ?? "");
-  const categories = useEntityCategories();
   const debouncedSearch = useDebouncedValue(search);
   const isDebouncing = search.trim() !== debouncedSearch.trim();
-  const results = useEntitySearch(debouncedSearch, categorySlug);
-  const createEntity = useCreateEntity();
-  const resolveResourceRecovery = useResolveResourceRecovery();
+  const results = useEntitySearch(debouncedSearch);
   const resolvePostRecovery = useResolvePostRecovery();
-  const isCreatingEntity = isPreparingEntity || createEntity.isPending;
   const existingRating = useMyEntityRating(entity?.id ?? "", userId);
   const createRating = useCreateShareRating();
   const updateRating = useUpdateShareRating(
@@ -206,101 +156,6 @@ function ShareComposerForm({ userId }: { userId: string }) {
     }
 
     router.replace(routes.create);
-  };
-
-  const createEntityFromDraft = async () => {
-    if (!userId || !newName.trim() || entitySubmissionInFlight.current) return;
-    entitySubmissionInFlight.current = true;
-    setIsPreparingEntity(true);
-    setEntityDraftError(null);
-    const signature = JSON.stringify([
-      categorySlug,
-      newName,
-      newDescription,
-      newLocation,
-      entityImage?.uri,
-    ]);
-    if (
-      !entityAttempt.current ||
-      (!findUncertain && entityAttempt.current.signature !== signature)
-    )
-      entityAttempt.current = { id: randomUUID(), signature };
-    const current = entityAttempt.current;
-    try {
-      if (entityImage?.fileSize && entityImage.fileSize > MAX_IMAGE_BYTES) {
-        throw validationError(
-          API_ERROR_MESSAGES.THE_FIND_IMAGE_MUST_BE_SMALLER_THAN_10_MB,
-        );
-      }
-      const image =
-        current.preparedImages?.image ??
-        (entityImage
-          ? await readLocalImage({
-              file: entityImage.file,
-              fileName: entityImage.fileName,
-              fileSize: entityImage.fileSize,
-              mimeType: entityImage.mimeType,
-              uri: entityImage.uri,
-            })
-          : undefined);
-      current.preparedImages = { image };
-      const created = await createEntity.mutateAsync({
-        authorId: userId,
-        attempt: current,
-        categorySlug,
-        name: newName.trim(),
-        description: newDescription,
-        locality: newLocation,
-        image,
-      });
-      if (!mounted.current) return;
-      selectEntity(created);
-      setNewName("");
-      setNewDescription("");
-      setNewLocation("");
-      setEntityImage(null);
-    } catch (error) {
-      if (!mounted.current) return;
-      setFindUncertain(Boolean(current.outcomeUncertain));
-      setEntityDraftError(
-        normalizeApiError(error, API_ERROR_MESSAGES.ADD_THIS_FIND).message,
-      );
-    } finally {
-      entitySubmissionInFlight.current = false;
-      if (mounted.current) setIsPreparingEntity(false);
-    }
-  };
-
-  const checkFindOutcome = async () => {
-    const current = entityAttempt.current;
-    if (!current || entitySubmissionInFlight.current) return;
-    entitySubmissionInFlight.current = true;
-    setCheckingFind(true);
-    setFindLookupMessage(null);
-    try {
-      const id = await resolveResourceRecovery.mutateAsync({
-        userId,
-        operationId: current.id,
-        kind: "FIND",
-      });
-      if (!id) {
-        if (mounted.current)
-          setFindLookupMessage(
-            "The result is not available yet. Retry creating or check again.",
-          );
-        return;
-      }
-      if (mounted.current)
-        router.replace({ pathname: "/create/share", params: { entityId: id } });
-    } catch {
-      if (mounted.current)
-        setFindLookupMessage(
-          "We couldn’t check or clear saved recovery. Please try again.",
-        );
-    } finally {
-      entitySubmissionInFlight.current = false;
-      if (mounted.current) setCheckingFind(false);
-    }
   };
 
   const publish = async () => {
@@ -417,11 +272,7 @@ function ShareComposerForm({ userId }: { userId: string }) {
         behavior={Platform.select({ ios: "padding", default: undefined })}
       >
         <ScrollView
-          pointerEvents={
-            uncertain || isSaving || checking || findUncertain || checkingFind
-              ? "none"
-              : "auto"
-          }
+          pointerEvents={uncertain || isSaving || checking ? "none" : "auto"}
           keyboardShouldPersistTaps="handled"
           contentContainerClassName="w-full gap-6 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
         >
@@ -431,45 +282,11 @@ function ShareComposerForm({ userId }: { userId: string }) {
                 Rate anything
               </Text>
               <Text variant="muted" className="leading-5">
-                Choose a category, find what you’re looking for, and share your
-                rating.
+                Choose a Find and share your rating.
               </Text>
             </View>
 
             <View className="gap-3">
-              <Text variant="small">Category</Text>
-              {!entity && categories.isError ? (
-                <FeedbackState
-                  variant="error"
-                  title="Couldn’t load categories."
-                  actionLabel="Retry"
-                  onAction={() => void categories.refetch()}
-                />
-              ) : null}
-              {!entity && categories.isLoading ? (
-                <ContentSkeleton rows={1} />
-              ) : null}
-              {!entity && categories.isSuccess && !categories.isError ? (
-                <View className="flex-row flex-wrap gap-2">
-                  {(categories.data ?? []).map((category) => (
-                    <Button
-                      key={category.id}
-                      disabled={isCreatingEntity}
-                      size="sm"
-                      variant={
-                        category.slug === categorySlug ? "default" : "outline"
-                      }
-                      onPress={() => {
-                        setCategorySlug(category.slug);
-                        setSearch("");
-                        setNewName("");
-                      }}
-                    >
-                      <Text>{category.label}</Text>
-                    </Button>
-                  ))}
-                </View>
-              ) : null}
               <Text variant="small">Find</Text>
               {!entity && entityId && entityFromRoute.isError ? (
                 <FeedbackState
@@ -518,29 +335,20 @@ function ShareComposerForm({ userId }: { userId: string }) {
                     autoFocus
                     placeholder="Search by name or location"
                     value={search}
-                    editable={
-                      categories.isSuccess &&
-                      !categories.isError &&
-                      !isCreatingEntity
-                    }
-                    onChangeText={(value) => {
-                      setSearch(value);
-                      setNewName(value.trim());
-                    }}
+                    onChangeText={setSearch}
                   />
                   {isDebouncing || results.isLoading ? (
-                    <ContentSkeleton rows={1} />
+                    <FindSearchSkeleton rows={1} />
                   ) : null}
                   {!isDebouncing && results.isError ? (
                     <Text variant="small" className="text-destructive">
                       {results.error.message}
                     </Text>
                   ) : null}
-                  {!isDebouncing && categories.isSuccess && !categories.isError
+                  {!isDebouncing
                     ? results.data?.map((item) => (
                         <Button
                           key={item.id}
-                          disabled={isCreatingEntity}
                           className="border border-border bg-card"
                           size="content"
                           variant="ghost"
@@ -565,67 +373,20 @@ function ShareComposerForm({ userId }: { userId: string }) {
                     : null}
                   {search.trim().length >= 2 &&
                   !isDebouncing &&
-                  categories.isSuccess &&
-                  !categories.isError &&
                   !results.isLoading &&
                   results.data?.length === 0 ? (
-                    <View className="gap-3 border-t border-border pt-3">
+                    <View className="gap-2 border-t border-border pt-3">
                       <Text variant="muted" className="text-sm">
-                        Can’t find it? Add it as a find
+                        Can’t find it? Ask the community for a recommendation in
+                        a post.
                       </Text>
-                      <Input
-                        accessibilityLabel="Find name"
-                        placeholder="Name"
-                        editable={
-                          !isCreatingEntity && !findUncertain && !checkingFind
-                        }
-                        value={newName}
-                        onChangeText={setNewName}
-                      />
-                      <Textarea
-                        accessibilityLabel="Find description"
-                        placeholder="Description (optional)"
-                        editable={
-                          !isCreatingEntity && !findUncertain && !checkingFind
-                        }
-                        value={newDescription}
-                        onChangeText={setNewDescription}
-                      />
-                      <Input
-                        accessibilityLabel="Find location"
-                        placeholder="Location (optional)"
-                        editable={
-                          !isCreatingEntity && !findUncertain && !checkingFind
-                        }
-                        value={newLocation}
-                        onChangeText={setNewLocation}
-                      />
-                      <ImagePickerCarousel
-                        images={entityImage ? [entityImage] : []}
-                        onImagesChange={(selected) =>
-                          setEntityImage(selected[0] ?? null)
-                        }
-                        maxImages={1}
-                        selectionLimit={1}
-                        presentation={ENTITY_IMAGE_PRESENTATION}
-                        replaceExisting
-                        addLabel={entityImage ? "Change image" : "Add image"}
-                        disabled={isCreatingEntity}
-                      />
-                      {entityDraftError ? (
-                        <Text variant="small" className="text-destructive">
-                          {entityDraftError}
-                        </Text>
-                      ) : null}
                       <Button
-                        disabled={!newName.trim() || isCreatingEntity}
+                        className="self-start px-0"
                         size="sm"
-                        variant="outline"
-                        onPress={() => void createEntityFromDraft()}
+                        variant="link"
+                        onPress={() => router.push(routes.createAsk)}
                       >
-                        <Text>
-                          {isCreatingEntity ? "Creating…" : "Add find"}
-                        </Text>
+                        <Text className="text-primary">Create an Ask post</Text>
                       </Button>
                     </View>
                   ) : null}
@@ -736,30 +497,6 @@ function ShareComposerForm({ userId }: { userId: string }) {
             ) : null}
           </Card>
         </ScrollView>
-        {findUncertain ? (
-          <View className="gap-2 p-4">
-            <Text variant="small" className="text-destructive">
-              Your find may have been created. Check the result or retry before
-              editing.
-            </Text>
-            <Button
-              disabled={checkingFind || isCreatingEntity}
-              variant="outline"
-              onPress={() => void checkFindOutcome()}
-            >
-              <Text>{checkingFind ? "Checking…" : "Check result"}</Text>
-            </Button>
-            <Button
-              disabled={checkingFind || isCreatingEntity}
-              onPress={() => void createEntityFromDraft()}
-            >
-              <Text>Retry creating</Text>
-            </Button>
-            {findLookupMessage ? (
-              <Text variant="small">{findLookupMessage}</Text>
-            ) : null}
-          </View>
-        ) : null}
         {uncertain ? (
           <View className="gap-2 p-4">
             <Text variant="small" className="text-destructive">

@@ -21,10 +21,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
-import { CommentSection } from "@/features/comments/comment-section";
+import {
+  CommentListSkeleton,
+  CommentSection,
+} from "@/features/comments/comment-section";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
@@ -36,6 +38,7 @@ import { useShareRatingScore } from "@/queries/shares";
 import { AskPostCard } from "./ask-post-card";
 import { SharePostCard } from "./share-post-card";
 import { PostDetailFrame } from "./post-detail-frame";
+import { PostCardSkeleton } from "./post-feed-skeleton";
 
 export function PostDetailScreen() {
   const user = useAuthUser();
@@ -43,7 +46,7 @@ export function PostDetailScreen() {
   const postId = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
   const post = usePost(postId, user?.id ?? "");
 
-  if (post.isLoading) {
+  if (!postId || !user?.id || post.isLoading) {
     return <PostDetailLoading />;
   }
 
@@ -422,10 +425,11 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
 function PostDetailLoading() {
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View className="w-full gap-5 px-4 md:mx-auto md:max-w-3xl md:px-6 md:py-6">
-        <Skeleton className="h-14 w-full" />
-        <Skeleton className="h-8 w-4/5" />
-        <Skeleton className="h-52 w-full" />
+      <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
+        <View className="mx-auto w-full max-w-[36rem] gap-3">
+          <PostCardSkeleton withMedia />
+          <CommentListSkeleton />
+        </View>
       </View>
     </PostDetailFrame>
   );

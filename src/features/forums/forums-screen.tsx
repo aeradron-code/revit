@@ -6,10 +6,10 @@ import { FlatList, Pressable, View } from "react-native";
 import type { ForumSummary } from "@/api/forums";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { ForumAvatar } from "@/features/forums/forum-avatar";
@@ -86,7 +86,7 @@ export function ForumsScreen() {
               ))}
             </View>
 
-            {forums.isLoading ? <ContentSkeleton /> : null}
+            {forums.isLoading ? <ForumListSkeleton /> : null}
             {forums.isError ? (
               <FeedbackState
                 actionLabel="Retry"
@@ -174,6 +174,26 @@ function ForumListItem({ forum }: { forum: ForumSummary }) {
         </Pressable>
       </Link>
     </Card>
+  );
+}
+
+function ForumListSkeleton() {
+  return (
+    <View accessibilityLabel="Loading forums" className="gap-2">
+      {["first", "second", "third"].map((key) => (
+        <View
+          key={key}
+          className="w-full flex-row items-center gap-3 rounded-lg border border-border bg-card p-3"
+        >
+          <Skeleton className="size-10 rounded-lg" />
+          <View className="min-w-0 flex-1 gap-1">
+            <Skeleton className="h-4 w-2/5" />
+            <Skeleton className="h-3 w-4/5" />
+            <Skeleton className="h-3 w-1/3" />
+          </View>
+        </View>
+      ))}
+    </View>
   );
 }
 

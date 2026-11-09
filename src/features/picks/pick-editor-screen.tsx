@@ -7,11 +7,11 @@ import type { Entity } from "@/api/entities";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
@@ -131,7 +131,7 @@ export function PickEditorScreen() {
     router.replace(routes.picks);
   };
 
-  if (isEditing && pick.isLoading) {
+  if (isEditing && (!pickId || pick.isLoading)) {
     return <LoadingState />;
   }
 
@@ -411,8 +411,40 @@ function LoadingState() {
           ),
         }}
       />
-      <View className="px-6 py-6 md:mx-auto md:w-full md:max-w-2xl">
-        <ContentSkeleton rows={3} />
+      <View className="w-full max-w-2xl gap-3 px-2 pb-8 pt-4 md:mx-auto md:pb-12 md:pt-6">
+        <View className="gap-5 rounded-lg border border-border bg-card p-5 md:p-6">
+          <View className="gap-2 border-b border-border pb-4">
+            <Skeleton className="h-8 w-2/5" />
+            <Skeleton className="h-4 w-4/5" />
+          </View>
+          <View className="gap-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-11 w-full rounded-md" />
+          </View>
+          <View className="gap-2">
+            <Skeleton className="h-4 w-36" />
+            <Skeleton className="h-24 w-full rounded-md" />
+          </View>
+          <View className="gap-2.5">
+            <View className="gap-1">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-4/5" />
+            </View>
+            <Skeleton className="h-11 w-full rounded-md" />
+            <View className="min-h-11 flex-row items-center gap-3 rounded-lg border border-border px-3 py-2">
+              <Skeleton className="size-5 rounded-full" />
+              <View className="flex-1 gap-1">
+                <Skeleton className="h-4 w-2/5" />
+                <Skeleton className="h-3 w-3/5" />
+              </View>
+              <Skeleton className="h-4 w-10" />
+            </View>
+          </View>
+          <View className="gap-2.5">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-20 w-full rounded-md" />
+          </View>
+        </View>
       </View>
     </SafeAreaView>
   );

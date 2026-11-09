@@ -7,7 +7,6 @@ import type { PostWithDetails } from "@/api/posts";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +18,7 @@ import {
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { ForumAvatar } from "@/features/forums/forum-avatar";
 import { ForumCoverDisplay } from "@/features/forums/forum-cover-display";
@@ -44,7 +44,7 @@ export function ForumDetailScreen() {
   const deleteForum = useDeleteForum();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  if (forum.isLoading) return <LoadingState />;
+  if (!id || !user?.id || forum.isLoading) return <LoadingState />;
 
   const forumData = forum.data;
   if (forum.isError || !forumData) {
@@ -154,6 +154,7 @@ export function ForumDetailScreen() {
         data={postItems}
         keyExtractor={(post) => post.id}
         keyboardShouldPersistTaps="handled"
+        ListHeaderComponentStyle={{ marginBottom: 8 }}
         ItemSeparatorComponent={() => <View className="h-1" />}
         ListHeaderComponent={
           <View className="gap-1 md:gap-4">
@@ -353,6 +354,9 @@ function ForumSharePostCard({
 }
 
 function LoadingState() {
+  const { width } = useWindowDimensions();
+  const isWide = width >= 768;
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
       <Stack.Screen
@@ -366,10 +370,54 @@ function LoadingState() {
           ),
         }}
       />
-      <View className="px-6 py-6 md:mx-auto md:w-full md:max-w-2xl">
-        <ContentSkeleton rows={3} />
+      <View className="w-full gap-2 py-1 md:mx-auto md:max-w-6xl md:gap-4 md:px-6 md:py-2">
+        <View className="overflow-hidden rounded-lg border border-border bg-card">
+          <Skeleton
+            className="w-full rounded-none"
+            style={{ aspectRatio: isWide ? 1080 / 128 : 3 }}
+          />
+          <View className="flex-row items-center gap-3 p-3">
+            <Skeleton className="size-12 rounded-lg" />
+            <Skeleton className="h-5 w-2/5" />
+          </View>
+        </View>
+        {!isWide ? <ForumAboutSkeleton /> : null}
+        <View className="relative w-full flex-row gap-3">
+          <View className="min-w-0 flex-1">
+            <PostFeedSkeleton rows={2} />
+          </View>
+          {isWide ? <View style={{ width: 320, flexShrink: 0 }} /> : null}
+          {isWide ? (
+            <View
+              className="absolute right-0 top-0 w-full"
+              style={{ width: 320 }}
+            >
+              <ForumAboutSkeleton />
+            </View>
+          ) : null}
+        </View>
       </View>
     </SafeAreaView>
+  );
+}
+
+function ForumAboutSkeleton() {
+  return (
+    <View className="gap-3 rounded-lg border border-border bg-card p-4">
+      <Skeleton className="h-5 w-3/5" />
+      <View className="gap-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-4/5" />
+      </View>
+      <View className="flex-row gap-4">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-4 w-24" />
+      </View>
+      <View className="flex-row gap-2">
+        <Skeleton className="h-9 flex-1 rounded-md" />
+        <Skeleton className="h-9 flex-1 rounded-md" />
+      </View>
+    </View>
   );
 }
 

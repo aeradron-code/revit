@@ -222,7 +222,7 @@ export function CommentSection({
             </Text>
           ) : null}
         </View>
-        {comments.isLoading ? <CommentListLoading /> : null}
+        {comments.isLoading ? <CommentListSkeleton /> : null}
         {comments.isError && items.length === 0 ? (
           <FeedbackState
             actionLabel="Retry"
@@ -598,11 +598,26 @@ function CommentItem({
   );
 }
 
-function CommentListLoading() {
+export function CommentListSkeleton() {
   return (
     <View className="gap-3">
-      <Skeleton className="h-28 w-full rounded-lg" />
-      <Skeleton className="h-28 w-full rounded-lg" />
+      {["first", "second"].map((key) => (
+        <View
+          key={key}
+          className="gap-2 rounded-lg border border-border bg-card p-3"
+        >
+          <View className="flex-row items-center gap-3">
+            <Skeleton className="size-9 rounded-full" />
+            <View className="flex-1 gap-1">
+              <Skeleton className="h-4 w-2/5" />
+              <Skeleton className="h-3 w-3/5" />
+            </View>
+          </View>
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-4/5" />
+          <Skeleton className="h-8 w-16 rounded-md" />
+        </View>
+      ))}
     </View>
   );
 }

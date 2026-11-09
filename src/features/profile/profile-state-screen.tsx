@@ -10,16 +10,29 @@ import { Text } from "@/components/ui/text";
 export function ProfileLoadingScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <View className="w-full gap-6 px-6 md:mx-auto md:max-w-4xl md:py-6">
-        <View className="flex-row items-center gap-3">
-          <Skeleton className="size-24 rounded-full" />
-          <View className="flex-1 gap-3">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-5 w-32" />
+      <View className="w-full gap-1 md:mx-auto md:max-w-4xl md:px-6 md:py-6">
+        <View className="overflow-hidden border border-border bg-card md:rounded-xl">
+          <Skeleton className="h-28 w-full rounded-none sm:h-36" />
+          <View className="px-5 pb-3 sm:flex-row sm:items-start sm:gap-5 sm:px-8 sm:pb-7">
+            <Skeleton className="-mt-10 size-24 rounded-full border-2 border-background sm:-mt-8 sm:size-28" />
+            <View className="min-w-0 flex-1 gap-3 pt-3 sm:pt-5">
+              <View className="gap-2">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-4 w-32" />
+              </View>
+              <View className="gap-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+              </View>
+              <View className="flex-row gap-5">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
+              </View>
+              <Skeleton className="h-10 w-28 rounded-md" />
+            </View>
           </View>
         </View>
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-36 w-full" />
+        <Skeleton className="h-1 w-full md:hidden" />
       </View>
     </SafeAreaView>
   );

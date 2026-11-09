@@ -144,48 +144,87 @@ function RootNavigator() {
         <Stack>
           <Stack.Protected guard={canEnterApp && !isPasswordRecovery}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="activity" options={{ headerShown: true }} />
-            <Stack.Screen name="create/ask" options={{ headerShown: true }} />
-            <Stack.Screen name="create/share" options={{ headerShown: true }} />
+            <Stack.Screen
+              name="activity"
+              options={{ headerShown: true, title: "Activity" }}
+            />
+            <Stack.Screen
+              name="create/ask"
+              options={{ headerShown: true, title: "Create post" }}
+            />
+            <Stack.Screen
+              name="create/share"
+              options={{ headerShown: true, title: "Create post" }}
+            />
             <Stack.Screen
               name="entities/[id]"
-              options={{ headerShown: true }}
+              options={{ headerShown: true, title: "Find" }}
             />
             <Stack.Screen
               name="entities/search"
-              options={{ headerShown: true }}
+              options={({ route }) => ({
+                headerShown: true,
+                title:
+                  (route.params as { returnTo?: string } | undefined)
+                    ?.returnTo === "share"
+                    ? "Create"
+                    : "Finds",
+              })}
             />
-            <Stack.Screen name="posts/[id]" options={{ headerShown: true }} />
+            <Stack.Screen
+              name="posts/[id]"
+              options={{ headerShown: true, title: "Post" }}
+            />
             <Stack.Screen
               name="restaurants/[id]"
-              options={{ headerShown: true }}
+              options={{ headerShown: true, title: "Find" }}
             />
             <Stack.Screen
               name="restaurants/search"
-              options={{ headerShown: true }}
+              options={({ route }) => ({
+                headerShown: true,
+                title:
+                  (route.params as { returnTo?: string } | undefined)
+                    ?.returnTo === "share"
+                    ? "Create"
+                    : "Finds",
+              })}
             />
-            <Stack.Screen name="forums/[id]" options={{ headerShown: true }} />
+            <Stack.Screen
+              name="forums/[id]"
+              options={{ headerShown: true, title: "Forums" }}
+            />
             <Stack.Screen
               name="forums/create"
-              options={{ headerShown: true }}
+              options={{ headerShown: true, title: "Forums" }}
             />
             <Stack.Screen
               name="forums/[id]/create"
-              options={{ headerShown: true }}
+              options={{ headerShown: true, title: "Forums" }}
             />
-            <Stack.Screen name="picks/create" options={{ headerShown: true }} />
-            <Stack.Screen name="picks/[id]" options={{ headerShown: true }} />
+            <Stack.Screen
+              name="forums/[id]/posts/[postId]"
+              options={{ headerShown: true, title: "Forum post" }}
+            />
+            <Stack.Screen
+              name="picks/create"
+              options={{ headerShown: true, title: "Picks" }}
+            />
+            <Stack.Screen
+              name="picks/[id]"
+              options={{ headerShown: true, title: "Picks" }}
+            />
             <Stack.Screen
               name="users/[username]/index"
-              options={{ headerShown: true }}
+              options={{ headerShown: true, title: "Profile" }}
             />
             <Stack.Screen
               name="users/[username]/followers"
-              options={{ headerShown: true }}
+              options={{ headerShown: true, title: "Followers" }}
             />
             <Stack.Screen
               name="users/[username]/following"
-              options={{ headerShown: true }}
+              options={{ headerShown: true, title: "Following" }}
             />
           </Stack.Protected>
 

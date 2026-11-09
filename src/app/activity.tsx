@@ -5,9 +5,9 @@ import { FlatList, View } from "react-native";
 import type { ActivityNotification } from "@/api/notifications";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
-import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { shouldAutoMarkRead } from "@/features/activity/mark-read";
 import { routes } from "@/lib/routes";
@@ -86,7 +86,7 @@ export default function ActivityScreen() {
         ListHeaderComponent={
           <View className="gap-4">
             <Text variant="muted">Your latest social activity.</Text>
-            {notifications.isLoading ? <ContentSkeleton /> : null}
+            {notifications.isLoading ? <ActivityListSkeleton /> : null}
             {notifications.isError ? (
               <FeedbackState
                 actionLabel="Retry"
@@ -164,6 +164,26 @@ function ActivityItem({
         ) : null}
       </Button>
     </Link>
+  );
+}
+
+function ActivityListSkeleton() {
+  return (
+    <View accessibilityLabel="Loading activity" className="gap-2">
+      {["first", "second", "third"].map((key) => (
+        <View
+          key={key}
+          className="w-full flex-row items-center gap-3 rounded-lg border border-border bg-card px-3 py-2"
+        >
+          <Skeleton className="size-8 rounded-full" />
+          <View className="min-w-0 flex-1 gap-1">
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-3 w-1/4" />
+          </View>
+          <Skeleton className="size-2 rounded-full" />
+        </View>
+      ))}
+    </View>
   );
 }
 

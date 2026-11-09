@@ -4,9 +4,11 @@ import { FlatList, RefreshControl, View } from "react-native";
 
 import type { PostWithDetails } from "@/api/posts";
 import type { SharePostWithDetails } from "@/api/shares";
-import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
-import { CommentSection } from "@/features/comments/comment-section";
+import {
+  CommentListSkeleton,
+  CommentSection,
+} from "@/features/comments/comment-section";
 import { AskPostCard } from "@/features/posts/ask-post-card";
 import { SharePostCard } from "@/features/posts/share-post-card";
 import { routes } from "@/lib/routes";
@@ -17,6 +19,7 @@ import { usePost } from "@/queries/posts";
 import { useShareRatingScore } from "@/queries/shares";
 import { useForum } from "@/queries/forums";
 import { PostDetailFrame } from "@/features/posts/post-detail-frame";
+import { PostCardSkeleton } from "@/features/posts/post-feed-skeleton";
 
 export function ForumPostDetailScreen() {
   const params = useLocalSearchParams<{
@@ -36,11 +39,14 @@ export function ForumPostDetailScreen() {
   const post = usePost(postId, viewerId);
   const comments = useTopLevelComments(postId, { viewerId });
 
-  if (post.isLoading) {
+  if (!forumId || !postId || !viewerId || post.isLoading) {
     return (
       <ForumPostFrame forumId={forumId}>
-        <View className="w-full gap-4 px-4 py-6 md:mx-auto md:max-w-3xl md:px-6">
-          <ContentSkeleton rows={3} />
+        <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
+          <View className="mx-auto w-full max-w-[36rem] gap-3">
+            <PostCardSkeleton withMedia />
+            <CommentListSkeleton />
+          </View>
         </View>
       </ForumPostFrame>
     );
@@ -139,8 +145,11 @@ function ForumSharePostDetail({
   if (entity.isLoading || score.isLoading) {
     return (
       <ForumPostFrame forumId={post.forum_id ?? ""}>
-        <View className="w-full gap-4 px-4 py-6 md:mx-auto md:max-w-3xl md:px-6">
-          <ContentSkeleton rows={3} />
+        <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
+          <View className="mx-auto w-full max-w-[36rem] gap-3">
+            <PostCardSkeleton withMedia />
+            <CommentListSkeleton />
+          </View>
         </View>
       </ForumPostFrame>
     );

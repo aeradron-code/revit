@@ -35,6 +35,7 @@ import {
   useSharePostsByEntity,
 } from "@/queries/shares";
 import { StarRating } from "@/features/ratings/star-rating";
+import { PostFeedSkeleton } from "@/features/posts/post-feed-skeleton";
 
 export function EntityDetailScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
@@ -59,7 +60,7 @@ export function EntityDetailScreen() {
           ),
         }}
       />
-      {entity.isLoading ? <EntityDetailLoading /> : null}
+      {!entityId || entity.isLoading ? <EntityDetailLoading /> : null}
       {entity.isError ? (
         <ProfileMessageScreen
           title="Find unavailable"
@@ -67,7 +68,7 @@ export function EntityDetailScreen() {
           action={() => void entity.refetch()}
         />
       ) : null}
-      {!entity.isLoading && !entity.isError && !entity.data ? (
+      {entityId && !entity.isLoading && !entity.isError && !entity.data ? (
         <ProfileMessageScreen
           title="Find not found"
           description="This find may have been removed or is no longer available."
@@ -199,7 +200,7 @@ function EntityDetails({ entityId }: { entityId: string }) {
         }
         ListEmptyComponent={
           <View className="mx-auto w-full max-w-[36rem]">
-            {posts.isLoading ? <EntityPostsLoading /> : null}
+            {posts.isLoading ? <PostFeedSkeleton rows={2} /> : null}
             {posts.isError ? (
               <FeedbackState
                 actionLabel="Retry"
@@ -382,20 +383,36 @@ function RatingRow({ post }: { post: SharePostWithDetails }) {
 }
 
 function EntityDetailLoading() {
-  return (
-    <View className="w-full gap-6 px-6 md:mx-auto md:max-w-3xl md:py-6">
-      <Skeleton className="h-32 w-full" />
-      <Skeleton className="h-6 w-24" />
-      <Skeleton className="h-60 w-full" />
-    </View>
-  );
-}
+  const { width } = useWindowDimensions();
+  const horizontal = width >= 900;
 
-function EntityPostsLoading() {
   return (
-    <View className="gap-3">
-      <Skeleton className="h-20 w-full" />
-      <Skeleton className="h-20 w-full" />
+    <View className="w-full px-2 py-1 md:mx-auto md:max-w-5xl md:px-6 md:py-6">
+      <View
+        className={`gap-4 rounded-lg border border-border bg-card md:gap-6 ${
+          horizontal ? "flex-row p-6" : "p-4"
+        }`}
+      >
+        <Skeleton
+          className={`rounded-lg ${horizontal ? "h-64 w-2/5" : "h-56 w-full"}`}
+        />
+        <View className="min-w-0 flex-1 gap-3">
+          <Skeleton className="h-6 w-24 rounded-full" />
+          <Skeleton className="h-9 w-3/5" />
+          <Skeleton className="h-4 w-4/5" />
+          <View className="gap-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+          </View>
+          <View className="flex-row flex-wrap items-center justify-between gap-3 pt-2">
+            <View className="flex-row items-center gap-2">
+              <Skeleton className="h-5 w-28" />
+              <Skeleton className="h-7 w-12" />
+            </View>
+            <Skeleton className="h-11 w-32 rounded-md" />
+          </View>
+        </View>
+      </View>
     </View>
   );
 }

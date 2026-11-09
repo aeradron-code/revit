@@ -8,10 +8,10 @@ import type { Entity } from "@/api/entities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { getInitials } from "@/lib/format";
@@ -93,7 +93,7 @@ export function DiscoverScreen() {
               />
             ) : null}
             {hasSearchTerm && (isDebouncing || results.isLoading) ? (
-              <ContentSkeleton rows={2} />
+              <DiscoverResultsSkeleton filter={filter} />
             ) : null}
             {hasSearchTerm && !isDebouncing && results.isError ? (
               <FeedbackState
@@ -216,6 +216,32 @@ function EntityResult({ entity }: { entity: Entity }) {
         </View>
       </Button>
     </Link>
+  );
+}
+
+function DiscoverResultsSkeleton({ filter }: { filter: ResultFilter }) {
+  return (
+    <View accessibilityLabel="Loading search results" className="gap-2">
+      {["first", "second"].map((key) => (
+        <View
+          key={key}
+          className="min-h-14 w-full flex-row items-center gap-3 rounded-lg border border-border bg-card px-3 py-2"
+        >
+          <Skeleton
+            className={`size-9 ${filter === "entities" ? "rounded-md" : "rounded-full"}`}
+          />
+          <View className="min-w-0 flex-1 gap-1">
+            <View className="w-full flex-row items-center justify-between gap-2">
+              <Skeleton className="h-4 w-2/5" />
+              {filter === "posts" ? (
+                <Skeleton className="h-5 w-14 rounded-full" />
+              ) : null}
+            </View>
+            <Skeleton className="h-3 w-3/5" />
+          </View>
+        </View>
+      ))}
+    </View>
   );
 }
 

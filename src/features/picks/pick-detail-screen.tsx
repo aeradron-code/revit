@@ -6,7 +6,6 @@ import { FlatList, Platform, Pressable, View } from "react-native";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
@@ -49,7 +49,7 @@ export function PickDetailScreen() {
     router.replace(routes.picks);
   };
 
-  if (pick.isLoading) return <PickLoadingState onBack={goBack} />;
+  if (!id || pick.isLoading) return <PickLoadingState onBack={goBack} />;
   const personalPick = pick.data;
   if (pick.isError || !personalPick)
     return (
@@ -264,8 +264,31 @@ function PickLoadingState({ onBack }: { onBack: () => void }) {
           ),
         }}
       />
-      <View className="px-6 py-6 md:mx-auto md:w-full md:max-w-2xl">
-        <ContentSkeleton rows={3} />
+      <View className="grow gap-6 px-4 py-6 md:mx-auto md:w-full md:max-w-4xl md:px-6 md:py-12">
+        <View className="gap-4">
+          <Skeleton className="h-3 w-28" />
+          <View className="flex-row items-start justify-between gap-3">
+            <View className="min-w-0 flex-1 gap-2">
+              <Skeleton className="h-10 w-3/4 md:h-14" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-4/5" />
+            </View>
+            <Skeleton className="h-10 w-24 rounded-md" />
+          </View>
+        </View>
+        {["first", "second", "third"].map((key) => (
+          <View
+            key={key}
+            className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-3 sm:gap-5 sm:p-5"
+          >
+            <Skeleton className="h-10 w-10 rounded-sm sm:h-14 sm:w-14" />
+            <Skeleton className="size-12 shrink-0 rounded-lg sm:size-20" />
+            <View className="min-w-0 flex-1 gap-2">
+              <Skeleton className="h-4 w-3/5" />
+              <Skeleton className="h-3 w-4/5" />
+            </View>
+          </View>
+        ))}
       </View>
     </SafeAreaView>
   );

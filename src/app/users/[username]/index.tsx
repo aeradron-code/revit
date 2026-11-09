@@ -1,7 +1,6 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
 
 import { AppHeader } from "@/components/navigation/app-header";
-import { SafeAreaView } from "@/components/ui/safe-area-view";
 import {
   ProfileLoadingScreen,
   ProfileMessageScreen,
@@ -25,7 +24,7 @@ export default function UserProfileScreen() {
     router.replace(routes.discover);
   };
 
-  if (profile.isLoading) {
+  if (!username || profile.isLoading) {
     return (
       <UserProfileFrame onBack={goBack}>
         <ProfileLoadingScreen />
@@ -71,7 +70,7 @@ function UserProfileFrame({
   onBack: () => void;
 }) {
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+    <>
       <Stack.Screen
         options={{
           header: () => (
@@ -80,6 +79,6 @@ function UserProfileFrame({
         }}
       />
       {children}
-    </SafeAreaView>
+    </>
   );
 }

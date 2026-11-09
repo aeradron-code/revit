@@ -5,9 +5,9 @@ import type { FollowProfile } from "@/api/follows";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { getInitials } from "@/lib/format";
 import { routes } from "@/lib/routes";
@@ -52,8 +52,10 @@ export function FollowListScreen({ kind }: FollowListScreenProps) {
         ItemSeparatorComponent={() => <View className="h-2" />}
         ListEmptyComponent={
           <FollowListState
-            profileLoading={profile.isLoading}
-            profileMissing={!profile.isLoading && !profile.data}
+            profileLoading={!username || profile.isLoading}
+            profileMissing={
+              Boolean(username) && !profile.isLoading && !profile.data
+            }
             listLoading={list.isLoading}
             isError={profile.isError || list.isError}
             kind={kind}
@@ -138,7 +140,7 @@ function FollowListState({
   if (profileLoading || listLoading) {
     return (
       <View className="py-4">
-        <ContentSkeleton />
+        <FollowListSkeleton />
       </View>
     );
   }
@@ -173,5 +175,25 @@ function FollowListState({
             : "Not following anyone yet"
       }
     />
+  );
+}
+
+function FollowListSkeleton() {
+  return (
+    <View accessibilityLabel="Loading profiles" className="gap-2">
+      {["first", "second", "third"].map((key) => (
+        <View
+          key={key}
+          className="w-full flex-row items-center gap-3 rounded-lg border border-border bg-card px-3 py-2"
+        >
+          <Skeleton className="size-8 rounded-full" />
+          <View className="min-w-0 flex-1 gap-1">
+            <Skeleton className="h-4 w-2/5" />
+            <Skeleton className="h-3 w-1/3" />
+            <Skeleton className="h-3 w-3/5" />
+          </View>
+        </View>
+      ))}
+    </View>
   );
 }

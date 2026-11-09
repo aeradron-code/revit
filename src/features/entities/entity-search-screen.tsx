@@ -9,10 +9,10 @@ import type { ResourceCreationAttempt } from "@/api/creation-recovery";
 import { ResourceRecoveryGate } from "@/features/create/resource-recovery-gate";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
-import { ContentSkeleton } from "@/components/ui/content-skeleton";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
@@ -131,7 +131,7 @@ function EntitySearchForm({
             ) : null}
 
             {hasSearchTerm && (isDebouncing || search.isLoading) ? (
-              <ContentSkeleton rows={2} />
+              <EntitySearchResultsSkeleton />
             ) : null}
 
             {hasSearchTerm && !isDebouncing && search.isError ? (
@@ -548,6 +548,22 @@ function EntityResult({
         </View>
       </Button>
     </Link>
+  );
+}
+
+function EntitySearchResultsSkeleton() {
+  return (
+    <View accessibilityLabel="Loading Find results" className="gap-2">
+      {["first", "second"].map((key) => (
+        <View
+          key={key}
+          className="min-h-11 w-full gap-1 rounded-lg border border-border bg-card px-3 py-2"
+        >
+          <Skeleton className="h-4 w-2/5" />
+          <Skeleton className="h-3 w-3/5" />
+        </View>
+      ))}
+    </View>
   );
 }
 
