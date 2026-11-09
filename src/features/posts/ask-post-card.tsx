@@ -57,6 +57,7 @@ export function AskPostCard({
         <PostAuthorHeader
           author={post.author}
           createdAt={post.created_at}
+          postId={post.id}
           trailingContent={
             <View className="flex-row items-center gap-1">
               <Badge className="rounded-full px-2 py-0.5" variant="default">

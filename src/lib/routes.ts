@@ -3,6 +3,7 @@ import type { Href } from "expo-router";
 const routeTable = {
   activity: "/activity",
   auth: "/auth",
+  adminReports: "/admin/reports",
   create: "/create",
   createAsk: "/create/ask",
   createForum: "/forums/create",

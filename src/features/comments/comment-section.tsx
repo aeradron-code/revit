@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getInitials } from "@/lib/format";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
+import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 import {
   useCreateReply,
   useCreateTopLevelComment,
@@ -583,17 +584,27 @@ function CommentItem({
         ) : null}
       </View>
       <Text className="leading-6">{comment.body}</Text>
-      {onReply ? (
-        <Button
-          className="self-start"
-          disabled={replyDisabled || !canInteract}
-          onPress={onReply}
-          size="sm"
-          variant="ghost"
-        >
-          <Text>Reply</Text>
-        </Button>
-      ) : null}
+      <View className="flex-row items-center gap-1">
+        {onReply ? (
+          <Button
+            className="self-start"
+            disabled={replyDisabled || !canInteract}
+            onPress={onReply}
+            size="sm"
+            variant="ghost"
+          >
+            <Text>Reply</Text>
+          </Button>
+        ) : null}
+        {!isOwn ? (
+          <SafetyOptionsMenu
+            ownerId={comment.author_id}
+            targetId={comment.id}
+            targetLabel="comment"
+            targetType="comment"
+          />
+        ) : null}
+      </View>
     </View>
   );
 }

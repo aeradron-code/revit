@@ -27,6 +27,7 @@ import {
   useTogglePickFollow,
 } from "@/queries/picks";
 import { useFollowStatus } from "@/queries/follows";
+import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 
 export function PickDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -98,30 +99,40 @@ export function PickDetailScreen() {
                     </Text>
                   ) : null}
                 </View>
-                {!isOwner && authorFollow.data ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={
-                      followedPicks.isLoading ||
-                      followedPicks.isError ||
-                      toggleFollow.isPending
-                    }
-                    onPress={() =>
-                      toggleFollow.mutate(
-                        !(followedPicks.data ?? []).includes(id),
-                      )
-                    }
-                  >
-                    <Text>
-                      {toggleFollow.isPending
-                        ? "Updating…"
-                        : (followedPicks.data ?? []).includes(id)
-                          ? "Following"
-                          : "Follow"}
-                    </Text>
-                  </Button>
-                ) : null}
+                <View className="items-end gap-2">
+                  {!isOwner && authorFollow.data ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={
+                        followedPicks.isLoading ||
+                        followedPicks.isError ||
+                        toggleFollow.isPending
+                      }
+                      onPress={() =>
+                        toggleFollow.mutate(
+                          !(followedPicks.data ?? []).includes(id),
+                        )
+                      }
+                    >
+                      <Text>
+                        {toggleFollow.isPending
+                          ? "Updating…"
+                          : (followedPicks.data ?? []).includes(id)
+                            ? "Following"
+                            : "Follow"}
+                      </Text>
+                    </Button>
+                  ) : null}
+                  {!isOwner ? (
+                    <SafetyOptionsMenu
+                      ownerId={personalPick.author_id}
+                      targetId={personalPick.id}
+                      targetLabel="Pick"
+                      targetType="pick"
+                    />
+                  ) : null}
+                </View>
                 {isOwner ? (
                   <View className="flex-row gap-2">
                     <Button

@@ -36,6 +36,7 @@ import {
 } from "@/queries/shares";
 import { StarRating } from "@/features/ratings/star-rating";
 import { PostFeedSkeleton } from "@/features/posts/post-feed-skeleton";
+import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 
 export function EntityDetailScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
@@ -175,6 +176,12 @@ function EntityDetails({ entityId }: { entityId: string }) {
                     >
                       <Text>Rate this find</Text>
                     </Button>
+                    <SafetyOptionsMenu
+                      ownerId={entityData.created_by}
+                      targetId={entityData.id}
+                      targetLabel="find"
+                      targetType="entity"
+                    />
                     {user?.id && entityData.created_by === user.id ? (
                       <Button
                         accessibilityLabel="Delete find"

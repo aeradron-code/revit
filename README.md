@@ -35,3 +35,18 @@ Implementation follows the [Expo SDK 58 documentation](https://docs.expo.dev/ver
 - Keep Supabase Auth session operations in the dedicated Supabase/auth layer. Never expose the raw Supabase database client as a shortcut around `src/api`.
 - API modules select only required fields, normalize errors, apply bounded timeouts, retry safe reads only, and return application-ready typed data rather than raw Supabase responses.
 - All runtime consumers use TanStack Query adapters from `src/queries`; providers, screens, components, and feature modules do not invoke `src/api` request functions directly. Type-only and normalized-error imports are allowed.
+
+## User reports and blocks
+
+- New profiles receive the `user` role. To appoint the single admin account, run this in the Supabase SQL editor after choosing the account by its username:
+
+  ```sql
+  update public.profiles
+  set role = 'admin'
+  where username = 'your_username';
+  ```
+
+- Admins can see all reports in Settings → Review reports and mark them reviewed. Reviewing a report does not remove content or disable accounts; a separate decision and action are required outside this workflow.
+- Users can report profiles, posts and their images, comments, finds, forums, and Picks. Each user can submit one report per target. The report stores a short snapshot so it remains reviewable if the reported content or account is later removed.
+- Deleting the reporting account removes reports submitted by that account through the reporter foreign key. Reports about a deleted account remain. Blocks are removed when either account is deleted.
+- Blocking hides each account’s posts, comments, and Picks from the other, removes any mutual follow, and prevents new follows, comments, replies, and Ask ratings between them. Blocking does not delete content.

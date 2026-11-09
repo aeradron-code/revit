@@ -7,14 +7,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { formatPostDate, getInitials } from "@/lib/format";
 import { routes } from "@/lib/routes";
+import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 
 export function PostAuthorHeader({
   author,
   createdAt,
+  postId,
   trailingContent,
 }: {
   author: PostAuthor;
   createdAt: string;
+  postId: string;
   trailingContent?: ReactNode;
 }) {
   const avatarLabel = `${author.display_name}'s avatar`;
@@ -44,7 +47,15 @@ export function PostAuthorHeader({
           </Text>
         </Link>
       </View>
-      {trailingContent}
+      <View className="flex-row items-center gap-1">
+        {trailingContent}
+        <SafetyOptionsMenu
+          ownerId={author.id}
+          targetId={postId}
+          targetLabel="post"
+          targetType="post"
+        />
+      </View>
     </View>
   );
 }

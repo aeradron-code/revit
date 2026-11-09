@@ -1,4 +1,5 @@
 import { Link } from "expo-router";
+import { UserCheck, UserPlus } from "lucide-react-native";
 import {
   ActivityIndicator,
   FlatList,
@@ -18,6 +19,7 @@ import type { Profile } from "@/api/profiles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -29,6 +31,8 @@ import { useFollowStatus, useFollowToggle } from "@/queries/follows";
 import { useAskPostsByAuthor } from "@/queries/posts";
 
 import { useFollowCounts } from "@/queries/profiles";
+import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
+import { useMyBlockStatus } from "@/queries/safety";
 
 type ProfileViewProps = {
   isOwnProfile?: boolean;
@@ -49,6 +53,7 @@ export function ProfileView({
   );
   const followStatus = useFollowStatus(user?.id ?? "", profile.id);
   const followToggle = useFollowToggle(user?.id ?? "", profile.id);
+  const blockStatus = useMyBlockStatus(user?.id ?? "", profile.id);
   const initials = getInitials(profile.display_name);
 
   const refresh = async () => {
@@ -129,13 +134,69 @@ export function ProfileView({
                   </AvatarFallback>
                 </Avatar>
                 <View className="min-w-0 flex-1 gap-3 pt-3 sm:pt-5">
-                  <View className="gap-1">
-                    <Text variant="h1" className="text-left">
-                      {profile.display_name}
-                    </Text>
-                    <Text variant="muted" className="text-sm">
-                      @{profile.username}
-                    </Text>
+                  <View className="flex-row items-start justify-between gap-3">
+                    <View className="min-w-0 flex-1 gap-1">
+                      <Text variant="h1" className="text-left" numberOfLines={1}>
+                        {profile.display_name}
+                      </Text>
+                      <Text variant="muted" className="text-sm">
+                        @{profile.username}
+                      </Text>
+                    </View>
+                    {!isOwn ? (
+                      <View className="shrink-0 flex-row items-center gap-2">
+                        {!blockStatus.data ? (
+                          <Button
+                            accessibilityLabel={
+                              followStatus.data
+                                ? "Unfollow user"
+                                : "Follow user"
+                            }
+                            className="min-h-10 rounded-full px-4"
+                            disabled={
+                              followStatus.isLoading ||
+                              followToggle.isPending ||
+                              blockStatus.isLoading ||
+                              blockStatus.isError
+                            }
+                            variant={followStatus.data ? "outline" : "default"}
+                            onPress={() =>
+                              followToggle.mutate(!(followStatus.data ?? false))
+                            }
+                            size="sm"
+                          >
+                            {!followToggle.isPending ? (
+                              <Icon
+                                as={followStatus.data ? UserCheck : UserPlus}
+                                className={
+                                  followStatus.data
+                                    ? "size-4 text-primary dark:text-foreground"
+                                    : "size-4 text-primary-foreground"
+                                }
+                              />
+                            ) : null}
+                            <Text>
+                              {followToggle.isPending
+                                ? "Updating…"
+                                : followStatus.data
+                                  ? "Following"
+                                  : "Follow"}
+                            </Text>
+                          </Button>
+                        ) : null}
+                        <SafetyOptionsMenu
+                          ownerId={profile.id}
+                          targetId={profile.id}
+                          targetLabel="person"
+                          reportMenuLabel="Report"
+                          blockMenuLabel="Block"
+                          unblockMenuLabel="Unblock"
+                          showReportIcon={false}
+                          targetType="user"
+                          triggerClassName="size-10 border border-border bg-card"
+                        />
+                      </View>
+                    ) : null}
                   </View>
                   <Text className="max-w-2xl leading-6 text-foreground">
                     {profile.bio?.trim() ||
@@ -149,26 +210,6 @@ export function ProfileView({
                     isLoading={counts.isLoading}
                     username={profile.username ?? ""}
                   />
-                  {!isOwn ? (
-                    <Button
-                      className="min-w-28 self-start"
-                      disabled={
-                        followStatus.isLoading || followToggle.isPending
-                      }
-                      variant={followStatus.data ? "outline" : "default"}
-                      onPress={() =>
-                        followToggle.mutate(!(followStatus.data ?? false))
-                      }
-                    >
-                      <Text>
-                        {followToggle.isPending
-                          ? "Updating…"
-                          : followStatus.data
-                            ? "Following"
-                            : "Follow"}
-                      </Text>
-                    </Button>
-                  ) : null}
                   {!isOwn && (followStatus.isError || followToggle.isError) ? (
                     <Text variant="small" className="text-destructive">
                       {followToggle.error?.message ??
@@ -253,7 +294,12 @@ function ProfilePostsEmpty({
       />
     );
   }
-  return <FeedbackState title="No Ask posts yet" />;
+  return (
+    <FeedbackState
+      className="mx-auto w-full max-w-xl self-center"
+      title="No Ask posts yet"
+    />
+  );
 }
 
 function FollowCounts({
@@ -268,13 +314,13 @@ function FollowCounts({
   username: string;
 }) {
   return (
-    <View className="flex-row items-center gap-4">
+    <View className="flex-row items-center gap-3">
       <Link href={routes.followers(username)} asChild>
         <Pressable accessibilityRole="link" className="py-1 active:opacity-70">
           <Count label="Followers" value={followers} isLoading={isLoading} />
         </Pressable>
       </Link>
-      <View className="h-4 w-px bg-border" />
+      <View className="size-1 rounded-full bg-muted-foreground/70" />
       <Link href={routes.following(username)} asChild>
         <Pressable accessibilityRole="link" className="py-1 active:opacity-70">
           <Count label="Following" value={following} isLoading={isLoading} />
@@ -298,7 +344,7 @@ function Count({
       {isLoading ? (
         <Skeleton className="h-4 w-6" />
       ) : (
-        <Text className="font-semibold">{value ?? 0}</Text>
+        <Text className="text-sm font-semibold">{value ?? 0}</Text>
       )}
       <Text variant="muted">{label}</Text>
     </View>

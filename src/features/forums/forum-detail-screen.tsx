@@ -25,6 +25,7 @@ import { ForumCoverDisplay } from "@/features/forums/forum-cover-display";
 import { AskPostCard } from "@/features/posts/ask-post-card";
 import { PostFeedSkeleton } from "@/features/posts/post-feed-skeleton";
 import { SharePostCard } from "@/features/posts/share-post-card";
+import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
 import {
@@ -105,6 +106,13 @@ export function ForumDetailScreen() {
           </Link>
         ) : null}
       </View>
+
+      <SafetyOptionsMenu
+        ownerId={forumData.owner_id}
+        targetId={forumData.id}
+        targetLabel="forum"
+        targetType="forum"
+      />
 
       {membership.isError ? (
         <Text className="text-destructive" variant="small">

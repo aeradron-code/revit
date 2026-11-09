@@ -181,6 +181,18 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {profile?.role === "admin" ? (
+          <View className="gap-3 rounded-xl border border-border bg-card p-4">
+            <Text variant="h2">Admin</Text>
+            <Text variant="muted">Review user-submitted safety reports.</Text>
+            <Link href={routes.adminReports} asChild>
+              <Button className="self-start" variant="outline">
+                <Text>Review reports</Text>
+              </Button>
+            </Link>
+          </View>
+        ) : null}
+
         <View className="gap-3 rounded-xl border border-destructive/40 bg-card p-4">
           <Text variant="h2">Delete account</Text>
           <Text variant="muted">

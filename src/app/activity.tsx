@@ -119,7 +119,7 @@ export default function ActivityScreen() {
 function EmptyActivity() {
   return (
     <FeedbackState
-      description="Follows, ratings, comments, replies, and forum activity will appear here."
+      description="Follows, ratings, comments, replies, forum activity, and report reviews will appear here."
       title="Nothing new yet"
     />
   );
@@ -130,40 +130,49 @@ function ActivityItem({
 }: {
   notification: ActivityNotification;
 }) {
-  const destination = notification.post_id
-    ? routes.post(notification.post_id)
-    : notification.forum_id
-      ? routes.forum(notification.forum_id)
-      : routes.user(notification.actor.username);
+  const destination =
+    notification.notification_type === "REPORT_REVIEWED"
+      ? null
+      : notification.post_id
+        ? routes.post(notification.post_id)
+        : notification.forum_id
+          ? routes.forum(notification.forum_id)
+          : routes.user(notification.actor.username);
 
-  return (
+  const content = (
+    <Button
+      className="w-full items-center gap-3 border border-border bg-card"
+      size="content"
+      variant="ghost"
+    >
+      <View className="size-8 items-center justify-center rounded-full bg-selected">
+        <Text className="font-bold text-primary">
+          {(notification.actor.display_name ?? "?").slice(0, 1).toUpperCase()}
+        </Text>
+      </View>
+      <View className="flex-1 gap-1">
+        <Text className="text-sm leading-5">
+          <Text className="font-semibold">
+            {notification.actor.display_name}
+          </Text>{" "}
+          {activityMessage(notification)}
+        </Text>
+        <Text variant="muted" className="text-xs">
+          {formatRelativeTime(notification.created_at)}
+        </Text>
+      </View>
+      {notification.read_at === null ? (
+        <View className="mt-2 size-2 rounded-full bg-primary" />
+      ) : null}
+    </Button>
+  );
+
+  return destination ? (
     <Link href={destination} asChild>
-      <Button
-        className="w-full items-center gap-3 border border-border bg-card"
-        size="content"
-        variant="ghost"
-      >
-        <View className="size-8 items-center justify-center rounded-full bg-selected">
-          <Text className="font-bold text-primary">
-            {(notification.actor.display_name ?? "?").slice(0, 1).toUpperCase()}
-          </Text>
-        </View>
-        <View className="flex-1 gap-1">
-          <Text className="text-sm leading-5">
-            <Text className="font-semibold">
-              {notification.actor.display_name}
-            </Text>{" "}
-            {activityMessage(notification)}
-          </Text>
-          <Text variant="muted" className="text-xs">
-            {formatRelativeTime(notification.created_at)}
-          </Text>
-        </View>
-        {notification.read_at === null ? (
-          <View className="mt-2 size-2 rounded-full bg-primary" />
-        ) : null}
-      </Button>
+      {content}
     </Link>
+  ) : (
+    content
   );
 }
 
@@ -201,6 +210,8 @@ function activityMessage(notification: ActivityNotification) {
       return "joined your forum.";
     case "FORUM_POST":
       return "posted in your forum.";
+    case "REPORT_REVIEWED":
+      return "reviewed your report.";
   }
 }
 
