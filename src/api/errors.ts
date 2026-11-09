@@ -32,6 +32,7 @@ export const API_ERROR_MESSAGES = {
   RESET_PASSWORD: "We couldn’t send reset instructions. Please try again.",
   UPDATE_PASSWORD: "We couldn’t update your password. Please try again.",
   SIGN_OUT: "We couldn’t sign you out. Please try again.",
+  DELETE_ACCOUNT: "We couldn’t delete your account. Please try again.",
   LOAD_THE_COMMENT_COUNT: "We could not load the comment count.",
   LOAD_THE_COMMENTS: "We could not load the comments.",
   LOAD_THE_REPLIES: "We could not load the replies.",

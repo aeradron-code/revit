@@ -18,7 +18,7 @@ export type FollowCounts = {
 
 export type UpdateProfileInput = Pick<
   TablesUpdate<"profiles">,
-  "display_name" | "username"
+  "bio" | "display_name" | "username"
 >;
 
 export function getProfile(
@@ -34,7 +34,7 @@ export function getProfile(
       } = await supabase
         .from("profiles")
         .select(
-          "id, username, display_name, bio, avatar_url, onboarding_completed_at, created_at, updated_at",
+          "id, username, display_name, bio, avatar_url, role, onboarding_completed_at, created_at, updated_at",
         )
         .eq("id", userId)
         .abortSignal(signal)
@@ -65,7 +65,7 @@ export function getProfileByUsername(
       } = await supabase
         .from("profiles")
         .select(
-          "id, username, display_name, bio, avatar_url, onboarding_completed_at, created_at, updated_at",
+          "id, username, display_name, bio, avatar_url, role, onboarding_completed_at, created_at, updated_at",
         )
         .eq("username", username)
         .abortSignal(signal)
@@ -150,7 +150,7 @@ export function updateProfile(
       .update({ ...input, onboarding_completed_at: new Date().toISOString() })
       .eq("id", userId)
       .select(
-        "id, username, display_name, bio, avatar_url, onboarding_completed_at, created_at, updated_at",
+        "id, username, display_name, bio, avatar_url, role, onboarding_completed_at, created_at, updated_at",
       )
       .abortSignal(signal)
       .single();

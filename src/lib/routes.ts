@@ -13,6 +13,7 @@ const routeTable = {
   home: "/",
   picks: "/picks",
   profile: "/profile",
+  settings: "/settings",
   entitySearch: "/entities/search",
   entitySearchForShare: {
     pathname: "/entities/search",

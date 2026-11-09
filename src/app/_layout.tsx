@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
 import { AppProvider } from "@/providers/app-provider";
+import { ThemePreferenceProvider } from "@/providers/theme-preference-provider";
 import {
   AuthProvider,
   needsProfileCompletion,
@@ -52,14 +53,16 @@ export default function TabLayout() {
     <>
       <SafeAreaContainer>
         <AppProvider>
-          <AuthProvider>
-            <ThemeProvider value={navigationTheme}>
-              <View className="flex-1">
-                <RootNavigator />
-                <PortalHost />
-              </View>
-            </ThemeProvider>
-          </AuthProvider>
+          <ThemePreferenceProvider>
+            <AuthProvider>
+              <ThemeProvider value={navigationTheme}>
+                <View className="flex-1">
+                  <RootNavigator />
+                  <PortalHost />
+                </View>
+              </ThemeProvider>
+            </AuthProvider>
+          </ThemePreferenceProvider>
         </AppProvider>
       </SafeAreaContainer>
 
@@ -233,6 +236,11 @@ function RootNavigator() {
           >
             <Stack.Screen name="auth" options={{ headerShown: false }} />
           </Stack.Protected>
+
+          <Stack.Screen
+            name="settings"
+            options={{ headerShown: true, title: "Settings" }}
+          />
         </Stack>
       </View>
     </AuthenticatedShell>

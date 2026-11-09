@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_jobs: {
+        Row: {
+          last_error: string | null
+          locked_until: string | null
+          requested_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          last_error?: string | null
+          locked_until?: string | null
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          last_error?: string | null
+          locked_until?: string | null
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_id: string
@@ -656,6 +683,7 @@ export type Database = {
           display_name: string | null
           id: string
           onboarding_completed_at: string | null
+          role: Database["public"]["Enums"]["profile_role"]
           updated_at: string
           username: string | null
         }
@@ -666,6 +694,7 @@ export type Database = {
           display_name?: string | null
           id: string
           onboarding_completed_at?: string | null
+          role?: Database["public"]["Enums"]["profile_role"]
           updated_at?: string
           username?: string | null
         }
@@ -676,6 +705,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           onboarding_completed_at?: string | null
+          role?: Database["public"]["Enums"]["profile_role"]
           updated_at?: string
           username?: string | null
         }
@@ -725,6 +755,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_account_deletion_job: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       create_ask_post_idempotent: {
         Args: {
           p_body: string
@@ -1223,6 +1257,7 @@ export type Database = {
         | "FORUM_POST"
       pick_type: "PERSONAL"
       post_type: "ASK" | "SHARE"
+      profile_role: "user" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1360,6 +1395,7 @@ export const Constants = {
       ],
       pick_type: ["PERSONAL"],
       post_type: ["ASK", "SHARE"],
+      profile_role: ["user", "admin"],
     },
   },
 } as const

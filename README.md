@@ -25,7 +25,7 @@ pnpm lint
 pnpm check
 ```
 
-Implementation follows the [Expo SDK 57 documentation](https://docs.expo.dev/versions/v57.0.0/).
+Implementation follows the [Expo SDK 58 documentation](https://docs.expo.dev/versions/v58.0.0/).
 
 ## Implementation rules
 
