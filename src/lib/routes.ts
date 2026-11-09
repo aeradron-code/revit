@@ -12,9 +12,12 @@ const routeTable = {
   discover: "/discover",
   forums: "/forums",
   home: "/",
+  privacy: "/privacy",
   picks: "/picks",
   profile: "/profile",
   settings: "/settings",
+  support: "/support",
+  terms: "/terms",
   entitySearch: "/entities/search",
   entitySearchForShare: {
     pathname: "/entities/search",

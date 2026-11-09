@@ -193,6 +193,28 @@ export default function SettingsScreen() {
           </View>
         ) : null}
 
+        <View className="gap-3 rounded-xl border border-border bg-card p-4">
+          <Text variant="h2">Legal and support</Text>
+          <Text variant="muted">
+            Read Revit’s policies or contact Aeradron for help.
+          </Text>
+          <Link href={routes.privacy} asChild>
+            <Button className="self-start" variant="outline">
+              <Text>Privacy Policy</Text>
+            </Button>
+          </Link>
+          <Link href={routes.terms} asChild>
+            <Button className="self-start" variant="outline">
+              <Text>Terms and Conditions</Text>
+            </Button>
+          </Link>
+          <Link href={routes.support} asChild>
+            <Button className="self-start" variant="outline">
+              <Text>Contact support</Text>
+            </Button>
+          </Link>
+        </View>
+
         <View className="gap-3 rounded-xl border border-destructive/40 bg-card p-4">
           <Text variant="h2">Delete account</Text>
           <Text variant="muted">

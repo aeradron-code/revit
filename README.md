@@ -50,3 +50,9 @@ Implementation follows the [Expo SDK 58 documentation](https://docs.expo.dev/ver
 - Users can report profiles, posts and their images, comments, finds, forums, and Picks. Each user can submit one report per target. The report stores a short snapshot so it remains reviewable if the reported content or account is later removed.
 - Deleting the reporting account removes reports submitted by that account through the reporter foreign key. Reports about a deleted account remain. Blocks are removed when either account is deleted.
 - Blocking hides each account’s posts, comments, and Picks from the other, removes any mutual follow, and prevents new follows, comments, replies, and Ask ratings between them. Blocking does not delete content.
+
+## Legal and support pages
+
+- Revit includes public web routes for the Privacy Policy (`/privacy`), Terms and Conditions (`/terms`), and Support (`/support`). They are also linked from Settings and the signed-out authentication screens.
+- After deploying the Expo web export to the public domain, use the full `/privacy` URL in the App Store and Google Play privacy-policy fields, and the full `/support` URL as the support contact page.
+- The Revit support contact is `aeradron@gmail.com` and `+91 7899270142`.

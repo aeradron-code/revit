@@ -11,8 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Text } from "@/components/ui/text";
-
-const termsUrl = process.env.EXPO_PUBLIC_TERMS_URL;
+import { routes } from "@/lib/routes";
 
 export default function SignUpScreen() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -105,7 +104,7 @@ export default function SignUpScreen() {
         ) : null}
         <View className="flex-row items-start gap-3">
           <Checkbox
-            accessibilityLabel="I agree to the Terms and Conditions"
+            accessibilityLabel="I agree to the Terms and Conditions and acknowledge the Privacy Policy"
             checked={acceptedTerms}
             onCheckedChange={setAcceptedTerms}
             disabled={loading}
@@ -114,30 +113,23 @@ export default function SignUpScreen() {
           />
           <Text className="flex-1 text-sm text-muted-foreground">
             I agree to the{" "}
-            {termsUrl ? (
-              <Link
-                href={termsUrl as `https://${string}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary underline"
-              >
-                Terms and Conditions
-              </Link>
-            ) : (
-              <Text className="text-sm">Terms and Conditions</Text>
-            )}
+            <Link href={routes.terms} className="text-primary underline">
+              Terms and Conditions
+            </Link>{" "}
+            and acknowledge the{" "}
+            <Link href={routes.privacy} className="text-primary underline">
+              Privacy Policy
+            </Link>
             .
           </Text>
         </View>
         <Button size="lg" disabled={loading || !acceptedTerms} onPress={submit}>
           <Text>{loading ? "Please wait…" : "Create account"}</Text>
         </Button>
-        <GoogleSignInButton />
-        <Link href="/auth" dismissTo asChild>
-          <Button disabled={loading} className="mt-1" variant="ghost">
-            <Text>Already have an account? Sign in</Text>
-          </Button>
-        </Link>
+        <GoogleSignInButton disabled={!acceptedTerms || loading} />
+        <AuthTextLink href="/auth/sign-up">
+          Already have an account? Sign in
+        </AuthTextLink>
       </View>
     </AuthScreenLayout>
   );

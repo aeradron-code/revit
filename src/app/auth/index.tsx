@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Text } from "@/components/ui/text";
+import { routes } from "@/lib/routes";
 
 export default function SignInScreen() {
   const [email, setEmail] = useState("");
@@ -94,6 +95,17 @@ export default function SignInScreen() {
           <Text>{loading ? "Please wait…" : "Sign in"}</Text>
         </Button>
         <GoogleSignInButton />
+        <Text className="text-center text-xs leading-5 text-muted-foreground">
+          By continuing with Google to create an account, you agree to the{" "}
+          <Link href={routes.terms} className="text-primary underline">
+            Terms and Conditions
+          </Link>{" "}
+          and acknowledge the{" "}
+          <Link href={routes.privacy} className="text-primary underline">
+            Privacy Policy
+          </Link>
+          .
+        </Text>
         <AuthTextLink href="/auth/sign-up">
           Need an account? Create one
         </AuthTextLink>

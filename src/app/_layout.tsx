@@ -270,6 +270,18 @@ function RootNavigator() {
             name="settings"
             options={{ headerShown: true, title: "Settings" }}
           />
+          <Stack.Screen
+            name="privacy"
+            options={{ headerShown: true, title: "Privacy Policy" }}
+          />
+          <Stack.Screen
+            name="terms"
+            options={{ headerShown: true, title: "Terms and Conditions" }}
+          />
+          <Stack.Screen
+            name="support"
+            options={{ headerShown: true, title: "Support" }}
+          />
         </Stack>
       </View>
     </AuthenticatedShell>
