@@ -35,7 +35,7 @@ export function AuthScreenLayout({
           <View className="w-full max-w-md gap-7">
             <View className="items-center gap-1.5">
               <Image
-                source={require("../../../assets/expo.icon/Assets/revit-logo.svg")}
+                source={require("../../../assets/images/revit-logo.svg")}
                 style={{ width: 64, height: 64 }}
                 contentFit="contain"
                 accessibilityLabel="Revit"

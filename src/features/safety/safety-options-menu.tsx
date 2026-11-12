@@ -1,8 +1,8 @@
-import { Flag, MoreHorizontal } from "lucide-react-native";
+import { MoreVertical } from "lucide-react-native";
 import { type ElementRef, useRef, useState } from "react";
 import { Modal, Pressable, useWindowDimensions, View } from "react-native";
 
-import { type ReportReason, type ReportTargetType } from "@/api/safety";
+import type { ReportReason, ReportTargetType } from "@/api/safety";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -35,20 +35,16 @@ export function SafetyOptionsMenu({
   ownerId,
   targetId,
   targetLabel,
-  reportMenuLabel,
   blockMenuLabel,
   unblockMenuLabel,
-  showReportIcon = true,
   targetType,
   triggerClassName,
 }: {
   ownerId?: string | null;
   targetId: string;
   targetLabel: string;
-  reportMenuLabel?: string;
   blockMenuLabel?: string;
   unblockMenuLabel?: string;
-  showReportIcon?: boolean;
   targetType: ReportTargetType;
   triggerClassName?: string;
 }) {
@@ -126,10 +122,10 @@ export function SafetyOptionsMenu({
   return (
     <>
       <View ref={triggerRef} collapsable={false}>
-        <Button
+        <Pressable
           accessibilityLabel="More options"
           accessibilityState={{ expanded: menuPosition !== null }}
-          className={cn("size-8 rounded-full p-0", triggerClassName)}
+          className={cn("size-8 rounded-full p-2", triggerClassName)}
           onPress={() =>
             triggerRef.current?.measureInWindow((x, y, w, h) =>
               setMenuPosition({
@@ -138,11 +134,9 @@ export function SafetyOptionsMenu({
               }),
             )
           }
-          size="icon"
-          variant="ghost"
         >
-          <Icon as={MoreHorizontal} className="size-4 text-muted-foreground" />
-        </Button>
+          <Icon as={MoreVertical} className="size-4 text-muted-foreground" />
+        </Pressable>
       </View>
 
       <Modal
@@ -170,14 +164,7 @@ export function SafetyOptionsMenu({
                 size="sm"
                 variant="ghost"
               >
-                {showReportIcon ? (
-                  <Icon as={Flag} className="size-4 text-foreground" />
-                ) : null}
-                <Text>
-                  {reportSubmitted
-                    ? "Reported"
-                    : (reportMenuLabel ?? `Report ${targetLabel}`)}
-                </Text>
+                <Text>{reportSubmitted ? "Reported" : "Report"}</Text>
               </Button>
               {ownerId ? (
                 <Button

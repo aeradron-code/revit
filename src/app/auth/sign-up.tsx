@@ -127,7 +127,7 @@ export default function SignUpScreen() {
           <Text>{loading ? "Please wait…" : "Create account"}</Text>
         </Button>
         <GoogleSignInButton disabled={!acceptedTerms || loading} />
-        <AuthTextLink href="/auth/sign-up">
+        <AuthTextLink href="/auth">
           Already have an account? Sign in
         </AuthTextLink>
       </View>

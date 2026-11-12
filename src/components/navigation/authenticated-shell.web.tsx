@@ -46,7 +46,7 @@ export function AuthenticatedShell({
       <View className="sidebar-shell absolute bottom-0 left-0 top-0 hidden w-64 border-r border-border bg-card px-2 py-5 md:flex">
         <View className="mb-10 px-2">
           <Image
-            source={require("../../../assets/expo.icon/Assets/revit-logo.svg")}
+            source={require("../../../assets/images/revit-logo.svg")}
             style={{ width: 36, height: 36 }}
             contentFit="contain"
             accessibilityLabel="Revit"

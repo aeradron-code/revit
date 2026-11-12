@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 import { getInitials } from "@/lib/format";
 import { useAuth } from "@/providers/auth-provider";
 import {
@@ -220,20 +221,31 @@ export function InlineCommentDrawer({ postId }: { postId: string }) {
                   </AvatarFallback>
                 </Avatar>
                 <View className="min-w-0 flex-1 gap-1">
-                  <View className="flex-row items-baseline justify-between">
-                    <Text
-                      className="min-w-0 flex-1 text-xs font-semibold"
-                      numberOfLines={1}
-                    >
-                      {comment.author.display_name}
-                    </Text>
-                    <Text className="text-xs" variant="muted">
-                      {formatRelativeTime(comment.created_at)}
-                    </Text>
+                  <View className="flex-row items-start gap-1">
+                    <View className="min-w-0 flex-1 gap-1">
+                      <View className="flex-row items-center justify-between gap-1">
+                        <Text
+                          className="min-w-0 flex-1 text-xs font-semibold"
+                          numberOfLines={1}
+                        >
+                          {comment.author.display_name}
+                        </Text>
+                        <Text className="text-xs" variant="muted">
+                          {formatRelativeTime(comment.created_at)}
+                        </Text>
+                      </View>
+                      <Text className="text-xs leading-4" numberOfLines={2}>
+                        {comment.body}
+                      </Text>
+                    </View>
+                    <SafetyOptionsMenu
+                      ownerId={comment.author_id}
+                      targetId={comment.id}
+                      targetLabel="comment"
+                      targetType="comment"
+                      triggerClassName="p-0 pl-2"
+                    />
                   </View>
-                  <Text className="text-xs leading-4" numberOfLines={2}>
-                    {comment.body}
-                  </Text>
                   <Button
                     className="self-start p-0 pt-1"
                     disabled={replyPending}
@@ -339,21 +351,30 @@ export function InlineCommentDrawer({ postId }: { postId: string }) {
                           </Text>
                         </AvatarFallback>
                       </Avatar>
-                      <View className="min-w-0 flex-1 gap-0.5">
-                        <View className="flex-row items-baseline justify-between gap-3">
-                          <Text
-                            className="min-w-0 flex-1 text-xs font-semibold"
-                            numberOfLines={1}
-                          >
-                            {reply.author.display_name}
-                          </Text>
-                          <Text className="text-xs" variant="muted">
-                            {formatRelativeTime(reply.created_at)}
+                      <View className="min-w-0 flex-1 flex-row items-start gap-1">
+                        <View className="min-w-0 flex-1 gap-0.5">
+                          <View className="flex-row items-center justify-between gap-1">
+                            <Text
+                              className="min-w-0 flex-1 text-xs font-semibold"
+                              numberOfLines={1}
+                            >
+                              {reply.author.display_name}
+                            </Text>
+                            <Text className="text-xs" variant="muted">
+                              {formatRelativeTime(reply.created_at)}
+                            </Text>
+                          </View>
+                          <Text className="text-xs leading-4" numberOfLines={2}>
+                            {reply.body}
                           </Text>
                         </View>
-                        <Text className="text-xs leading-4" numberOfLines={2}>
-                          {reply.body}
-                        </Text>
+                        <SafetyOptionsMenu
+                          ownerId={reply.author_id}
+                          targetId={reply.id}
+                          targetLabel="comment"
+                          targetType="comment"
+                          triggerClassName="size-7"
+                        />
                       </View>
                     </View>
                   ))}

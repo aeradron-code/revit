@@ -136,7 +136,11 @@ export function ProfileView({
                 <View className="min-w-0 flex-1 gap-3 pt-3 sm:pt-5">
                   <View className="flex-row items-start justify-between gap-3">
                     <View className="min-w-0 flex-1 gap-1">
-                      <Text variant="h1" className="text-left" numberOfLines={1}>
+                      <Text
+                        variant="h1"
+                        className="text-left"
+                        numberOfLines={1}
+                      >
                         {profile.display_name}
                       </Text>
                       <Text variant="muted" className="text-sm">
@@ -188,12 +192,10 @@ export function ProfileView({
                           ownerId={profile.id}
                           targetId={profile.id}
                           targetLabel="person"
-                          reportMenuLabel="Report"
                           blockMenuLabel="Block"
                           unblockMenuLabel="Unblock"
-                          showReportIcon={false}
                           targetType="user"
-                          triggerClassName="size-10 border border-border bg-card"
+                          triggerClassName="size-10 border border-border bg-card p-2.5"
                         />
                       </View>
                     ) : null}

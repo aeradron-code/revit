@@ -80,7 +80,10 @@
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
     "format:check": "biome format .",
-    "check": "pnpm lint && pnpm exec tsc --noEmit"
+    "check": "pnpm lint && pnpm exec tsc --noEmit",
+    "web:preview": "pnpm exec expo export --platform web && eas deploy --alias preview",
+    "android:local": "eas build --platform android --local",
+    "android:preview": "eas build --platform android --profile preview"
   },
   "private": true
 }
