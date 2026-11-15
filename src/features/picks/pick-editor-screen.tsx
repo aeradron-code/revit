@@ -1,3 +1,5 @@
+import { ScrollView } from "react-native";
+import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { ChevronDown, ChevronUp, MapPin, Trash2 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
@@ -178,7 +180,7 @@ export function PickEditorScreen() {
         contentContainerClassName="mx-auto w-full max-w-2xl gap-3 px-2 pb-8 pt-4 md:pb-12 md:pt-6"
         data={items}
         keyExtractor={(item) => item.entity.id}
-        automaticallyAdjustKeyboardInsets
+        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <Card className="gap-5 border-border bg-card p-5 shadow-none md:p-6">
@@ -470,7 +472,7 @@ function MessageState({
           ),
         }}
       />
-      <View className="flex-1 items-center justify-center gap-2 px-6">
+      <ScrollView contentContainerClassName="flex-grow items-center justify-center gap-2 px-6 py-6">
         <Text variant="h2">{title}</Text>
         <Text variant="muted" className="text-center">
           {description}
@@ -478,7 +480,7 @@ function MessageState({
         <Button variant="outline" onPress={returnToPicks}>
           <Text>Go back</Text>
         </Button>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

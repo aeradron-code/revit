@@ -1,3 +1,4 @@
+import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, router } from "expo-router";
 import {
@@ -49,6 +50,7 @@ export function HomeScreen() {
         contentContainerClassName="gap-1 md:gap-2 md:px-6 md:py-6 py-1"
         data={posts}
         keyExtractor={(post) => post.id}
+        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <FeedHeader

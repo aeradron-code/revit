@@ -1,3 +1,4 @@
+import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Link } from "expo-router";
 import { UserCheck, UserPlus } from "lucide-react-native";
 import {
@@ -74,6 +75,7 @@ export function ProfileView({
         contentContainerClassName="w-full gap-1 md:mx-auto md:max-w-4xl md:px-6 md:py-6"
         data={postItems}
         keyExtractor={(post) => post.id}
+        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="gap-1 py-1">

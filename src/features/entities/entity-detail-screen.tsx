@@ -64,6 +64,7 @@ export function EntityDetailScreen() {
       {!entityId || entity.isLoading ? <EntityDetailLoading /> : null}
       {entity.isError ? (
         <ProfileMessageScreen
+          edges={[]}
           title="Find unavailable"
           description="We couldn’t load this find. Check your connection and try again."
           action={() => void entity.refetch()}
@@ -71,6 +72,7 @@ export function EntityDetailScreen() {
       ) : null}
       {entityId && !entity.isLoading && !entity.isError && !entity.data ? (
         <ProfileMessageScreen
+          edges={[]}
           title="Find not found"
           description="This find may have been removed or is no longer available."
         />

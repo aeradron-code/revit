@@ -1,3 +1,5 @@
+import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
+import type * as ImagePicker from "expo-image-picker";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { randomUUID } from "expo-crypto";
 import type { ReactNode } from "react";
@@ -9,6 +11,7 @@ import type { ResourceCreationAttempt } from "@/api/creation-recovery";
 import { ResourceRecoveryGate } from "@/features/create/resource-recovery-gate";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
+import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
@@ -16,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
+import { readLocalImage } from "@/lib/media/read-local-image";
 import {
   useCreateEntity,
   useEntityCategories,
@@ -26,7 +30,17 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useResolveResourceRecovery } from "@/queries/creation-recovery";
 
 export function EntitySearchScreen() {
-  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
+  const {
+    returnTo,
+    query: initialQuery,
+    category: initialCategorySlug,
+    add: initialAdd,
+  } = useLocalSearchParams<{
+    returnTo?: string;
+    query?: string;
+    category?: string;
+    add?: string;
+  }>();
   const returnToShare = returnTo === "share";
   const user = useAuthUser();
   if (!user) return null;
@@ -44,6 +58,9 @@ export function EntitySearchScreen() {
     >
       <EntitySearchForm
         key={user.id}
+        initialQuery={initialQuery}
+        initialCategorySlug={initialCategorySlug}
+        initialAdd={initialAdd === "true"}
         returnToShare={returnToShare}
         userId={user.id}
       />
@@ -52,19 +69,28 @@ export function EntitySearchScreen() {
 }
 
 function EntitySearchForm({
+  initialQuery,
+  initialCategorySlug,
+  initialAdd,
   returnToShare,
   userId,
 }: {
+  initialQuery?: string;
+  initialCategorySlug?: string;
+  initialAdd: boolean;
   returnToShare: boolean;
   userId: string;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery ?? "");
   const debouncedQuery = useDebouncedValue(query);
   const isDebouncing = query.trim() !== debouncedQuery.trim();
-  const search = useEntitySearch(debouncedQuery);
+  const search = useEntitySearch(
+    initialAdd ? "" : debouncedQuery,
+    returnToShare ? initialCategorySlug : undefined,
+  );
   const hasSearchTerm = query.trim().length >= 2;
   const finds = search.data ?? [];
-  const [isAddingEntity, setIsAddingEntity] = useState(false);
+  const [isAddingEntity, setIsAddingEntity] = useState(initialAdd);
   const [creationLocked, setCreationLocked] = useState(false);
 
   const goBack = () => {
@@ -93,6 +119,7 @@ function EntitySearchForm({
         className="flex-1"
         contentContainerClassName="mx-auto w-full gap-6 px-4 py-4 md:max-w-3xl md:px-6 md:py-6"
         data={
+          !initialAdd &&
           !creationLocked &&
           hasSearchTerm &&
           !isDebouncing &&
@@ -102,39 +129,44 @@ function EntitySearchForm({
             : []
         }
         keyExtractor={(entity) => entity.id}
+        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="gap-6">
             <View className="gap-1">
               <Text variant="h1" className="text-left">
-                Find something
+                {initialAdd ? "Find details" : "Find something"}
               </Text>
               <Text className="text-sm" variant="muted">
-                Search existing finds before adding a new one.
+                {initialAdd
+                  ? "Add the details for the find you couldn’t find in this category."
+                  : "Search existing finds before adding a new one."}
               </Text>
             </View>
 
-            <SearchInput
-              accessibilityLabel="Search finds"
-              autoCapitalize="words"
-              placeholder="Name or locality"
-              value={query}
-              editable={!creationLocked}
-              onChangeText={setQuery}
-            />
+            {!initialAdd ? (
+              <SearchInput
+                accessibilityLabel="Search finds"
+                autoCapitalize="words"
+                placeholder="Name or locality"
+                value={query}
+                editable={!creationLocked}
+                onChangeText={setQuery}
+              />
+            ) : null}
 
-            {!hasSearchTerm ? (
+            {!initialAdd && !hasSearchTerm ? (
               <SearchState
                 description="Enter at least two characters to search by name, locality, or address."
                 title="Search finds"
               />
             ) : null}
 
-            {hasSearchTerm && (isDebouncing || search.isLoading) ? (
+            {!initialAdd && hasSearchTerm && (isDebouncing || search.isLoading) ? (
               <EntitySearchResultsSkeleton />
             ) : null}
 
-            {hasSearchTerm && !isDebouncing && search.isError ? (
+            {!initialAdd && hasSearchTerm && !isDebouncing && search.isError ? (
               <FeedbackState
                 actionLabel="Retry"
                 onAction={() => void search.refetch()}
@@ -145,6 +177,7 @@ function EntitySearchForm({
           </View>
         }
         ListEmptyComponent={
+          !initialAdd &&
           !creationLocked &&
           hasSearchTerm &&
           !isDebouncing &&
@@ -157,28 +190,30 @@ function EntitySearchForm({
           ) : undefined
         }
         ListFooterComponent={
-          creationLocked ||
+          isAddingEntity ? (
+            <AddEntityForm
+              initialName={query}
+              initialCategorySlug={initialCategorySlug}
+              onCancel={() => {
+                if (initialAdd) router.back();
+                else setIsAddingEntity(false);
+              }}
+              returnToShare={returnToShare}
+              userId={userId}
+              onLockChange={setCreationLocked}
+            />
+          ) : creationLocked ||
           (hasSearchTerm &&
             !isDebouncing &&
             !search.isLoading &&
             !search.isError &&
             finds.length === 0) ? (
-            isAddingEntity ? (
-              <AddEntityForm
-                initialName={query}
-                onCancel={() => setIsAddingEntity(false)}
-                returnToShare={returnToShare}
-                userId={userId}
-                onLockChange={setCreationLocked}
-              />
-            ) : (
-              <Button
-                className="self-start rounded-md"
-                onPress={() => setIsAddingEntity(true)}
-              >
-                <Text>Add find</Text>
-              </Button>
-            )
+            <Button
+              className="self-start rounded-md"
+              onPress={() => setIsAddingEntity(true)}
+            >
+              <Text>Add find</Text>
+            </Button>
           ) : undefined
         }
         renderItem={({ item }) => (
@@ -191,12 +226,14 @@ function EntitySearchForm({
 
 function AddEntityForm({
   initialName,
+  initialCategorySlug,
   onCancel,
   returnToShare,
   userId,
   onLockChange,
 }: {
   initialName: string;
+  initialCategorySlug?: string;
   onCancel: () => void;
   returnToShare: boolean;
   userId: string;
@@ -219,8 +256,9 @@ function AddEntityForm({
     };
   }, []);
   const categories = useEntityCategories();
-  const [categorySlug, setCategorySlug] = useState("");
+  const [categorySlug, setCategorySlug] = useState(initialCategorySlug ?? "");
   const [name, setName] = useState(initialName.trim());
+  const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
   const [locality, setLocality] = useState("");
@@ -241,6 +279,7 @@ function AddEntityForm({
     const signature = JSON.stringify([
       categorySlug,
       name,
+      image?.uri,
       addressLine1,
       addressLine2,
       locality,
@@ -257,10 +296,24 @@ function AddEntityForm({
     const current = attempt.current;
 
     try {
+      const imageUpload = image
+        ? (current.preparedImages?.image ??
+          (await readLocalImage({
+            file: image.file,
+            fileName: image.fileName,
+            mimeType: image.mimeType,
+            uri: image.uri,
+          })))
+        : undefined;
+      current.preparedImages = {
+        ...current.preparedImages,
+        image: imageUpload,
+      };
       const entity = await createEntity.mutateAsync({
         authorId: userId,
         attempt: current,
         categorySlug,
+        image: imageUpload,
         address_line_1: addressLine1,
         address_line_2: addressLine2 || null,
         district: district || null,
@@ -329,9 +382,8 @@ function AddEntityForm({
   return (
     <View className="gap-3 rounded-lg border border-border bg-card p-3">
       <View className="gap-1">
-        <Text className="text-sm font-semibold">Add find</Text>
         <Text className="text-xs leading-4" variant="muted">
-          Only add it if the search above does not show a suitable match.
+          Add the details below for this find.
         </Text>
       </View>
 
@@ -342,17 +394,26 @@ function AddEntityForm({
           </Text>
         ) : null}
         <View className="flex-row flex-wrap gap-2">
-          {(categories.data ?? []).map((category) => (
-            <Button
-              key={category.id}
-              size="sm"
-              variant={categorySlug === category.slug ? "default" : "outline"}
-              disabled={createEntity.isPending || uncertain || checking}
-              onPress={() => setCategorySlug(category.slug)}
-            >
-              <Text>{category.label}</Text>
-            </Button>
-          ))}
+          {(categories.data ?? [])
+            .filter(
+              (category) =>
+                !returnToShare ||
+                !initialCategorySlug ||
+                category.slug === initialCategorySlug,
+            )
+            .map((category) => (
+              <Button
+                key={category.id}
+                size="sm"
+                variant={
+                  categorySlug === category.slug ? "default" : "outline"
+                }
+                disabled={createEntity.isPending || uncertain || checking}
+                onPress={() => setCategorySlug(category.slug)}
+              >
+                <Text>{category.label}</Text>
+              </Button>
+            ))}
         </View>
       </LabeledField>
       <LabeledField label="Find name">
@@ -363,6 +424,17 @@ function AddEntityForm({
           placeholder="Find name"
           value={name}
           onChangeText={setName}
+        />
+      </LabeledField>
+      <LabeledField label="Image (optional)">
+        <ImagePickerCarousel
+          images={image ? [image] : []}
+          onImagesChange={(nextImages) => setImage(nextImages[0] ?? null)}
+          maxImages={1}
+          selectionLimit={1}
+          replaceExisting
+          addLabel="Add image"
+          disabled={createEntity.isPending || uncertain || checking}
         />
       </LabeledField>
       <LabeledField label="Street address (optional)">
@@ -478,7 +550,7 @@ function AddEntityForm({
           <Text>Cancel</Text>
         </Button>
         <Button disabled={!canSubmit} size="sm" onPress={() => void submit()}>
-          <Text>{createEntity.isPending ? "Adding…" : "Add find"}</Text>
+          <Text>{createEntity.isPending ? "Saving…" : "Save find"}</Text>
         </Button>
       </View>
     </View>

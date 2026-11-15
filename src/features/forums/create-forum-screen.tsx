@@ -2,7 +2,8 @@ import type * as ImagePicker from "expo-image-picker";
 import { randomUUID } from "expo-crypto";
 import { router, Stack } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
+import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
 import { API_ERROR_MESSAGES, normalizeApiError } from "@/api/errors";
 import type { ResourceCreationAttempt } from "@/api/creation-recovery";
@@ -198,9 +199,9 @@ function CreateForumForm({ userId }: { userId: string }) {
           ),
         }}
       />
-      <ScrollView
+      <KeyboardAwareScrollView
         pointerEvents={uncertain || isSubmitting || checking ? "none" : "auto"}
-        automaticallyAdjustKeyboardInsets
+        bottomOffset={24}
         keyboardShouldPersistTaps="handled"
         contentContainerClassName="w-full gap-5 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:pb-12 md:pt-6"
       >
@@ -303,7 +304,7 @@ function CreateForumForm({ userId }: { userId: string }) {
             </Text>
           ) : null}
         </Card>
-      </ScrollView>
+      </KeyboardAwareScrollView>
       {uncertain ? (
         <View className="gap-2 p-4">
           <Text variant="small" className="text-destructive">

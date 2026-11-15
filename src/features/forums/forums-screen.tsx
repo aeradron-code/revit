@@ -1,3 +1,4 @@
+import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Link } from "expo-router";
 import { Users } from "lucide-react-native";
 import { useMemo, useState } from "react";
@@ -53,6 +54,7 @@ export function ForumsScreen() {
         contentContainerClassName="mx-auto w-full gap-5 px-2 py-3 md:max-w-3xl md:py-6"
         data={!forums.isLoading && !forums.isError ? visibleForums : []}
         keyExtractor={(forum) => forum.id}
+        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="w-full gap-4">

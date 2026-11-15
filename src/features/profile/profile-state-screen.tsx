@@ -1,5 +1,6 @@
+import type { SafeAreaViewProps } from "react-native-safe-area-context";
 import { Sparkles } from "lucide-react-native";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -42,14 +43,16 @@ export function ProfileMessageScreen({
   action,
   description,
   title,
+  edges = ["bottom"],
 }: {
+  edges?: SafeAreaViewProps["edges"];
   action?: () => void;
   description: string;
   title: string;
 }) {
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <View className="flex-1 items-center justify-center px-6">
+    <SafeAreaView className="flex-1 bg-background" edges={edges}>
+      <ScrollView contentContainerClassName="flex-grow items-center justify-center px-6 py-6">
         <View className="w-full max-w-lg items-center gap-3 rounded-lg border border-border bg-card p-4 shadow-none">
           <View className="size-10 items-center justify-center rounded-md bg-secondary">
             <Icon as={Sparkles} className="text-primary" />
@@ -66,7 +69,7 @@ export function ProfileMessageScreen({
             </Button>
           ) : null}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

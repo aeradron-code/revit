@@ -1,6 +1,6 @@
 import { type Href, router, Stack } from "expo-router";
 import { type ReactNode, useRef, useState } from "react";
-import { View } from "react-native";
+import { ScrollView } from "react-native";
 
 import type { IdempotentPostKind } from "@/api/posts";
 import { AppHeader } from "@/components/navigation/app-header";
@@ -73,7 +73,12 @@ function Shell({
           ),
         }}
       />
-      <View className="gap-3">{children}</View>
+      <ScrollView
+        contentContainerClassName="flex-grow gap-3"
+        keyboardShouldPersistTaps="handled"
+      >
+        {children}
+      </ScrollView>
     </SafeAreaView>
   );
 }

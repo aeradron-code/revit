@@ -12,6 +12,7 @@ import * as SystemUI from "expo-system-ui";
 import { Fragment, useEffect } from "react";
 import { Platform, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Uniwind, useUniwind } from "uniwind";
 import "../global.css";
 
@@ -60,18 +61,20 @@ export default function TabLayout() {
   return (
     <>
       <SafeAreaContainer>
-        <AppProvider>
-          <ThemePreferenceProvider>
-            <AuthProvider>
-              <ThemeProvider value={navigationTheme}>
-                <View className="flex-1">
-                  <RootNavigator />
-                  <PortalHost />
-                </View>
-              </ThemeProvider>
-            </AuthProvider>
-          </ThemePreferenceProvider>
-        </AppProvider>
+        <KeyboardProvider>
+          <AppProvider>
+            <ThemePreferenceProvider>
+              <AuthProvider>
+                <ThemeProvider value={navigationTheme}>
+                  <View className="flex-1">
+                    <RootNavigator />
+                    <PortalHost />
+                  </View>
+                </ThemeProvider>
+              </AuthProvider>
+            </ThemePreferenceProvider>
+          </AppProvider>
+        </KeyboardProvider>
       </SafeAreaContainer>
 
       <StatusBar style={isDark ? "light" : "dark"} />
@@ -107,6 +110,7 @@ function RootNavigator() {
   if (session && profileError && !profile) {
     return (
       <ProfileMessageScreen
+        edges={["top", "bottom", "left", "right"]}
         title="Profile unavailable"
         description="We couldn&apos;t load your account profile. Check your connection and try again."
         action={() => void retryProfile()}

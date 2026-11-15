@@ -1,3 +1,4 @@
+import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Link } from "expo-router";
 import { Image } from "expo-image";
 import { Bookmark } from "lucide-react-native";
@@ -61,6 +62,7 @@ export function PicksScreen() {
         contentContainerClassName="w-full gap-2 px-2 py-3 md:mx-auto md:max-w-3xl md:py-6"
         data={!loading && !error ? items : []}
         keyExtractor={(pick) => pick.id}
+        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="w-full gap-4 pb-3">

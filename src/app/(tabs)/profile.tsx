@@ -8,6 +8,7 @@ export default function ProfileScreen() {
   if (!profile) {
     return (
       <ProfileMessageScreen
+        edges={[]}
         title="Profile unavailable"
         description="We couldn&apos;t load your profile. Please restart the app and try again."
       />

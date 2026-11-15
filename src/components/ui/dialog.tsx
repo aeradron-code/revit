@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   type GestureResponderEvent,
   Platform,
+  Pressable,
   Text,
   View,
   type ViewProps,
@@ -12,7 +13,9 @@ import { FadeIn, FadeOut, ReduceMotion } from "react-native-reanimated";
 import { FullWindowOverlay as RNFullWindowOverlay } from "react-native-screens";
 import { Icon } from "@/components/ui/icon";
 import { NativeOnlyAnimatedView } from "@/components/ui/native-only-animated-view";
+import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { cn } from "@/lib/utils";
+import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -46,7 +49,7 @@ function DialogOverlay({
     <FullWindowOverlay>
       <DialogPrimitive.Overlay
         className={cn(
-          "absolute bottom-0 left-0 right-0 top-0 z-50 flex items-center justify-center bg-scrim/70 p-4",
+          "absolute bottom-0 left-0 right-0 top-0 z-50 flex items-center justify-center bg-scrim/70",
           Platform.select({
             web: "animate-in fade-in-0 fixed cursor-default [&>*]:cursor-auto",
           }),
@@ -62,10 +65,24 @@ function DialogOverlay({
           as="Pressable"
         >
           <NativeOnlyAnimatedView
+            style={{ flex: 1, width: "100%" }}
             entering={FadeIn.delay(50).reduceMotion(ReduceMotion.System)}
             exiting={FadeOut.duration(150).reduceMotion(ReduceMotion.System)}
           >
-            {children}
+            <SafeAreaView className="flex-1 w-full" pointerEvents="box-none">
+              <KeyboardAwareScrollView
+                className="flex-1"
+                contentContainerClassName="flex-grow items-center justify-center p-4"
+                bottomOffset={16}
+              >
+                <Pressable
+                  className="absolute inset-0"
+                  accessibilityLabel="Dismiss dialog"
+                  onPress={() => onOpenChange(false)}
+                />
+                {children}
+              </KeyboardAwareScrollView>
+            </SafeAreaView>
           </NativeOnlyAnimatedView>
         </NativeOnlyAnimatedView>
       </DialogPrimitive.Overlay>
@@ -85,7 +102,7 @@ function DialogContent({
       <DialogOverlay>
         <DialogPrimitive.Content
           className={cn(
-            "bg-elevated border-border z-50 mx-auto flex w-full max-w-[calc(100vw-2rem)] flex-col gap-4 rounded-lg border p-4 shadow-xl shadow-black/20 sm:max-w-lg",
+            "bg-elevated border-border z-50 mx-auto flex w-full max-w-lg flex-col gap-4 rounded-lg border p-4 shadow-xl shadow-black/20 sm:max-w-lg",
             Platform.select({
               web: "animate-in fade-in-0 zoom-in-95 duration-200",
             }),

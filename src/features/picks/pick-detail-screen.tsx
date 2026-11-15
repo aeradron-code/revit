@@ -1,3 +1,4 @@
+import { ScrollView } from "react-native";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { ChevronRight, Edit3, MapPin, Trash2 } from "lucide-react-native";
@@ -321,7 +322,7 @@ function PickMissingState({
           ),
         }}
       />
-      <View className="flex-1 items-center justify-center gap-2 px-6">
+      <ScrollView contentContainerClassName="flex-grow items-center justify-center gap-2 px-6 py-6">
         <Text variant="h2">Pick unavailable</Text>
         <Text variant="muted" className="text-center">
           {description ?? "This Pick may have been deleted."}
@@ -329,7 +330,7 @@ function PickMissingState({
         <Button variant="outline" onPress={onBack}>
           <Text>Go back</Text>
         </Button>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

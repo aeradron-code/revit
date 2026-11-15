@@ -1,3 +1,5 @@
+import { ScrollView } from "react-native";
+import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Globe, Plus, Trash2, Users } from "lucide-react-native";
 import { useState } from "react";
@@ -161,6 +163,7 @@ export function ForumDetailScreen() {
         contentContainerClassName="w-full py-1 md:mx-auto md:max-w-6xl md:px-6 md:py-2"
         data={postItems}
         keyExtractor={(post) => post.id}
+        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponentStyle={{ marginBottom: 8 }}
         ItemSeparatorComponent={() => <View className="h-1" />}
@@ -435,10 +438,7 @@ function PostsLoadingState() {
 
 function MissingState({ description }: { description?: string }) {
   return (
-    <SafeAreaView
-      className="flex-1 items-center justify-center gap-2 bg-background px-6"
-      edges={["bottom"]}
-    >
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
       <Stack.Screen
         options={{
           header: () => (
@@ -450,10 +450,12 @@ function MissingState({ description }: { description?: string }) {
           ),
         }}
       />
-      <Text variant="h2">Forum unavailable</Text>
-      <Text variant="muted" className="text-center">
-        {description ?? "This forum may have been deleted."}
-      </Text>
+      <ScrollView contentContainerClassName="flex-grow items-center justify-center gap-2 px-6 py-6">
+        <Text variant="h2">Forum unavailable</Text>
+        <Text variant="muted" className="text-center">
+          {description ?? "This forum may have been deleted."}
+        </Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }

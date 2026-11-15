@@ -1,3 +1,4 @@
+import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import type { ReactNode } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
@@ -108,6 +109,7 @@ export function ForumPostDetailScreen() {
               {...content}
               className="flex-1"
               contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
+              renderScrollComponent={renderKeyboardAwareListScroll}
               keyboardShouldPersistTaps="handled"
               refreshControl={
                 <RefreshControl
@@ -193,6 +195,7 @@ function ForumSharePostDetail({
               {...content}
               className="flex-1"
               contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
+              renderScrollComponent={renderKeyboardAwareListScroll}
               keyboardShouldPersistTaps="handled"
               refreshControl={
                 <RefreshControl

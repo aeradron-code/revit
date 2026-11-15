@@ -43,7 +43,6 @@ export default function SignInScreen() {
 
   return (
     <AuthScreenLayout
-      keyboardAware
       showBrandGradient
       title="Welcome back"
       description="Sign in to see the ratings shared by people you follow."

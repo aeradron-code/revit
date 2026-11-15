@@ -56,7 +56,6 @@ export default function SignUpScreen() {
 
   return (
     <AuthScreenLayout
-      keyboardAware
       showBrandGradient
       title="Create your account"
       description="Share your reviews and follow people whose reviews you care about."

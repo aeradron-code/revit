@@ -1,3 +1,4 @@
+import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react-native";
 import { useRef, useState } from "react";
@@ -150,6 +151,7 @@ function SharePostDetail({
               {...content}
               className="flex-1"
               contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
+              renderScrollComponent={renderKeyboardAwareListScroll}
               keyboardShouldPersistTaps="handled"
               refreshControl={
                 <RefreshControl
@@ -210,6 +212,7 @@ function AskPostDetail({
               {...content}
               className="flex-1"
               contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
+              renderScrollComponent={renderKeyboardAwareListScroll}
               keyboardShouldPersistTaps="handled"
               refreshControl={
                 <RefreshControl
@@ -447,6 +450,7 @@ function PostDetailMessage({
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
       <ProfileMessageScreen
+        edges={[]}
         action={action}
         description={description}
         title={title}

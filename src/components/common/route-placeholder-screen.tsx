@@ -1,5 +1,5 @@
 import { Sparkles } from "lucide-react-native";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
@@ -13,7 +13,7 @@ export function RoutePlaceholderScreen({
 }: RoutePlaceholderScreenProps) {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
-      <View className="mx-auto w-full max-w-5xl flex-1 gap-5 px-3 py-5 sm:px-6 sm:py-7">
+      <ScrollView contentContainerClassName="mx-auto w-full max-w-5xl flex-grow gap-5 px-3 py-5 sm:px-6 sm:py-7">
         <View className="gap-2">
           <Text variant="h1" className="text-left">
             {title}
@@ -30,7 +30,7 @@ export function RoutePlaceholderScreen({
             </Text>
           </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

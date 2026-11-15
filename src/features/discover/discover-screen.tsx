@@ -1,3 +1,4 @@
+import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Link } from "expo-router";
 import { MapPin } from "lucide-react-native";
 import { useState } from "react";
@@ -57,6 +58,7 @@ export function DiscoverScreen() {
         keyExtractor={(row) =>
           `${row.type}:${row.type === "profile" ? row.item.username : row.item.id}`
         }
+        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="gap-4 pb-2">
