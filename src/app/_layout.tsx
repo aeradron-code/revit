@@ -1,21 +1,31 @@
 import { NavigationBar } from "expo-navigation-bar";
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
+import {
+  DarkTheme,
+  DefaultTheme,
+  router,
+  Stack,
+  ThemeProvider,
+} from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { Fragment, useEffect } from "react";
 import { Platform, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Uniwind, useUniwind } from "uniwind";
 import "../global.css";
 
 import { PortalHost } from "@rn-primitives/portal";
 import { AuthenticatedShell } from "@/components/navigation/authenticated-shell";
+import { AppHeader } from "@/components/navigation/app-header";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Colors } from "@/constants/theme";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
+import { routes } from "@/lib/routes";
 import { AppProvider } from "@/providers/app-provider";
+import { ThemePreferenceProvider } from "@/providers/theme-preference-provider";
 import {
   AuthProvider,
   needsProfileCompletion,
@@ -51,16 +61,20 @@ export default function TabLayout() {
   return (
     <>
       <SafeAreaContainer>
-        <AppProvider>
-          <AuthProvider>
-            <ThemeProvider value={navigationTheme}>
-              <View className="flex-1">
-                <RootNavigator />
-                <PortalHost />
-              </View>
-            </ThemeProvider>
-          </AuthProvider>
-        </AppProvider>
+        <KeyboardProvider>
+          <AppProvider>
+            <ThemePreferenceProvider>
+              <AuthProvider>
+                <ThemeProvider value={navigationTheme}>
+                  <View className="flex-1">
+                    <RootNavigator />
+                    <PortalHost />
+                  </View>
+                </ThemeProvider>
+              </AuthProvider>
+            </ThemePreferenceProvider>
+          </AppProvider>
+        </KeyboardProvider>
       </SafeAreaContainer>
 
       <StatusBar style={isDark ? "light" : "dark"} />
@@ -96,6 +110,7 @@ function RootNavigator() {
   if (session && profileError && !profile) {
     return (
       <ProfileMessageScreen
+        edges={["top", "bottom", "left", "right"]}
         title="Profile unavailable"
         description="We couldn&apos;t load your account profile. Check your connection and try again."
         action={() => void retryProfile()}
@@ -141,7 +156,22 @@ function RootNavigator() {
             </Button>
           </View>
         ) : null}
-        <Stack>
+        <Stack
+          screenOptions={{
+            header: ({ navigation, options, route }) => (
+              <AppHeader
+                title={options.title ?? route.name}
+                onBack={() => {
+                  if (navigation.canGoBack()) {
+                    navigation.goBack();
+                    return;
+                  }
+                  router.replace(routes.home);
+                }}
+              />
+            ),
+          }}
+        >
           <Stack.Protected guard={canEnterApp && !isPasswordRecovery}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen
@@ -226,6 +256,12 @@ function RootNavigator() {
               name="users/[username]/following"
               options={{ headerShown: true, title: "Following" }}
             />
+            <Stack.Protected guard={canEnterApp && profile?.role === "admin"}>
+              <Stack.Screen
+                name="admin/reports"
+                options={{ headerShown: true, title: "Report review" }}
+              />
+            </Stack.Protected>
           </Stack.Protected>
 
           <Stack.Protected
@@ -233,6 +269,23 @@ function RootNavigator() {
           >
             <Stack.Screen name="auth" options={{ headerShown: false }} />
           </Stack.Protected>
+
+          <Stack.Screen
+            name="settings"
+            options={{ headerShown: true, title: "Settings" }}
+          />
+          <Stack.Screen
+            name="privacy"
+            options={{ headerShown: true, title: "Privacy Policy" }}
+          />
+          <Stack.Screen
+            name="terms"
+            options={{ headerShown: true, title: "Terms and Conditions" }}
+          />
+          <Stack.Screen
+            name="support"
+            options={{ headerShown: true, title: "Support" }}
+          />
         </Stack>
       </View>
     </AuthenticatedShell>

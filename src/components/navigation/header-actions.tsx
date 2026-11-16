@@ -95,60 +95,78 @@ export function HeaderActions({ className }: { className?: string }) {
             pointerEvents="box-none"
             className="items-end px-3"
           >
-            <View className="mt-14 w-64 rounded-xl border border-border bg-popover shadow-lg">
-              <View className="flex-row items-center gap-3 border-b border-border p-4">
-                <Avatar
-                  alt="Your profile"
-                  className="size-11 border border-border"
-                >
-                  {profile?.avatar_url ? (
-                    <AvatarImage source={{ uri: profile.avatar_url }} />
-                  ) : null}
-                  <AvatarFallback>
-                    <Text className="font-semibold">{initials}</Text>
-                  </AvatarFallback>
-                </Avatar>
-                <View className="min-w-0 flex-1">
-                  <Text className="font-semibold" numberOfLines={1}>
-                    {profile?.display_name ?? "Your profile"}
-                  </Text>
-                  {profile?.username ? (
-                    <Text variant="muted" className="text-sm" numberOfLines={1}>
-                      @{profile.username}
+            <View className="relative mt-[4.5rem] w-64">
+              <View
+                pointerEvents="none"
+                className="absolute -top-3 right-6 size-4 rotate-45 border-l border-t border-border bg-popover"
+              />
+              <View className="rounded-xl border border-border bg-popover shadow-lg">
+                <View className="flex-row items-center gap-3 border-b border-border p-4">
+                  <Avatar
+                    alt="Your profile"
+                    className="size-11 border border-border"
+                  >
+                    {profile?.avatar_url ? (
+                      <AvatarImage source={{ uri: profile.avatar_url }} />
+                    ) : null}
+                    <AvatarFallback>
+                      <Text className="font-semibold">{initials}</Text>
+                    </AvatarFallback>
+                  </Avatar>
+                  <View className="min-w-0 flex-1">
+                    <Text className="font-semibold" numberOfLines={1}>
+                      {profile?.display_name ?? "Your profile"}
+                    </Text>
+                    {profile?.username ? (
+                      <Text variant="muted" className="text-sm" numberOfLines={1}>
+                        @{profile.username}
+                      </Text>
+                    ) : null}
+                  </View>
+                </View>
+                <View className="p-1">
+                  <Button
+                    accessibilityLabel="View your profile"
+                    className="w-full justify-start"
+                    disabled={signingOut}
+                    onPress={() => {
+                      closeMenu();
+                      router.push(routes.profile);
+                    }}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <Text>View profile</Text>
+                  </Button>
+                  <Link href={routes.settings} asChild>
+                    <Button
+                      accessibilityLabel="Open settings"
+                      className="w-full justify-start"
+                      disabled={signingOut}
+                      onPress={closeMenu}
+                      size="sm"
+                      variant="ghost"
+                    >
+                      <Text>Settings</Text>
+                    </Button>
+                  </Link>
+                  <Button
+                    accessibilityLabel="Sign out"
+                    className="w-full justify-start"
+                    disabled={signingOut}
+                    onPress={() => void handleSignOut()}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <Icon as={LogOut} className="size-4 text-foreground" />
+                    <Text>{signingOut ? "Signing out…" : "Sign out"}</Text>
+                  </Button>
+                  {error ? (
+                    <Text className="px-3 pb-2 text-xs text-destructive">
+                      {error}
                     </Text>
                   ) : null}
                 </View>
-              </View>
-              <View className="p-1">
-                <Button
-                  accessibilityLabel="View your profile"
-                  className="w-full justify-start"
-                  disabled={signingOut}
-                  onPress={() => {
-                    closeMenu();
-                    router.push(routes.profile);
-                  }}
-                  size="sm"
-                  variant="ghost"
-                >
-                  <Text>View profile</Text>
-                </Button>
-                <Button
-                  accessibilityLabel="Sign out"
-                  className="w-full justify-start"
-                  disabled={signingOut}
-                  onPress={() => void handleSignOut()}
-                  size="sm"
-                  variant="ghost"
-                >
-                  <Icon as={LogOut} className="size-4 text-foreground" />
-                  <Text>{signingOut ? "Signing out…" : "Sign out"}</Text>
-                </Button>
-                {error ? (
-                  <Text className="px-3 pb-2 text-xs text-destructive">
-                    {error}
-                  </Text>
-                ) : null}
               </View>
             </View>
           </SafeAreaView>

@@ -1,4 +1,10 @@
 export const queryKeys = {
+  safety: {
+    all: ["safety"] as const,
+    reports: () => [...queryKeys.safety.all, "reports"] as const,
+    blockStatus: (viewerId: string, targetId: string) =>
+      [...queryKeys.safety.all, "block-status", viewerId, targetId] as const,
+  },
   comments: {
     all: ["comments"] as const,
     byPostPrefix: (postId: string) =>

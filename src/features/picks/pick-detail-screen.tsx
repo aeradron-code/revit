@@ -1,3 +1,4 @@
+import { ScrollView } from "react-native";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { ChevronRight, Edit3, MapPin, Trash2 } from "lucide-react-native";
@@ -27,6 +28,7 @@ import {
   useTogglePickFollow,
 } from "@/queries/picks";
 import { useFollowStatus } from "@/queries/follows";
+import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 
 export function PickDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -98,30 +100,40 @@ export function PickDetailScreen() {
                     </Text>
                   ) : null}
                 </View>
-                {!isOwner && authorFollow.data ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={
-                      followedPicks.isLoading ||
-                      followedPicks.isError ||
-                      toggleFollow.isPending
-                    }
-                    onPress={() =>
-                      toggleFollow.mutate(
-                        !(followedPicks.data ?? []).includes(id),
-                      )
-                    }
-                  >
-                    <Text>
-                      {toggleFollow.isPending
-                        ? "Updating…"
-                        : (followedPicks.data ?? []).includes(id)
-                          ? "Following"
-                          : "Follow"}
-                    </Text>
-                  </Button>
-                ) : null}
+                <View className="items-end gap-2">
+                  {!isOwner && authorFollow.data ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={
+                        followedPicks.isLoading ||
+                        followedPicks.isError ||
+                        toggleFollow.isPending
+                      }
+                      onPress={() =>
+                        toggleFollow.mutate(
+                          !(followedPicks.data ?? []).includes(id),
+                        )
+                      }
+                    >
+                      <Text>
+                        {toggleFollow.isPending
+                          ? "Updating…"
+                          : (followedPicks.data ?? []).includes(id)
+                            ? "Following"
+                            : "Follow"}
+                      </Text>
+                    </Button>
+                  ) : null}
+                  {!isOwner ? (
+                    <SafetyOptionsMenu
+                      ownerId={personalPick.author_id}
+                      targetId={personalPick.id}
+                      targetLabel="Pick"
+                      targetType="pick"
+                    />
+                  ) : null}
+                </View>
                 {isOwner ? (
                   <View className="flex-row gap-2">
                     <Button
@@ -276,19 +288,21 @@ function PickLoadingState({ onBack }: { onBack: () => void }) {
             <Skeleton className="h-10 w-24 rounded-md" />
           </View>
         </View>
-        {["first", "second", "third"].map((key) => (
-          <View
-            key={key}
-            className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-3 sm:gap-5 sm:p-5"
-          >
-            <Skeleton className="h-10 w-10 rounded-sm sm:h-14 sm:w-14" />
-            <Skeleton className="size-12 shrink-0 rounded-lg sm:size-20" />
-            <View className="min-w-0 flex-1 gap-2">
-              <Skeleton className="h-4 w-3/5" />
-              <Skeleton className="h-3 w-4/5" />
+        <View className="gap-3">
+          {["first", "second", "third"].map((key) => (
+            <View
+              key={key}
+              className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-3 sm:gap-5 sm:p-5"
+            >
+              <Skeleton className="h-10 w-10 rounded-sm sm:h-14 sm:w-14" />
+              <Skeleton className="size-12 shrink-0 rounded-lg sm:size-20" />
+              <View className="min-w-0 flex-1 gap-1">
+                <Skeleton className="h-4 w-3/5" />
+                <Skeleton className="h-3 w-4/5" />
+              </View>
             </View>
-          </View>
-        ))}
+          ))}
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -310,7 +324,7 @@ function PickMissingState({
           ),
         }}
       />
-      <View className="flex-1 items-center justify-center gap-2 px-6">
+      <ScrollView contentContainerClassName="flex-grow items-center justify-center gap-2 px-6 py-6">
         <Text variant="h2">Pick unavailable</Text>
         <Text variant="muted" className="text-center">
           {description ?? "This Pick may have been deleted."}
@@ -318,7 +332,7 @@ function PickMissingState({
         <Button variant="outline" onPress={onBack}>
           <Text>Go back</Text>
         </Button>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

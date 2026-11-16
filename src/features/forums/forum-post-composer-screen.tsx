@@ -2,7 +2,8 @@ import type * as ImagePicker from "expo-image-picker";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { randomUUID } from "expo-crypto";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
+import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { UsersRound } from "lucide-react-native";
 import type { Entity } from "@/api/entities";
 import { API_ERROR_MESSAGES, normalizeApiError } from "@/api/errors";
@@ -211,8 +212,8 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
           ),
         }}
       />
-      <ScrollView
-        automaticallyAdjustKeyboardInsets
+      <KeyboardAwareScrollView
+        bottomOffset={24}
         keyboardShouldPersistTaps="handled"
         contentContainerClassName="w-full gap-6 pb-8 px-2 pt-4 md:mx-auto md:max-w-2xl md:pb-12 md:pt-6"
       >
@@ -432,7 +433,7 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
             ) : null}
           </View>
         ) : null}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

@@ -1,9 +1,10 @@
 import type * as ImagePicker from "expo-image-picker";
 import { randomUUID } from "expo-crypto";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { MapPin } from "lucide-react-native";
+import { ArrowRight, MapPin } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { View } from "react-native";
+import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 
 import type { Entity } from "@/api/entities";
 import type { AskCreationAttempt } from "@/api/posts";
@@ -30,7 +31,11 @@ import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useResolvePostRecovery } from "@/queries/creation-recovery";
-import { useEntity, useEntitySearch } from "@/queries/entities";
+import {
+  useEntity,
+  useEntityCategories,
+  useEntitySearch,
+} from "@/queries/entities";
 import {
   useCreateShareRating,
   useMyEntityRating,
@@ -57,6 +62,7 @@ export function ShareComposerScreen() {
 function ShareComposerForm({ userId }: { userId: string }) {
   const { entityId } = useLocalSearchParams<{ entityId?: string }>();
   const [search, setSearch] = useState("");
+  const [categorySlug, setCategorySlug] = useState("");
   const [entity, setEntity] = useState<Entity | null>(null);
   const [score, setScore] = useState<number | null>(null);
   const [body, setBody] = useState("");
@@ -78,9 +84,13 @@ function ShareComposerForm({ userId }: { userId: string }) {
     };
   }, []);
   const entityFromRoute = useEntity(entityId ?? "");
+  const categories = useEntityCategories();
   const debouncedSearch = useDebouncedValue(search);
   const isDebouncing = search.trim() !== debouncedSearch.trim();
-  const results = useEntitySearch(debouncedSearch);
+  const results = useEntitySearch(
+    categorySlug ? debouncedSearch : "",
+    categorySlug || undefined,
+  );
   const resolvePostRecovery = useResolvePostRecovery();
   const existingRating = useMyEntityRating(entity?.id ?? "", userId);
   const createRating = useCreateShareRating();
@@ -104,6 +114,7 @@ function ShareComposerForm({ userId }: { userId: string }) {
   useEffect(() => {
     if (entity || !entityFromRoute.data) return;
     setEntity(entityFromRoute.data);
+    setCategorySlug(entityFromRoute.data.category.slug);
   }, [entity, entityFromRoute.data]);
 
   useEffect(() => {
@@ -136,6 +147,7 @@ function ShareComposerForm({ userId }: { userId: string }) {
     initializedEntityId.current = null;
     dirtyFields.current = { score: false, body: false };
     setEntity(nextEntity);
+    setCategorySlug(nextEntity.category.slug);
     setSearch("");
     setScore(null);
     setBody("");
@@ -267,255 +279,292 @@ function ShareComposerForm({ userId }: { userId: string }) {
           ),
         }}
       />
-      <KeyboardAvoidingView
+      <KeyboardAwareScrollView
         className="flex-1"
-        behavior={Platform.select({ ios: "padding", default: undefined })}
+        bottomOffset={24}
+        pointerEvents={uncertain || isSaving || checking ? "none" : "auto"}
+        keyboardShouldPersistTaps="handled"
+        contentContainerClassName="w-full gap-6 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
       >
-        <ScrollView
-          pointerEvents={uncertain || isSaving || checking ? "none" : "auto"}
-          keyboardShouldPersistTaps="handled"
-          contentContainerClassName="w-full gap-6 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
-        >
-          <Card className="gap-6 border-border bg-card p-4 pb-6 shadow-none">
-            <View className="gap-2 py-1">
-              <Text variant="h1" className="text-left">
-                Rate anything
+        <Card className="gap-4 border-border bg-card p-4 shadow-none">
+          <View className="gap-2">
+            <Text variant="h1" className="text-left">
+              Rate anything
+            </Text>
+            {!entity ? (
+              <Text className="text-sm">
+                Choose a category, then search finds in that category.
               </Text>
-              <Text variant="muted" className="leading-5">
-                Choose a Find and share your rating.
-              </Text>
-            </View>
+            ) : null}
+          </View>
 
-            <View className="gap-3">
-              <Text variant="small">Find</Text>
-              {!entity && entityId && entityFromRoute.isError ? (
-                <FeedbackState
-                  variant="error"
-                  title="Couldn’t load the selected find."
-                  actionLabel="Retry"
-                  onAction={() => void entityFromRoute.refetch()}
-                />
-              ) : null}
-              {!entity &&
-              entityId &&
-              entityFromRoute.isSuccess &&
-              !entityFromRoute.data ? (
-                <Text variant="muted">
-                  This find is no longer available. Search for another find
-                  below.
-                </Text>
-              ) : null}
-              {entity ? (
-                <View className="min-h-11 flex-row items-center gap-3 border-l-2 border-primary px-3 py-1.5">
-                  <Icon as={MapPin} className="size-5 text-primary" />
-                  <View className="min-w-0 flex-1 gap-0.5">
-                    <Text className="truncate text-base font-semibold">
-                      {entity.name}
-                    </Text>
-                    <Text variant="muted" className="truncate text-xs">
-                      {[entity.category.label, entity.locality]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </Text>
-                  </View>
-                  <Button
-                    disabled={isSaving}
-                    className="shrink-0"
-                    size="xs"
-                    variant="ghost"
-                    onPress={clearEntity}
-                  >
-                    <Text className="text-sm text-primary">Change</Text>
-                  </Button>
+          <View className="gap-3">
+            {!entity && entityId && entityFromRoute.isError ? (
+              <FeedbackState
+                variant="error"
+                title="Couldn’t load the selected find."
+                actionLabel="Retry"
+                onAction={() => void entityFromRoute.refetch()}
+              />
+            ) : null}
+            {!entity &&
+            entityId &&
+            entityFromRoute.isSuccess &&
+            !entityFromRoute.data ? (
+              <Text variant="muted">
+                This find is no longer available. Search for another find below.
+              </Text>
+            ) : null}
+            {entity ? (
+              <View className="min-h-11 flex-row items-center gap-3 border-l-2 border-primary px-3 py-1.5">
+                <Icon as={MapPin} className="size-5 text-primary" />
+                <View className="min-w-0 flex-1 gap-0.5">
+                  <Text className="truncate text-base font-semibold">
+                    {entity.name}
+                  </Text>
+                  <Text variant="muted" className="truncate text-xs">
+                    {[entity.category.label, entity.locality]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </Text>
                 </View>
-              ) : (
-                <>
+                <Button
+                  disabled={isSaving}
+                  className="shrink-0"
+                  size="xs"
+                  variant="ghost"
+                  onPress={clearEntity}
+                >
+                  <Text className="text-sm text-primary">Change</Text>
+                </Button>
+              </View>
+            ) : (
+              <>
+                {categories.isError ? (
+                  <FeedbackState
+                    variant="error"
+                    title="Couldn’t load find categories."
+                    actionLabel="Retry"
+                    onAction={() => void categories.refetch()}
+                  />
+                ) : null}
+                <View className="flex-row flex-wrap gap-2">
+                  {(categories.data ?? []).map((category) => (
+                    <Button
+                      key={category.id}
+                      size="sm"
+                      variant={
+                        categorySlug === category.slug ? "default" : "outline"
+                      }
+                      onPress={() => {
+                        setCategorySlug(category.slug);
+                        setSearch("");
+                      }}
+                    >
+                      <Text>{category.label}</Text>
+                    </Button>
+                  ))}
+                </View>
+                {categorySlug ? (
                   <SearchInput
                     accessibilityLabel="Search finds"
-                    autoFocus
-                    placeholder="Search by name or location"
+                    placeholder="Search by name or location in this category"
                     value={search}
                     onChangeText={setSearch}
                   />
-                  {isDebouncing || results.isLoading ? (
-                    <FindSearchSkeleton rows={1} />
-                  ) : null}
-                  {!isDebouncing && results.isError ? (
-                    <Text variant="small" className="text-destructive">
-                      {results.error.message}
+                ) : null}
+                {categorySlug && search.trim().length < 2 ? (
+                  <Text variant="muted">
+                    Enter at least two characters to search this category.
+                  </Text>
+                ) : null}
+                {categorySlug &&
+                search.trim().length >= 2 &&
+                (isDebouncing || results.isLoading) ? (
+                  <FindSearchSkeleton rows={1} className="gap-3" />
+                ) : null}
+                {categorySlug && !isDebouncing && results.isError ? (
+                  <Text variant="small" className="text-destructive">
+                    {results.error.message}
+                  </Text>
+                ) : null}
+                {categorySlug && !isDebouncing
+                  ? results.data?.map((item) => (
+                      <Button
+                        key={item.id}
+                        className="border border-border bg-card"
+                        size="content"
+                        variant="ghost"
+                        onPress={() => selectEntity(item)}
+                      >
+                        <Icon as={MapPin} className="text-primary" />
+                        <View className="min-w-0 flex-1 gap-0.5">
+                          <Text className="truncate text-left font-medium">
+                            {item.name}
+                          </Text>
+                          <Text
+                            variant="muted"
+                            className="truncate text-left text-xs"
+                          >
+                            {[item.category.label, item.locality]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </Text>
+                        </View>
+                      </Button>
+                    ))
+                  : null}
+                {categorySlug &&
+                search.trim().length >= 2 &&
+                !isDebouncing &&
+                !results.isLoading &&
+                results.data?.length === 0 ? (
+                  <View className="gap-2 border-t border-border pt-3">
+                    <Text variant="muted" className="text-sm">
+                      Can’t find it? Add it to Revit, then share your rating.
                     </Text>
-                  ) : null}
-                  {!isDebouncing
-                    ? results.data?.map((item) => (
-                        <Button
-                          key={item.id}
-                          className="border border-border bg-card"
-                          size="content"
-                          variant="ghost"
-                          onPress={() => selectEntity(item)}
-                        >
-                          <Icon as={MapPin} className="text-primary" />
-                          <View className="min-w-0 flex-1 gap-0.5">
-                            <Text className="truncate text-left font-medium">
-                              {item.name}
-                            </Text>
-                            <Text
-                              variant="muted"
-                              className="truncate text-left text-xs"
-                            >
-                              {[item.category.label, item.locality]
-                                .filter(Boolean)
-                                .join(" · ")}
-                            </Text>
-                          </View>
-                        </Button>
-                      ))
-                    : null}
-                  {search.trim().length >= 2 &&
-                  !isDebouncing &&
-                  !results.isLoading &&
-                  results.data?.length === 0 ? (
-                    <View className="gap-2 border-t border-border pt-3">
-                      <Text variant="muted" className="text-sm">
-                        Can’t find it? Ask the community for a recommendation in
-                        a post.
-                      </Text>
-                      <Button
-                        className="self-start px-0"
-                        size="sm"
-                        variant="link"
-                        onPress={() => router.push(routes.createAsk)}
-                      >
-                        <Text className="text-primary">Create an Ask post</Text>
-                      </Button>
-                    </View>
-                  ) : null}
-                </>
-              )}
-            </View>
-
-            {entity ? (
-              <>
-                <View className="gap-3 border-t border-border pt-6">
-                  <View className="flex-row items-center justify-between">
-                    <Text variant="small">Your rating</Text>
-                    {existingRating.isLoading ? (
-                      <Text variant="muted">Checking your rating…</Text>
-                    ) : null}
-                  </View>
-                  {existingRating.isError ? (
-                    <FeedbackState
-                      variant="error"
-                      title="Couldn’t check your existing rating."
-                      actionLabel="Retry"
-                      onAction={() => void existingRating.refetch()}
-                    />
-                  ) : null}
-                  <View className="flex-row items-center justify-between gap-3">
-                    <View className="flex-row items-center gap-3">
-                      <StarRating
-                        value={score}
-                        disabled={isSaving || existingRating.isLoading}
-                        starSize={25}
-                        gap={5}
-                        onChange={(nextScore) => {
-                          selectionFeedback();
-                          dirtyFields.current.score = true;
-                          setScore(nextScore);
-                        }}
-                      />
-                      <Text className="text-sm font-medium" variant="muted">
-                        {score === null ? "Not rated" : `${score} of 5`}
-                      </Text>
-                    </View>
-                    {score !== null ? (
-                      <Button
-                        accessibilityLabel="Clear your rating"
-                        className="shrink-0"
-                        size="xs"
-                        disabled={isSaving || existingRating.isLoading}
-                        variant="link"
-                        onPress={() => {
-                          selectionFeedback();
-                          dirtyFields.current.score = true;
-                          setScore(null);
-                        }}
-                      >
-                        <Text className="text-sm text-primary">
-                          Clear rating
-                        </Text>
-                      </Button>
-                    ) : null}
-                  </View>
-                </View>
-
-                <View className="gap-3 border-t border-border pt-6">
-                  <View className="flex-row items-center justify-between">
-                    <Text variant="small">Review (optional)</Text>
-                    <Text variant="muted">{body.length}/2000</Text>
-                  </View>
-                  <Textarea
-                    accessibilityLabel="Review"
-                    editable={!isSaving && !uncertain && !checking}
-                    maxLength={2000}
-                    placeholder="What did you like, or what should people know?"
-                    value={body}
-                    onChangeText={(value) => {
-                      dirtyFields.current.body = true;
-                      setBody(value);
-                    }}
-                  />
-                </View>
-
-                {!isUpdating ? (
-                  <View className="gap-3 border-t border-border pt-6">
-                    <View className="flex-row items-center justify-between">
-                      <Text variant="small">Photos (optional)</Text>
-                      <Text variant="muted">{images.length}/3</Text>
-                    </View>
-                    <ImagePickerCarousel
-                      images={images}
-                      onImagesChange={setImages}
-                      maxImages={MAX_IMAGES}
-                      disabled={isSaving}
-                      addLabel="Add photos"
-                    />
+                    <Button
+                      className="self-start px-0 has-[>svg]:px-0"
+                      size="sm"
+                      variant="link"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/entities/search",
+                          params: {
+                            returnTo: "share",
+                            query: search.trim(),
+                            category: categorySlug,
+                            add: "true",
+                          },
+                        })
+                      }
+                    >
+                      <Text className="text-primary">Add this find</Text>
+                      <Icon as={ArrowRight} className="size-4 text-primary" />
+                    </Button>
                   </View>
                 ) : null}
               </>
-            ) : null}
-
-            {mutationError ? (
-              <Text variant="small" className="text-destructive">
-                {
-                  normalizeApiError(
-                    mutationError,
-                    API_ERROR_MESSAGES.PUBLISH_YOUR_RATING,
-                  ).message
-                }
-              </Text>
-            ) : null}
-          </Card>
-        </ScrollView>
-        {uncertain ? (
-          <View className="gap-2 p-4">
-            <Text variant="small" className="text-destructive">
-              Your post may have been published. Check the result or retry
-              publishing before editing.
-            </Text>
-            <Button
-              disabled={checking || isSaving}
-              variant="outline"
-              onPress={() => void checkOutcome()}
-            >
-              <Text>{checking ? "Checking…" : "Check result"}</Text>
-            </Button>
-            {lookupMessage ? (
-              <Text variant="small">{lookupMessage}</Text>
-            ) : null}
+            )}
           </View>
-        ) : null}
-      </KeyboardAvoidingView>
+
+          {entity ? (
+            <>
+              <View className="gap-3 border-t border-border pt-6">
+                <View className="flex-row items-center justify-between">
+                  <Text variant="small">Your rating</Text>
+                  {existingRating.isLoading ? (
+                    <Text variant="muted">Checking your rating…</Text>
+                  ) : null}
+                </View>
+                {existingRating.isError ? (
+                  <FeedbackState
+                    variant="error"
+                    title="Couldn’t check your existing rating."
+                    actionLabel="Retry"
+                    onAction={() => void existingRating.refetch()}
+                  />
+                ) : null}
+                <View className="flex-row items-center justify-between gap-3">
+                  <View className="flex-row items-center gap-3">
+                    <StarRating
+                      value={score}
+                      disabled={isSaving || existingRating.isLoading}
+                      starSize={25}
+                      gap={5}
+                      onChange={(nextScore) => {
+                        selectionFeedback();
+                        dirtyFields.current.score = true;
+                        setScore(nextScore);
+                      }}
+                    />
+                    <Text className="text-sm font-medium" variant="muted">
+                      {score === null ? "Not rated" : `${score} of 5`}
+                    </Text>
+                  </View>
+                  {score !== null ? (
+                    <Button
+                      accessibilityLabel="Clear your rating"
+                      className="shrink-0"
+                      size="xs"
+                      disabled={isSaving || existingRating.isLoading}
+                      variant="link"
+                      onPress={() => {
+                        selectionFeedback();
+                        dirtyFields.current.score = true;
+                        setScore(null);
+                      }}
+                    >
+                      <Text className="text-sm text-primary">Clear rating</Text>
+                    </Button>
+                  ) : null}
+                </View>
+              </View>
+
+              <View className="gap-3 border-t border-border pt-6">
+                <View className="flex-row items-center justify-between">
+                  <Text variant="small">Review (optional)</Text>
+                  <Text variant="muted">{body.length}/2000</Text>
+                </View>
+                <Textarea
+                  accessibilityLabel="Review"
+                  editable={!isSaving && !uncertain && !checking}
+                  maxLength={2000}
+                  placeholder="What did you like, or what should people know?"
+                  value={body}
+                  onChangeText={(value) => {
+                    dirtyFields.current.body = true;
+                    setBody(value);
+                  }}
+                />
+              </View>
+
+              {!isUpdating ? (
+                <View className="gap-3 border-t border-border pt-6">
+                  <View className="flex-row items-center justify-between">
+                    <Text variant="small">Photos (optional)</Text>
+                    <Text variant="muted">{images.length}/3</Text>
+                  </View>
+                  <ImagePickerCarousel
+                    images={images}
+                    onImagesChange={setImages}
+                    maxImages={MAX_IMAGES}
+                    disabled={isSaving}
+                    addLabel="Add photos"
+                  />
+                </View>
+              ) : null}
+            </>
+          ) : null}
+
+          {mutationError ? (
+            <Text variant="small" className="text-destructive">
+              {
+                normalizeApiError(
+                  mutationError,
+                  API_ERROR_MESSAGES.PUBLISH_YOUR_RATING,
+                ).message
+              }
+            </Text>
+          ) : null}
+        </Card>
+      </KeyboardAwareScrollView>
+      {uncertain ? (
+        <View className="gap-2 p-4">
+          <Text variant="small" className="text-destructive">
+            Your post may have been published. Check the result or retry
+            publishing before editing.
+          </Text>
+          <Button
+            disabled={checking || isSaving}
+            variant="outline"
+            onPress={() => void checkOutcome()}
+          >
+            <Text>{checking ? "Checking…" : "Check result"}</Text>
+          </Button>
+          {lookupMessage ? <Text variant="small">{lookupMessage}</Text> : null}
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }

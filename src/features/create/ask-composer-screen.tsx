@@ -2,7 +2,8 @@ import { randomUUID } from "expo-crypto";
 import type * as ImagePicker from "expo-image-picker";
 import { router, Stack } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
+import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { API_ERROR_MESSAGES, normalizeApiError } from "@/api/errors";
 import type { AskCreationAttempt } from "@/api/posts";
 import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
@@ -72,14 +73,14 @@ function RecoveryMessage({
           ),
         }}
       />
-      <View className="gap-3">
+      <ScrollView contentContainerClassName="gap-3 pb-6">
         <Text>{message}</Text>
         {retry ? (
           <Button onPress={retry} variant="outline">
             <Text>Retry</Text>
           </Button>
         ) : null}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -162,7 +163,7 @@ function SavedAskRecovery({
           ),
         }}
       />
-      <View className="gap-3">
+      <ScrollView contentContainerClassName="gap-3 pb-6">
         <Text variant="h1">Check your previous post</Text>
         <Text>
           Your previous post may have been published. Check its result before
@@ -202,7 +203,7 @@ function SavedAskRecovery({
             <Text>Start a new post</Text>
           </Button>
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -343,107 +344,101 @@ function AskComposerForm() {
           ),
         }}
       />
-      <KeyboardAvoidingView
+      <KeyboardAwareScrollView
         className="flex-1"
-        behavior={Platform.select({ ios: "padding", default: undefined })}
+        bottomOffset={24}
+        keyboardShouldPersistTaps="handled"
+        contentContainerClassName="w-full gap-6 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
       >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerClassName="w-full gap-6 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
-        >
-          <Card className="gap-6 border-border bg-card pt-4 pb-6 px-4 shadow-none">
-            <View className="gap-2 py-1">
-              <Text variant="h1" className="text-left">
-                Ask your circle.
-              </Text>
-              <Text variant="muted" className="leading-5">
-                A little context. Better opinions.
-              </Text>
-            </View>
+        <Card className="gap-6 border-border bg-card pt-4 pb-6 px-4 shadow-none">
+          <View className="gap-2 py-1">
+            <Text variant="h1" className="text-left">
+              Ask your circle.
+            </Text>
+            <Text variant="muted" className="leading-5">
+              A little context. Better opinions.
+            </Text>
+          </View>
 
-            <View className="flex-row items-center gap-3">
-              <Avatar
-                alt={`${user?.email ?? "Your"} avatar`}
-                className="size-9"
-              >
-                <AvatarFallback>
-                  <Text variant="small">
-                    {(user?.email?.[0] ?? "Y").toUpperCase()}
-                  </Text>
-                </AvatarFallback>
-              </Avatar>
-              <View className="gap-0.5">
-                <Text className="text-sm font-semibold">
-                  {user?.email?.split("@")[0] ?? "You"}
+          <View className="flex-row items-center gap-3">
+            <Avatar alt={`${user?.email ?? "Your"} avatar`} className="size-9">
+              <AvatarFallback>
+                <Text variant="small">
+                  {(user?.email?.[0] ?? "Y").toUpperCase()}
                 </Text>
-                <Text variant="muted">New question</Text>
-              </View>
+              </AvatarFallback>
+            </Avatar>
+            <View className="gap-0.5">
+              <Text className="text-sm font-semibold">
+                {user?.email?.split("@")[0] ?? "You"}
+              </Text>
+              <Text variant="muted">New question</Text>
             </View>
+          </View>
 
+          <View className="gap-2">
+            <View className="flex-row items-center justify-between">
+              <Text variant="small">Your question</Text>
+              <Text variant="muted">{bodyLength}/2000</Text>
+            </View>
+            <Textarea
+              accessibilityLabel="Ask details"
+              editable={!createPost.isPending && !outcomeUncertain}
+              maxLength={2000}
+              placeholder="What would you like to ask your circle?"
+              value={body}
+              onChangeText={(value) => {
+                if (outcomeUncertain) return;
+                if (value !== body) attempt.current = null;
+                setBody(value);
+              }}
+            />
+          </View>
+
+          <View className="gap-3">
+            <ImagePickerCarousel
+              images={images}
+              onImagesChange={(value) => {
+                if (outcomeUncertain) return;
+                attempt.current = null;
+                setImages(value);
+              }}
+              maxImages={MAX_IMAGES}
+              disabled={createPost.isPending || outcomeUncertain}
+              addLabel="Add images"
+            />
+          </View>
+
+          {createPost.isError ? (
+            <Text variant="small" className="text-destructive">
+              {
+                normalizeApiError(
+                  createPost.error,
+                  API_ERROR_MESSAGES.CREATE_YOUR_ASK_POST,
+                ).message
+              }
+            </Text>
+          ) : null}
+          {outcomeUncertain ? (
             <View className="gap-2">
-              <View className="flex-row items-center justify-between">
-                <Text variant="small">Your question</Text>
-                <Text variant="muted">{bodyLength}/2000</Text>
-              </View>
-              <Textarea
-                accessibilityLabel="Ask details"
-                editable={!createPost.isPending && !outcomeUncertain}
-                maxLength={2000}
-                placeholder="What would you like to ask your circle?"
-                value={body}
-                onChangeText={(value) => {
-                  if (outcomeUncertain) return;
-                  if (value !== body) attempt.current = null;
-                  setBody(value);
-                }}
-              />
-            </View>
-
-            <View className="gap-3">
-              <ImagePickerCarousel
-                images={images}
-                onImagesChange={(value) => {
-                  if (outcomeUncertain) return;
-                  attempt.current = null;
-                  setImages(value);
-                }}
-                maxImages={MAX_IMAGES}
-                disabled={createPost.isPending || outcomeUncertain}
-                addLabel="Add images"
-              />
-            </View>
-
-            {createPost.isError ? (
               <Text variant="small" className="text-destructive">
-                {
-                  normalizeApiError(
-                    createPost.error,
-                    API_ERROR_MESSAGES.CREATE_YOUR_ASK_POST,
-                  ).message
-                }
+                Your post may have been published. Check the result or retry
+                publishing before editing.
               </Text>
-            ) : null}
-            {outcomeUncertain ? (
-              <View className="gap-2">
-                <Text variant="small" className="text-destructive">
-                  Your post may have been published. Check the result or retry
-                  publishing before editing.
-                </Text>
-                <Button
-                  disabled={checkingOutcome || createPost.isPending}
-                  onPress={() => void checkOutcome()}
-                  variant="outline"
-                >
-                  <Text>{checkingOutcome ? "Checking…" : "Check result"}</Text>
-                </Button>
-                {lookupMessage ? (
-                  <Text variant="small">{lookupMessage}</Text>
-                ) : null}
-              </View>
-            ) : null}
-          </Card>
-        </ScrollView>
-      </KeyboardAvoidingView>
+              <Button
+                disabled={checkingOutcome || createPost.isPending}
+                onPress={() => void checkOutcome()}
+                variant="outline"
+              >
+                <Text>{checkingOutcome ? "Checking…" : "Check result"}</Text>
+              </Button>
+              {lookupMessage ? (
+                <Text variant="small">{lookupMessage}</Text>
+              ) : null}
+            </View>
+          ) : null}
+        </Card>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

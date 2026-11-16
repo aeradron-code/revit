@@ -29,6 +29,7 @@ export function PageScrollView({
   return (
     <ScrollView
       {...props}
+      keyboardShouldPersistTaps={props.keyboardShouldPersistTaps ?? "handled"}
       contentContainerClassName={cn(
         "w-full px-2 py-3 md:mx-auto md:py-6",
         contentWidths[contentWidth],

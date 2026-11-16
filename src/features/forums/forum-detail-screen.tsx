@@ -1,3 +1,5 @@
+import { ScrollView } from "react-native";
+import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Globe, Plus, Trash2, Users } from "lucide-react-native";
 import { useState } from "react";
@@ -25,6 +27,7 @@ import { ForumCoverDisplay } from "@/features/forums/forum-cover-display";
 import { AskPostCard } from "@/features/posts/ask-post-card";
 import { PostFeedSkeleton } from "@/features/posts/post-feed-skeleton";
 import { SharePostCard } from "@/features/posts/share-post-card";
+import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
 import {
@@ -106,6 +109,13 @@ export function ForumDetailScreen() {
         ) : null}
       </View>
 
+      <SafetyOptionsMenu
+        ownerId={forumData.owner_id}
+        targetId={forumData.id}
+        targetLabel="forum"
+        targetType="forum"
+      />
+
       {membership.isError ? (
         <Text className="text-destructive" variant="small">
           {membership.error.message}
@@ -153,6 +163,7 @@ export function ForumDetailScreen() {
         contentContainerClassName="w-full py-1 md:mx-auto md:max-w-6xl md:px-6 md:py-2"
         data={postItems}
         keyExtractor={(post) => post.id}
+        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponentStyle={{ marginBottom: 8 }}
         ItemSeparatorComponent={() => <View className="h-1" />}
@@ -370,7 +381,7 @@ function LoadingState() {
           ),
         }}
       />
-      <View className="w-full gap-2 py-1 md:mx-auto md:max-w-6xl md:gap-4 md:px-6 md:py-2">
+      <View className="w-full gap-1 py-1 md:mx-auto md:max-w-6xl md:gap-4 md:px-6 md:py-2">
         <View className="overflow-hidden rounded-lg border border-border bg-card">
           <Skeleton
             className="w-full rounded-none"
@@ -384,7 +395,7 @@ function LoadingState() {
         {!isWide ? <ForumAboutSkeleton /> : null}
         <View className="relative w-full flex-row gap-3">
           <View className="min-w-0 flex-1">
-            <PostFeedSkeleton rows={2} />
+            <PostFeedSkeleton rows={2} gapClassName="gap-1" />
           </View>
           {isWide ? <View style={{ width: 320, flexShrink: 0 }} /> : null}
           {isWide ? (
@@ -405,7 +416,7 @@ function ForumAboutSkeleton() {
   return (
     <View className="gap-3 rounded-lg border border-border bg-card p-4">
       <Skeleton className="h-5 w-3/5" />
-      <View className="gap-2">
+      <View className="gap-1">
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-4/5" />
       </View>
@@ -422,15 +433,12 @@ function ForumAboutSkeleton() {
 }
 
 function PostsLoadingState() {
-  return <PostFeedSkeleton rows={2} />;
+  return <PostFeedSkeleton rows={2} gapClassName="gap-1" />;
 }
 
 function MissingState({ description }: { description?: string }) {
   return (
-    <SafeAreaView
-      className="flex-1 items-center justify-center gap-2 bg-background px-6"
-      edges={["bottom"]}
-    >
+    <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
       <Stack.Screen
         options={{
           header: () => (
@@ -442,10 +450,12 @@ function MissingState({ description }: { description?: string }) {
           ),
         }}
       />
-      <Text variant="h2">Forum unavailable</Text>
-      <Text variant="muted" className="text-center">
-        {description ?? "This forum may have been deleted."}
-      </Text>
+      <ScrollView contentContainerClassName="flex-grow items-center justify-center gap-2 px-6 py-6">
+        <Text variant="h2">Forum unavailable</Text>
+        <Text variant="muted" className="text-center">
+          {description ?? "This forum may have been deleted."}
+        </Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }

@@ -22,18 +22,21 @@ export default function MainTabs() {
   const insets = useSafeAreaInsets();
   const bottomPadding = Math.max(insets.bottom, 8);
   // CSS keeps web insets current without interrupting streamed hydration.
-  const tabBarInsets = (Platform.OS === "web"
-    ? {
-        height: "calc(58px + max(env(safe-area-inset-bottom, 0px), 8px))",
-        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
-        paddingLeft: "env(safe-area-inset-left, 0px)",
-        paddingRight: "env(safe-area-inset-right, 0px)",
-      }
-    : { height: 58 + bottomPadding, paddingBottom: bottomPadding }) as ViewStyle;
+  const tabBarInsets = (
+    Platform.OS === "web"
+      ? {
+          height: "calc(58px + max(env(safe-area-inset-bottom, 0px), 8px))",
+          paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
+          paddingLeft: "env(safe-area-inset-left, 0px)",
+          paddingRight: "env(safe-area-inset-right, 0px)",
+        }
+      : { height: 58 + bottomPadding, paddingBottom: bottomPadding }
+  ) as ViewStyle;
 
   return (
     <Tabs
       screenOptions={({ route }) => ({
+        tabBarHideOnKeyboard: true,
         headerShown: true,
         header: () => (
           <AppHeader

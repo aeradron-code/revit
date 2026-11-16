@@ -36,6 +36,7 @@ import {
 } from "@/queries/shares";
 import { StarRating } from "@/features/ratings/star-rating";
 import { PostFeedSkeleton } from "@/features/posts/post-feed-skeleton";
+import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 
 export function EntityDetailScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
@@ -63,6 +64,7 @@ export function EntityDetailScreen() {
       {!entityId || entity.isLoading ? <EntityDetailLoading /> : null}
       {entity.isError ? (
         <ProfileMessageScreen
+          edges={[]}
           title="Find unavailable"
           description="We couldn’t load this find. Check your connection and try again."
           action={() => void entity.refetch()}
@@ -70,6 +72,7 @@ export function EntityDetailScreen() {
       ) : null}
       {entityId && !entity.isLoading && !entity.isError && !entity.data ? (
         <ProfileMessageScreen
+          edges={[]}
           title="Find not found"
           description="This find may have been removed or is no longer available."
         />
@@ -175,6 +178,12 @@ function EntityDetails({ entityId }: { entityId: string }) {
                     >
                       <Text>Rate this find</Text>
                     </Button>
+                    <SafetyOptionsMenu
+                      ownerId={entityData.created_by}
+                      targetId={entityData.id}
+                      targetLabel="find"
+                      targetType="entity"
+                    />
                     {user?.id && entityData.created_by === user.id ? (
                       <Button
                         accessibilityLabel="Delete find"
@@ -200,7 +209,9 @@ function EntityDetails({ entityId }: { entityId: string }) {
         }
         ListEmptyComponent={
           <View className="mx-auto w-full max-w-[36rem]">
-            {posts.isLoading ? <PostFeedSkeleton rows={2} /> : null}
+            {posts.isLoading ? (
+              <PostFeedSkeleton rows={2} gapClassName="gap-0" />
+            ) : null}
             {posts.isError ? (
               <FeedbackState
                 actionLabel="Retry"
@@ -397,12 +408,14 @@ function EntityDetailLoading() {
           className={`rounded-lg ${horizontal ? "h-64 w-2/5" : "h-56 w-full"}`}
         />
         <View className="min-w-0 flex-1 gap-3">
-          <Skeleton className="h-6 w-24 rounded-full" />
-          <Skeleton className="h-9 w-3/5" />
-          <Skeleton className="h-4 w-4/5" />
-          <View className="gap-2">
-            <Skeleton className="h-4 w-full" />
+          <View className="gap-1">
+            <Skeleton className="h-6 w-24 rounded-full" />
+            <Skeleton className="h-9 w-3/5" />
             <Skeleton className="h-4 w-4/5" />
+            <View className="gap-1">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-4/5" />
+            </View>
           </View>
           <View className="flex-row flex-wrap items-center justify-between gap-3 pt-2">
             <View className="flex-row items-center gap-2">

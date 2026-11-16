@@ -210,3 +210,8 @@ export function signOut() {
     { message: API_ERROR_MESSAGES.SIGN_OUT },
   );
 }
+
+/** Clear this device's session after a server-side account deletion. */
+export async function clearLocalSession(): Promise<void> {
+  await supabase.auth.signOut({ scope: "local" });
+}

@@ -1,6 +1,6 @@
 import { type Href, router, Stack } from "expo-router";
 import { type ReactNode, useRef, useState } from "react";
-import { View } from "react-native";
+import { ScrollView } from "react-native";
 import type { ResourceCreationKind } from "@/api/creation-recovery";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,10 @@ export function ResourceRecoveryGate({
           ),
         }}
       />
-      <View className="gap-3">
+      <ScrollView
+        contentContainerClassName="flex-grow gap-3"
+        keyboardShouldPersistTaps="handled"
+      >
         {recovery.isFetching ? (
           <Text>Checking your previous {label}…</Text>
         ) : recovery.isError ? (
@@ -129,7 +132,7 @@ export function ResourceRecoveryGate({
             )}
           </>
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

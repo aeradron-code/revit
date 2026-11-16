@@ -49,3 +49,5 @@ pnpm-debug.log*
 
 # Operating-system files
 .DS_Store
+
+generated_images

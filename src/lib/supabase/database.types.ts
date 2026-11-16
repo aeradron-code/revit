@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_jobs: {
+        Row: {
+          last_error: string | null
+          locked_until: string | null
+          requested_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          last_error?: string | null
+          locked_until?: string | null
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          last_error?: string | null
+          locked_until?: string | null
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_id: string
@@ -656,6 +683,7 @@ export type Database = {
           display_name: string | null
           id: string
           onboarding_completed_at: string | null
+          role: Database["public"]["Enums"]["profile_role"]
           updated_at: string
           username: string | null
         }
@@ -666,6 +694,7 @@ export type Database = {
           display_name?: string | null
           id: string
           onboarding_completed_at?: string | null
+          role?: Database["public"]["Enums"]["profile_role"]
           updated_at?: string
           username?: string | null
         }
@@ -676,10 +705,110 @@ export type Database = {
           display_name?: string | null
           id?: string
           onboarding_completed_at?: string | null
+          role?: Database["public"]["Enums"]["profile_role"]
           updated_at?: string
           username?: string | null
         }
         Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_id: string
+          reporter_summary: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_path: string | null
+          target_summary: string
+          target_type: Database["public"]["Enums"]["report_target_type"]
+          target_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_id: string
+          reporter_summary: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_path?: string | null
+          target_summary: string
+          target_type: Database["public"]["Enums"]["report_target_type"]
+          target_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: Database["public"]["Enums"]["report_reason"]
+          reporter_id?: string
+          reporter_summary?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_path?: string | null
+          target_summary?: string
+          target_type?: Database["public"]["Enums"]["report_target_type"]
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ratings: {
         Row: {
@@ -725,6 +854,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_account_deletion_job: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
+      submit_content_report: {
+        Args: {
+          p_details?: string | null
+          p_reason: Database["public"]["Enums"]["report_reason"]
+          p_target_id: string
+          p_target_type: Database["public"]["Enums"]["report_target_type"]
+        }
+        Returns: string
+      }
       create_ask_post_idempotent: {
         Args: {
           p_body: string
@@ -1221,8 +1363,24 @@ export type Database = {
         | "REPLY"
         | "FORUM_JOIN"
         | "FORUM_POST"
+        | "REPORT_REVIEWED"
       pick_type: "PERSONAL"
       post_type: "ASK" | "SHARE"
+      profile_role: "user" | "admin"
+      report_reason:
+        | "harassment"
+        | "impersonation"
+        | "inappropriate"
+        | "other"
+        | "spam"
+      report_status: "pending" | "reviewed"
+      report_target_type:
+        | "comment"
+        | "entity"
+        | "forum"
+        | "pick"
+        | "post"
+        | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1357,9 +1515,11 @@ export const Constants = {
         "REPLY",
         "FORUM_JOIN",
         "FORUM_POST",
+        "REPORT_REVIEWED",
       ],
       pick_type: ["PERSONAL"],
       post_type: ["ASK", "SHARE"],
+      profile_role: ["user", "admin"],
     },
   },
 } as const

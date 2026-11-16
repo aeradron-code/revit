@@ -64,6 +64,7 @@ export function SharePostCard({
         <PostAuthorHeader
           author={post.author}
           createdAt={post.created_at}
+          postId={post.id}
           trailingContent={
             <Badge className="rounded-full px-2 py-0.5" variant="default">
               <Text className="text-[9px] font-semibold">SHARE</Text>
