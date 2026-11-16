@@ -25,6 +25,18 @@ pnpm lint
 pnpm check
 ```
 
+## Database migration deployment
+
+Migrations are validated on pull requests to `main` by applying the migration history to a fresh local Postgres database. Merges to `main` that change `supabase/migrations/` trigger the production deployment workflow. The production job uses the GitHub `production` environment, so configure required reviewers for that environment before enabling the workflow.
+
+Add these repository secrets under **Settings → Secrets and variables → Actions → Secrets**:
+
+- `SUPABASE_ACCESS_TOKEN`: a Supabase personal access token with access to Revit Prod.
+- `SUPABASE_DB_PASSWORD`: the database password for Revit Prod.
+- `SUPABASE_PROJECT_ID`: the Revit Prod project reference from its Supabase dashboard URL.
+
+The production workflow first lists applied and pending migrations and runs a dry-run. Review that output before approving the `production` job, especially on the first run. Reconcile any migration history drift before approving the deployment; do not use `db reset --remote` on production. The deploy workflow can also be run manually from **Actions → Deploy database migrations → Run workflow** on `main`.
+
 Implementation follows the [Expo SDK 58 documentation](https://docs.expo.dev/versions/v58.0.0/).
 
 ## Brand assets
