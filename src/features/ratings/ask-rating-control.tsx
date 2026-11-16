@@ -81,7 +81,7 @@ export function AskRatingControl({ onClose, postId }: AskRatingControlProps) {
       <View className="flex-row items-center justify-between">
         {rating.isLoading ? (
           <View className="flex-row items-center gap-3">
-            <View className="flex-row items-center gap-0.5">
+            <View className="flex-row items-center gap-2">
               {SCORES.map((score) => (
                 <Skeleton
                   key={score}

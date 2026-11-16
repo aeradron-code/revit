@@ -381,7 +381,7 @@ function LoadingState() {
           ),
         }}
       />
-      <View className="w-full gap-2 py-1 md:mx-auto md:max-w-6xl md:gap-4 md:px-6 md:py-2">
+      <View className="w-full gap-1 py-1 md:mx-auto md:max-w-6xl md:gap-4 md:px-6 md:py-2">
         <View className="overflow-hidden rounded-lg border border-border bg-card">
           <Skeleton
             className="w-full rounded-none"
@@ -395,7 +395,7 @@ function LoadingState() {
         {!isWide ? <ForumAboutSkeleton /> : null}
         <View className="relative w-full flex-row gap-3">
           <View className="min-w-0 flex-1">
-            <PostFeedSkeleton rows={2} />
+            <PostFeedSkeleton rows={2} gapClassName="gap-1" />
           </View>
           {isWide ? <View style={{ width: 320, flexShrink: 0 }} /> : null}
           {isWide ? (
@@ -416,7 +416,7 @@ function ForumAboutSkeleton() {
   return (
     <View className="gap-3 rounded-lg border border-border bg-card p-4">
       <Skeleton className="h-5 w-3/5" />
-      <View className="gap-2">
+      <View className="gap-1">
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-4/5" />
       </View>
@@ -433,7 +433,7 @@ function ForumAboutSkeleton() {
 }
 
 function PostsLoadingState() {
-  return <PostFeedSkeleton rows={2} />;
+  return <PostFeedSkeleton rows={2} gapClassName="gap-1" />;
 }
 
 function MissingState({ description }: { description?: string }) {

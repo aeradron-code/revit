@@ -422,11 +422,11 @@ export function InlineCommentDrawer({ postId }: { postId: string }) {
 
 function InlineCommentsLoading() {
   return (
-    <View className="gap-3">
+    <View className="gap-2">
       {["first", "second"].map((key) => (
         <View key={key} className="flex-row gap-3">
           <Skeleton className="size-8 rounded-full bg-secondary" />
-          <View className="flex-1 gap-2 py-0.5">
+          <View className="flex-1 gap-1 py-0.5">
             <Skeleton className="h-3 w-28 rounded-sm bg-secondary" />
             <Skeleton className="h-3 w-full rounded-sm bg-secondary" />
           </View>

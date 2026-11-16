@@ -181,14 +181,14 @@ function ForumListItem({ forum }: { forum: ForumSummary }) {
 
 function ForumListSkeleton() {
   return (
-    <View accessibilityLabel="Loading forums" className="gap-2">
+    <View accessibilityLabel="Loading forums" className="gap-5">
       {["first", "second", "third"].map((key) => (
         <View
           key={key}
           className="w-full flex-row items-center gap-3 rounded-lg border border-border bg-card p-3"
         >
           <Skeleton className="size-10 rounded-lg" />
-          <View className="min-w-0 flex-1 gap-1">
+          <View className="min-w-0 flex-1 gap-0.5">
             <Skeleton className="h-4 w-2/5" />
             <Skeleton className="h-3 w-4/5" />
             <Skeleton className="h-3 w-1/3" />

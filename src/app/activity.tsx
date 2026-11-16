@@ -178,7 +178,7 @@ function ActivityItem({
 
 function ActivityListSkeleton() {
   return (
-    <View accessibilityLabel="Loading activity" className="gap-2">
+    <View accessibilityLabel="Loading activity" className="gap-3">
       {["first", "second", "third"].map((key) => (
         <View
           key={key}

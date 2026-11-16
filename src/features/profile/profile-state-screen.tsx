@@ -17,7 +17,7 @@ export function ProfileLoadingScreen() {
           <View className="px-5 pb-3 sm:flex-row sm:items-start sm:gap-5 sm:px-8 sm:pb-7">
             <Skeleton className="-mt-10 size-24 rounded-full border-2 border-background sm:-mt-8 sm:size-28" />
             <View className="min-w-0 flex-1 gap-3 pt-3 sm:pt-5">
-              <View className="gap-2">
+              <View className="gap-1">
                 <Skeleton className="h-8 w-48" />
                 <Skeleton className="h-4 w-32" />
               </View>

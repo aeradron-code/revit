@@ -223,7 +223,7 @@ function EntityResult({ entity }: { entity: Entity }) {
 
 function DiscoverResultsSkeleton({ filter }: { filter: ResultFilter }) {
   return (
-    <View accessibilityLabel="Loading search results" className="gap-2">
+    <View accessibilityLabel="Loading search results" className="gap-3">
       {["first", "second"].map((key) => (
         <View
           key={key}
@@ -232,7 +232,9 @@ function DiscoverResultsSkeleton({ filter }: { filter: ResultFilter }) {
           <Skeleton
             className={`size-9 ${filter === "entities" ? "rounded-md" : "rounded-full"}`}
           />
-          <View className="min-w-0 flex-1 gap-1">
+          <View
+            className={`min-w-0 flex-1 ${filter === "posts" ? "gap-1" : "gap-0.5"}`}
+          >
             <View className="w-full flex-row items-center justify-between gap-2">
               <Skeleton className="h-4 w-2/5" />
               {filter === "posts" ? (

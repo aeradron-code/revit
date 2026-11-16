@@ -8,8 +8,8 @@ export function PostCardSkeleton({
   withMedia?: boolean;
 }) {
   return (
-    <View className="w-full gap-3 overflow-hidden rounded-none border-y border-border bg-card px-3 py-3 md:rounded-lg md:border">
-      <View className="flex-row items-center gap-3">
+    <View className="w-full gap-0 overflow-hidden rounded-none border-y border-border bg-card px-3 md:rounded-lg md:border">
+      <View className="flex-row items-center gap-3 py-2">
         <Skeleton className="size-10 rounded-full" />
         <View className="min-w-0 flex-1 gap-2">
           <Skeleton className="h-4 w-2/5" />
@@ -26,7 +26,7 @@ export function PostCardSkeleton({
         <Skeleton className="h-3 w-4/5" />
         {withMedia ? <Skeleton className="h-36 w-full rounded-md" /> : null}
       </View>
-      <View className="flex-row items-center gap-2 px-1 pt-1">
+      <View className="flex-row items-center gap-2 px-1 py-2">
         <Skeleton className="h-8 w-20 rounded-md" />
         <Skeleton className="h-8 w-16 rounded-md" />
       </View>
@@ -34,7 +34,13 @@ export function PostCardSkeleton({
   );
 }
 
-export function PostFeedSkeleton({ rows = 3 }: { rows?: number }) {
+export function PostFeedSkeleton({
+  rows = 3,
+  gapClassName = "gap-3",
+}: {
+  rows?: number;
+  gapClassName?: string;
+}) {
   const rowKeys = ["first", "second", "third", "fourth", "fifth"].slice(
     0,
     rows,
@@ -43,7 +49,7 @@ export function PostFeedSkeleton({ rows = 3 }: { rows?: number }) {
   return (
     <View
       accessibilityLabel="Loading posts"
-      className="mx-auto w-full max-w-xl gap-3"
+      className={`mx-auto w-full max-w-xl ${gapClassName}`}
     >
       {rowKeys.map((key, index) => (
         <PostCardSkeleton key={key} withMedia={index % 2 === 0} />

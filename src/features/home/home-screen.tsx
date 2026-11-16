@@ -198,7 +198,7 @@ function FeedEmpty({
   feedMode: FeedMode;
 }) {
   if (feed.isLoading) {
-    return <PostFeedSkeleton />;
+    return <PostFeedSkeleton gapClassName="gap-1 md:gap-2" />;
   }
   if (feed.isError) {
     return (

@@ -625,11 +625,11 @@ function EntityResult({
 
 function EntitySearchResultsSkeleton() {
   return (
-    <View accessibilityLabel="Loading Find results" className="gap-2">
+    <View accessibilityLabel="Loading Find results" className="gap-6">
       {["first", "second"].map((key) => (
         <View
           key={key}
-          className="min-h-11 w-full gap-1 rounded-lg border border-border bg-card px-3 py-2"
+          className="min-h-11 w-full gap-0.5 rounded-lg border border-border bg-card px-3 py-2"
         >
           <Skeleton className="h-4 w-2/5" />
           <Skeleton className="h-3 w-3/5" />

@@ -288,19 +288,21 @@ function PickLoadingState({ onBack }: { onBack: () => void }) {
             <Skeleton className="h-10 w-24 rounded-md" />
           </View>
         </View>
-        {["first", "second", "third"].map((key) => (
-          <View
-            key={key}
-            className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-3 sm:gap-5 sm:p-5"
-          >
-            <Skeleton className="h-10 w-10 rounded-sm sm:h-14 sm:w-14" />
-            <Skeleton className="size-12 shrink-0 rounded-lg sm:size-20" />
-            <View className="min-w-0 flex-1 gap-2">
-              <Skeleton className="h-4 w-3/5" />
-              <Skeleton className="h-3 w-4/5" />
+        <View className="gap-3">
+          {["first", "second", "third"].map((key) => (
+            <View
+              key={key}
+              className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-3 sm:gap-5 sm:p-5"
+            >
+              <Skeleton className="h-10 w-10 rounded-sm sm:h-14 sm:w-14" />
+              <Skeleton className="size-12 shrink-0 rounded-lg sm:size-20" />
+              <View className="min-w-0 flex-1 gap-1">
+                <Skeleton className="h-4 w-3/5" />
+                <Skeleton className="h-3 w-4/5" />
+              </View>
             </View>
-          </View>
-        ))}
+          ))}
+        </View>
       </View>
     </SafeAreaView>
   );
