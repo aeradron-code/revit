@@ -82,6 +82,7 @@
     "format:check": "biome format .",
     "check": "pnpm lint && pnpm exec tsc --noEmit",
     "web:build": "pnpm exec expo export --platform web",
+    "web:preview": "pnpm web:build && eas deploy --alias preview",
     "android:local": "eas build --platform android --local",
     "android:preview": "eas build --platform android --profile preview"
   },
