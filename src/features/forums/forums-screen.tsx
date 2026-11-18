@@ -8,6 +8,8 @@ import type { ForumSummary } from "@/api/forums";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -51,7 +53,10 @@ export function ForumsScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <FlatList
         className="flex-1"
-        contentContainerClassName="mx-auto w-full gap-5 px-2 py-3 md:max-w-3xl md:py-6"
+        contentContainerClassName={pageContainerClassName(
+          "standard",
+          "gap-5 px-2 py-3 md:py-6",
+        )}
         data={!forums.isLoading && !forums.isError ? visibleForums : []}
         keyExtractor={(forum) => forum.id}
         renderScrollComponent={renderKeyboardAwareListScroll}
@@ -115,7 +120,11 @@ export function ForumsScreen() {
             />
           ) : undefined
         }
-        renderItem={({ item }) => <ForumListItem forum={item} />}
+        renderItem={({ item }) => (
+          <PageListContainer width="standard">
+            <ForumListItem forum={item} />
+          </PageListContainer>
+        )}
       />
     </SafeAreaView>
   );

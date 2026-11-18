@@ -16,6 +16,7 @@ import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/features/ratings/star-rating";
 import { FindSearchSkeleton } from "@/features/entities/find-search-skeleton";
@@ -215,7 +216,10 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
       <KeyboardAwareScrollView
         bottomOffset={24}
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="w-full gap-6 pb-8 px-2 pt-4 md:mx-auto md:max-w-2xl md:pb-12 md:pt-6"
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "gap-6 pb-8 px-2 pt-4 md:pb-12 md:pt-6",
+        )}
       >
         <View
           pointerEvents={uncertain || isSaving || checking ? "none" : "auto"}

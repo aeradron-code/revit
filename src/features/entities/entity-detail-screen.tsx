@@ -22,6 +22,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -103,7 +105,10 @@ function EntityDetails({ entityId }: { entityId: string }) {
     <>
       <FlatList
         className="flex-1"
-        contentContainerClassName="w-full py-1 md:mx-auto md:max-w-5xl md:px-6 md:py-6"
+        contentContainerClassName={pageContainerClassName(
+          "wide",
+          "py-1 md:px-6 md:py-6",
+        )}
         data={sharePosts}
         keyExtractor={(post) => post.id}
         ListHeaderComponent={
@@ -208,7 +213,7 @@ function EntityDetails({ entityId }: { entityId: string }) {
           </View>
         }
         ListEmptyComponent={
-          <View className="mx-auto w-full max-w-[36rem]">
+          <PageListContainer>
             {posts.isLoading ? (
               <PostFeedSkeleton rows={2} gapClassName="gap-0" />
             ) : null}
@@ -226,23 +231,29 @@ function EntityDetails({ entityId }: { entityId: string }) {
                 title="No ratings yet"
               />
             ) : null}
-          </View>
+          </PageListContainer>
         }
         ListFooterComponent={
           posts.hasNextPage ? (
-            <Button
-              disabled={posts.isFetchingNextPage}
-              variant="outline"
-              className="self-center"
-              onPress={() => void posts.fetchNextPage()}
-            >
-              <Text>
-                {posts.isFetchingNextPage ? "Loading…" : "Load more ratings"}
-              </Text>
-            </Button>
+            <PageListContainer className="py-2">
+              <Button
+                disabled={posts.isFetchingNextPage}
+                variant="outline"
+                className="self-center"
+                onPress={() => void posts.fetchNextPage()}
+              >
+                <Text>
+                  {posts.isFetchingNextPage ? "Loading…" : "Load more ratings"}
+                </Text>
+              </Button>
+            </PageListContainer>
           ) : undefined
         }
-        renderItem={({ item }) => <RatingRow post={item} />}
+        renderItem={({ item }) => (
+          <PageListContainer>
+            <RatingRow post={item} />
+          </PageListContainer>
+        )}
         refreshControl={
           <RefreshControl
             refreshing={
@@ -355,7 +366,7 @@ function RatingRow({ post }: { post: SharePostWithDetails }) {
       <Pressable
         accessibilityRole="link"
         accessibilityLabel={`View ${post.author.display_name}'s rating and post`}
-        className="mx-auto w-full max-w-xl flex-row flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4 active:opacity-70"
+        className="w-full flex-row flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4 active:opacity-70"
       >
         <Avatar
           alt={`${post.author.display_name}'s avatar`}
@@ -398,7 +409,9 @@ function EntityDetailLoading() {
   const horizontal = width >= 900;
 
   return (
-    <View className="w-full px-2 py-1 md:mx-auto md:max-w-5xl md:px-6 md:py-6">
+    <View
+      className={pageContainerClassName("wide", "px-2 py-1 md:px-6 md:py-6")}
+    >
       <View
         className={`gap-4 rounded-lg border border-border bg-card md:gap-6 ${
           horizontal ? "flex-row p-6" : "p-4"

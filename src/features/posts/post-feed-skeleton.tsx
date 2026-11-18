@@ -49,7 +49,7 @@ export function PostFeedSkeleton({
   return (
     <View
       accessibilityLabel="Loading posts"
-      className={`mx-auto w-full max-w-xl ${gapClassName}`}
+      className={`w-full ${gapClassName}`}
     >
       {rowKeys.map((key, index) => (
         <PostCardSkeleton key={key} withMedia={index % 2 === 0} />

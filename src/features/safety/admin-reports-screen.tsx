@@ -7,6 +7,8 @@ import { API_ERROR_MESSAGES } from "@/api/errors";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -37,13 +39,16 @@ export function AdminReportsScreen() {
         }}
       />
       {profile?.role !== "admin" ? (
-        <View className="mx-auto w-full max-w-3xl p-5">
+        <View className={pageContainerClassName("standard", "p-5")}>
           <FeedbackState title="You don’t have access to this page." />
         </View>
       ) : (
         <FlatList
           className="flex-1"
-          contentContainerClassName="mx-auto w-full max-w-3xl gap-3 p-4 md:p-6"
+          contentContainerClassName={pageContainerClassName(
+            "standard",
+            "gap-3 p-4 md:p-6",
+          )}
           data={items}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
@@ -66,20 +71,24 @@ export function AdminReportsScreen() {
           }
           ListEmptyComponent={
             reports.isLoading || reports.isError ? undefined : (
-              <FeedbackState title="No reports yet." />
+              <PageListContainer width="standard">
+                <FeedbackState title="No reports yet." />
+              </PageListContainer>
             )
           }
           renderItem={({ item }) => (
-            <ReportCard
-              report={item}
-              isUpdating={markReviewed.isPending}
-              reviewError={
-                markReviewed.isError && markReviewed.variables === item.id
-                  ? API_ERROR_MESSAGES.REVIEW_REPORT
-                  : null
-              }
-              onReview={() => markReviewed.mutate(item.id)}
-            />
+            <PageListContainer width="standard">
+              <ReportCard
+                report={item}
+                isUpdating={markReviewed.isPending}
+                reviewError={
+                  markReviewed.isError && markReviewed.variables === item.id
+                    ? API_ERROR_MESSAGES.REVIEW_REPORT
+                    : null
+                }
+                onReview={() => markReviewed.mutate(item.id)}
+              />
+            </PageListContainer>
           )}
         />
       )}

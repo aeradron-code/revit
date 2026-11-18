@@ -18,6 +18,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -160,7 +162,10 @@ export function ForumDetailScreen() {
       />
       <FlatList
         className="min-h-0 flex-1"
-        contentContainerClassName="w-full py-1 md:mx-auto md:max-w-6xl md:px-6 md:py-2"
+        contentContainerClassName={pageContainerClassName(
+          "extraWide",
+          "py-1 md:px-6 md:py-2",
+        )}
         data={postItems}
         keyExtractor={(post) => post.id}
         renderScrollComponent={renderKeyboardAwareListScroll}
@@ -200,90 +205,106 @@ export function ForumDetailScreen() {
           </View>
         }
         ListEmptyComponent={
-          <View className="relative w-full flex-row gap-3">
-            <View className="min-w-0 flex-1">
-              {posts.isLoading ? <PostsLoadingState /> : null}
-              {posts.isError ? (
-                <FeedbackState
-                  actionLabel="Retry"
-                  onAction={() => void posts.refetch()}
-                  title="Couldn’t load forum posts."
-                  variant="error"
-                />
+          <PageListContainer width="wide">
+            <View className="relative w-full flex-row gap-3">
+              <View className="min-w-0 flex-1">
+                <PageListContainer>
+                  {posts.isLoading ? <PostsLoadingState /> : null}
+                  {posts.isError ? (
+                    <FeedbackState
+                      actionLabel="Retry"
+                      onAction={() => void posts.refetch()}
+                      title="Couldn’t load forum posts."
+                      variant="error"
+                    />
+                  ) : null}
+                  {!posts.isLoading && !posts.isError ? (
+                    <FeedbackState title="No forum posts yet" />
+                  ) : null}
+                </PageListContainer>
+              </View>
+              {showForumSidebarBesideFeed ? (
+                <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
               ) : null}
-              {!posts.isLoading && !posts.isError ? (
-                <FeedbackState title="No forum posts yet" />
+              {showForumSidebarBesideFeed ? (
+                <View
+                  className="absolute right-0 top-0 w-full gap-3"
+                  style={{ width: forumSidebarWidth }}
+                >
+                  {aboutCommunity}
+                </View>
               ) : null}
             </View>
-            {showForumSidebarBesideFeed ? (
-              <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
-            ) : null}
-            {showForumSidebarBesideFeed ? (
-              <View
-                className="absolute right-0 top-0 w-full gap-3"
-                style={{ width: forumSidebarWidth }}
-              >
-                {aboutCommunity}
-              </View>
-            ) : null}
-          </View>
+          </PageListContainer>
         }
         ListFooterComponent={
           posts.isFetchNextPageError ? (
-            <View className="relative flex-row gap-3">
-              <View className="min-w-0 flex-1">
-                <FeedbackState
-                  actionLabel="Try again"
-                  onAction={() => void posts.fetchNextPage()}
-                  title="Couldn’t load more forum posts."
-                  variant="error"
-                />
+            <PageListContainer width="wide">
+              <View className="relative flex-row gap-3">
+                <View className="min-w-0 flex-1">
+                  <PageListContainer>
+                    <FeedbackState
+                      actionLabel="Try again"
+                      onAction={() => void posts.fetchNextPage()}
+                      title="Couldn’t load more forum posts."
+                      variant="error"
+                    />
+                  </PageListContainer>
+                </View>
+                {showForumSidebarBesideFeed ? (
+                  <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
+                ) : null}
               </View>
-              {showForumSidebarBesideFeed ? (
-                <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
-              ) : null}
-            </View>
+            </PageListContainer>
           ) : posts.hasNextPage ? (
-            <View className="flex-row gap-3">
-              <View className="min-w-0 flex-1">
-                <Button
-                  disabled={posts.isFetchingNextPage}
-                  variant="outline"
-                  onPress={() => void posts.fetchNextPage()}
-                >
-                  <Text>
-                    {posts.isFetchingNextPage
-                      ? "Loading more posts…"
-                      : "Load more posts"}
-                  </Text>
-                </Button>
+            <PageListContainer width="wide">
+              <View className="flex-row gap-3">
+                <View className="min-w-0 flex-1">
+                  <PageListContainer>
+                    <Button
+                      disabled={posts.isFetchingNextPage}
+                      variant="outline"
+                      onPress={() => void posts.fetchNextPage()}
+                    >
+                      <Text>
+                        {posts.isFetchingNextPage
+                          ? "Loading more posts…"
+                          : "Load more posts"}
+                      </Text>
+                    </Button>
+                  </PageListContainer>
+                </View>
+                {showForumSidebarBesideFeed ? (
+                  <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
+                ) : null}
               </View>
-              {showForumSidebarBesideFeed ? (
-                <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
-              ) : null}
-            </View>
+            </PageListContainer>
           ) : undefined
         }
         renderItem={({ item, index }) => (
-          <View className="relative w-full flex-row gap-3">
-            <View className="min-w-0 flex-1">
-              <ForumPostCard
-                post={item}
-                canInteract={forumData.isMember || isOwner}
-              />
-            </View>
-            {showForumSidebarBesideFeed ? (
-              <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
-            ) : null}
-            {showForumSidebarBesideFeed && index === 0 ? (
-              <View
-                className="absolute right-0 top-0 w-full gap-3"
-                style={{ width: forumSidebarWidth }}
-              >
-                {aboutCommunity}
+          <PageListContainer width="wide">
+            <View className="relative w-full flex-row gap-3">
+              <View className="min-w-0 flex-1">
+                <PageListContainer>
+                  <ForumPostCard
+                    post={item}
+                    canInteract={forumData.isMember || isOwner}
+                  />
+                </PageListContainer>
               </View>
-            ) : null}
-          </View>
+              {showForumSidebarBesideFeed ? (
+                <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
+              ) : null}
+              {showForumSidebarBesideFeed && index === 0 ? (
+                <View
+                  className="absolute right-0 top-0 w-full gap-3"
+                  style={{ width: forumSidebarWidth }}
+                >
+                  {aboutCommunity}
+                </View>
+              ) : null}
+            </View>
+          </PageListContainer>
         )}
       />
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
@@ -381,7 +402,12 @@ function LoadingState() {
           ),
         }}
       />
-      <View className="w-full gap-1 py-1 md:mx-auto md:max-w-6xl md:gap-4 md:px-6 md:py-2">
+      <View
+        className={pageContainerClassName(
+          "extraWide",
+          "gap-1 py-1 md:gap-4 md:px-6 md:py-2",
+        )}
+      >
         <View className="overflow-hidden rounded-lg border border-border bg-card">
           <Skeleton
             className="w-full rounded-none"
@@ -393,20 +419,24 @@ function LoadingState() {
           </View>
         </View>
         {!isWide ? <ForumAboutSkeleton /> : null}
-        <View className="relative w-full flex-row gap-3">
-          <View className="min-w-0 flex-1">
-            <PostFeedSkeleton rows={2} gapClassName="gap-1" />
-          </View>
-          {isWide ? <View style={{ width: 320, flexShrink: 0 }} /> : null}
-          {isWide ? (
-            <View
-              className="absolute right-0 top-0 w-full"
-              style={{ width: 320 }}
-            >
-              <ForumAboutSkeleton />
+        <PageListContainer width="wide">
+          <View className="relative w-full flex-row gap-3">
+            <View className="min-w-0 flex-1">
+              <PageListContainer>
+                <PostFeedSkeleton rows={2} gapClassName="gap-1" />
+              </PageListContainer>
             </View>
-          ) : null}
-        </View>
+            {isWide ? <View style={{ width: 320, flexShrink: 0 }} /> : null}
+            {isWide ? (
+              <View
+                className="absolute right-0 top-0 w-full"
+                style={{ width: 320 }}
+              >
+                <ForumAboutSkeleton />
+              </View>
+            ) : null}
+          </View>
+        </PageListContainer>
       </View>
     </SafeAreaView>
   );
@@ -450,7 +480,12 @@ function MissingState({ description }: { description?: string }) {
           ),
         }}
       />
-      <ScrollView contentContainerClassName="flex-grow items-center justify-center gap-2 px-6 py-6">
+      <ScrollView
+        contentContainerClassName={pageContainerClassName(
+          "extraWide",
+          "flex-grow items-center justify-center gap-2 px-6 py-6",
+        )}
+      >
         <Text variant="h2">Forum unavailable</Text>
         <Text variant="muted" className="text-center">
           {description ?? "This forum may have been deleted."}

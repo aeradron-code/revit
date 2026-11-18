@@ -10,6 +10,8 @@ import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
@@ -177,7 +179,10 @@ export function PickEditorScreen() {
       />
       <FlatList
         className="flex-1"
-        contentContainerClassName="mx-auto w-full max-w-2xl gap-3 px-2 pb-8 pt-4 md:pb-12 md:pt-6"
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "gap-3 px-2 pb-8 pt-4 md:pb-12 md:pt-6",
+        )}
         data={items}
         keyExtractor={(item) => item.entity.id}
         renderScrollComponent={renderKeyboardAwareListScroll}
@@ -299,28 +304,34 @@ export function PickEditorScreen() {
           </Card>
         }
         ListEmptyComponent={
-          <FeedbackState
-            description="Search above and add at least one find to continue."
-            title="No finds added"
-          />
+          <PageListContainer width="narrow">
+            <FeedbackState
+              description="Search above and add at least one find to continue."
+              title="No finds added"
+            />
+          </PageListContainer>
         }
         ListFooterComponent={
           mutationError ? (
-            <Text className="mt-2 text-destructive" variant="small">
-              {mutationError.message}
-            </Text>
+            <PageListContainer width="narrow" className="mt-2">
+              <Text className="text-destructive" variant="small">
+                {mutationError.message}
+              </Text>
+            </PageListContainer>
           ) : undefined
         }
         renderItem={({ item, index }) => (
-          <PickEditorItem
-            item={item}
-            index={index}
-            count={items.length}
-            isSaving={isSaving}
-            moveItem={moveItem}
-            removeItem={removeItem}
-            updateNote={updateNote}
-          />
+          <PageListContainer width="narrow">
+            <PickEditorItem
+              item={item}
+              index={index}
+              count={items.length}
+              isSaving={isSaving}
+              moveItem={moveItem}
+              removeItem={removeItem}
+              updateNote={updateNote}
+            />
+          </PageListContainer>
         )}
       />
     </SafeAreaView>
@@ -413,7 +424,12 @@ function LoadingState() {
           ),
         }}
       />
-      <View className="w-full max-w-2xl gap-3 px-2 pb-8 pt-4 md:mx-auto md:pb-12 md:pt-6">
+      <View
+        className={pageContainerClassName(
+          "narrow",
+          "gap-3 px-2 pb-8 pt-4 md:pb-12 md:pt-6",
+        )}
+      >
         <View className="gap-5 rounded-lg border border-border bg-card p-5 md:p-6">
           <View className="gap-1.5 border-b border-border pb-4">
             <Skeleton className="h-8 w-2/5" />
@@ -472,7 +488,12 @@ function MessageState({
           ),
         }}
       />
-      <ScrollView contentContainerClassName="flex-grow items-center justify-center gap-2 px-6 py-6">
+      <ScrollView
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "flex-grow items-center justify-center gap-2 px-6 py-6",
+        )}
+      >
         <Text variant="h2">{title}</Text>
         <Text variant="muted" className="text-center">
           {description}

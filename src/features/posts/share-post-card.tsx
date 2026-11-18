@@ -59,7 +59,7 @@ export function SharePostCard({
   );
 
   return (
-    <Card className="mx-auto w-full max-w-[36rem] self-center gap-0 overflow-hidden rounded-none border-x-0 pb-0 pt-0 md:rounded-lg md:border">
+    <Card className="w-full gap-0 overflow-hidden rounded-none border-x-0 pb-0 pt-0 md:rounded-lg md:border">
       <CardHeader className="md:pt-3 py-2">
         <PostAuthorHeader
           author={post.author}

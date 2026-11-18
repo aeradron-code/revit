@@ -20,6 +20,8 @@ import type { Profile } from "@/api/profiles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -72,7 +74,10 @@ export function ProfileView({
     >
       <FlatList
         className="flex-1"
-        contentContainerClassName="w-full gap-1 md:mx-auto md:max-w-4xl md:px-6 md:py-6"
+        contentContainerClassName={pageContainerClassName(
+          "profile",
+          "gap-1 md:px-6 md:py-6",
+        )}
         data={postItems}
         keyExtractor={(post) => post.id}
         renderScrollComponent={renderKeyboardAwareListScroll}
@@ -202,7 +207,7 @@ export function ProfileView({
                       </View>
                     ) : null}
                   </View>
-                  <Text className="max-w-2xl leading-6 text-foreground">
+                  <Text className="leading-6 text-foreground">
                     {profile.bio?.trim() ||
                       (isOwnProfile
                         ? "Add a bio to tell people what you like."
@@ -234,26 +239,36 @@ export function ProfileView({
           </View>
         }
         ListEmptyComponent={
-          <ProfilePostsEmpty
-            isError={posts.isError}
-            isLoading={posts.isLoading}
-            retry={() => void posts.refetch()}
-          />
+          <PageListContainer>
+            <ProfilePostsEmpty
+              isError={posts.isError}
+              isLoading={posts.isLoading}
+              retry={() => void posts.refetch()}
+            />
+          </PageListContainer>
         }
         ListFooterComponent={
           posts.hasNextPage ? (
-            <Button
-              disabled={posts.isFetchingNextPage}
-              variant="outline"
-              className="my-4 self-center"
-              onPress={() => void posts.fetchNextPage()}
-            >
-              {posts.isFetchingNextPage ? <ActivityIndicator /> : null}
-              <Text>{posts.isFetchingNextPage ? "Loading…" : "Load more"}</Text>
-            </Button>
+            <PageListContainer className="my-4">
+              <Button
+                disabled={posts.isFetchingNextPage}
+                variant="outline"
+                className="self-center"
+                onPress={() => void posts.fetchNextPage()}
+              >
+                {posts.isFetchingNextPage ? <ActivityIndicator /> : null}
+                <Text>
+                  {posts.isFetchingNextPage ? "Loading…" : "Load more"}
+                </Text>
+              </Button>
+            </PageListContainer>
           ) : undefined
         }
-        renderItem={({ item }) => <AskPostCard post={item} />}
+        renderItem={({ item }) => (
+          <PageListContainer>
+            <AskPostCard post={item} />
+          </PageListContainer>
+        )}
         refreshControl={
           <RefreshControl
             refreshing={
@@ -298,12 +313,7 @@ function ProfilePostsEmpty({
       />
     );
   }
-  return (
-    <FeedbackState
-      className="mx-auto w-full max-w-xl self-center"
-      title="No Ask posts yet"
-    />
-  );
+  return <FeedbackState title="No Ask posts yet" />;
 }
 
 function FollowCounts({

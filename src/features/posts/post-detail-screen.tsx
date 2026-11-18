@@ -13,6 +13,7 @@ import {
 
 import type { PostWithDetails } from "@/api/posts";
 import { Button } from "@/components/ui/button";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import {
   Dialog,
   DialogContent,
@@ -135,7 +136,7 @@ function SharePostDetail({
 
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View className="min-h-0 flex-1 py-1 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-2">
+      <View className="min-h-0 w-full flex-1 py-1 md:py-2">
         <CommentSection
           listHeader={
             <SharePostCard
@@ -150,7 +151,7 @@ function SharePostDetail({
             <FlatList
               {...content}
               className="flex-1"
-              contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
+              contentContainerClassName="gap-3 pb-2 md:px-6"
               renderScrollComponent={renderKeyboardAwareListScroll}
               keyboardShouldPersistTaps="handled"
               refreshControl={
@@ -194,7 +195,7 @@ function AskPostDetail({
 
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
+      <View className="min-h-0 w-full flex-1 py-4 md:py-6">
         <CommentSection
           listHeader={
             <AskPostCard
@@ -211,7 +212,7 @@ function AskPostDetail({
             <FlatList
               {...content}
               className="flex-1"
-              contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
+              contentContainerClassName="gap-3 px-4 pb-2 md:px-6"
               renderScrollComponent={renderKeyboardAwareListScroll}
               keyboardShouldPersistTaps="handled"
               refreshControl={
@@ -428,8 +429,13 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
 function PostDetailLoading() {
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
-        <View className="mx-auto w-full max-w-[36rem] gap-3">
+      <View
+        className={pageContainerClassName(
+          "content",
+          "min-h-0 flex-1 px-4 py-4 md:px-6 md:py-6",
+        )}
+      >
+        <View className="w-full gap-3">
           <PostCardSkeleton withMedia />
           <CommentListSkeleton />
         </View>

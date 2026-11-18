@@ -4,6 +4,7 @@ import { ScrollView, View } from "react-native";
 import { Button } from "@/components/ui/button";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { routes } from "@/lib/routes";
 
 export default function SupportScreen() {
@@ -12,7 +13,10 @@ export default function SupportScreen() {
       <Stack.Screen options={{ title: "Support" }} />
       <ScrollView
         className="flex-1"
-        contentContainerClassName="mx-auto w-full max-w-2xl gap-6 px-5 py-5 md:px-8 md:py-8"
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "gap-6 px-5 py-5 md:px-8 md:py-8",
+        )}
       >
         <View className="gap-2">
           <Text variant="h1">Revit Support</Text>

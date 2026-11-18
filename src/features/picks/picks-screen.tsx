@@ -10,6 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -59,7 +61,10 @@ export function PicksScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <FlatList
         className="flex-1"
-        contentContainerClassName="w-full gap-2 px-2 py-3 md:mx-auto md:max-w-3xl md:py-6"
+        contentContainerClassName={pageContainerClassName(
+          "standard",
+          "gap-2 px-2 py-3 md:py-6",
+        )}
         data={!loading && !error ? items : []}
         keyExtractor={(pick) => pick.id}
         renderScrollComponent={renderKeyboardAwareListScroll}
@@ -122,7 +127,11 @@ export function PicksScreen() {
             ) : null}
           </View>
         }
-        renderItem={({ item }) => <PickRow pick={item} />}
+        renderItem={({ item }) => (
+          <PageListContainer width="standard">
+            <PickRow pick={item} />
+          </PageListContainer>
+        )}
       />
     </SafeAreaView>
   );

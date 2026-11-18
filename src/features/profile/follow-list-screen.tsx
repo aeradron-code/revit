@@ -6,6 +6,8 @@ import { AppHeader } from "@/components/navigation/app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -48,25 +50,32 @@ export function FollowListScreen({ kind }: FollowListScreenProps) {
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="w-full grow px-6 md:mx-auto md:max-w-3xl md:px-6 md:py-6"
+        contentContainerClassName={pageContainerClassName(
+          "standard",
+          "grow px-6 md:px-6 md:py-6",
+        )}
         ItemSeparatorComponent={() => <View className="h-2" />}
         ListEmptyComponent={
-          <FollowListState
-            profileLoading={!username || profile.isLoading}
-            profileMissing={
-              Boolean(username) && !profile.isLoading && !profile.data
-            }
-            listLoading={list.isLoading}
-            isError={profile.isError || list.isError}
-            kind={kind}
-            retry={() =>
-              void (profile.isError ? profile.refetch() : list.refetch())
-            }
-          />
+          <PageListContainer width="standard">
+            <FollowListState
+              profileLoading={!username || profile.isLoading}
+              profileMissing={
+                Boolean(username) && !profile.isLoading && !profile.data
+              }
+              listLoading={list.isLoading}
+              isError={profile.isError || list.isError}
+              kind={kind}
+              retry={() =>
+                void (profile.isError ? profile.refetch() : list.refetch())
+              }
+            />
+          </PageListContainer>
         }
         ListFooterComponent={
           list.isFetchingNextPage ? (
-            <ActivityIndicator className="my-5" />
+            <PageListContainer width="standard" className="items-center py-5">
+              <ActivityIndicator />
+            </PageListContainer>
           ) : undefined
         }
         onEndReached={() => {
@@ -76,7 +85,11 @@ export function FollowListScreen({ kind }: FollowListScreenProps) {
         }}
         onEndReachedThreshold={0.4}
         refreshing={list.isRefetching && !list.isFetchingNextPage}
-        renderItem={({ item }) => <FollowProfileRow profile={item} />}
+        renderItem={({ item }) => (
+          <PageListContainer width="standard">
+            <FollowProfileRow profile={item} />
+          </PageListContainer>
+        )}
         onRefresh={() => void list.refetch()}
       />
     </SafeAreaView>

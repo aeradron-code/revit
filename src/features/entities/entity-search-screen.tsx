@@ -13,6 +13,8 @@ import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -117,7 +119,10 @@ function EntitySearchForm({
       />
       <FlatList
         className="flex-1"
-        contentContainerClassName="mx-auto w-full gap-6 px-4 py-4 md:max-w-3xl md:px-6 md:py-6"
+        contentContainerClassName={pageContainerClassName(
+          "standard",
+          "gap-6 px-4 py-4 md:px-6 md:py-6",
+        )}
         data={
           !initialAdd &&
           !creationLocked &&
@@ -162,7 +167,9 @@ function EntitySearchForm({
               />
             ) : null}
 
-            {!initialAdd && hasSearchTerm && (isDebouncing || search.isLoading) ? (
+            {!initialAdd &&
+            hasSearchTerm &&
+            (isDebouncing || search.isLoading) ? (
               <EntitySearchResultsSkeleton />
             ) : null}
 
@@ -183,41 +190,49 @@ function EntitySearchForm({
           !isDebouncing &&
           !search.isLoading &&
           !search.isError ? (
-            <SearchState
-              description="No existing find matches that search. Check the name and locality before adding one."
-              title="No matches found"
-            />
+            <PageListContainer width="standard">
+              <SearchState
+                description="No existing find matches that search. Check the name and locality before adding one."
+                title="No matches found"
+              />
+            </PageListContainer>
           ) : undefined
         }
         ListFooterComponent={
           isAddingEntity ? (
-            <AddEntityForm
-              initialName={query}
-              initialCategorySlug={initialCategorySlug}
-              onCancel={() => {
-                if (initialAdd) router.back();
-                else setIsAddingEntity(false);
-              }}
-              returnToShare={returnToShare}
-              userId={userId}
-              onLockChange={setCreationLocked}
-            />
+            <PageListContainer width="standard">
+              <AddEntityForm
+                initialName={query}
+                initialCategorySlug={initialCategorySlug}
+                onCancel={() => {
+                  if (initialAdd) router.back();
+                  else setIsAddingEntity(false);
+                }}
+                returnToShare={returnToShare}
+                userId={userId}
+                onLockChange={setCreationLocked}
+              />
+            </PageListContainer>
           ) : creationLocked ||
-          (hasSearchTerm &&
-            !isDebouncing &&
-            !search.isLoading &&
-            !search.isError &&
-            finds.length === 0) ? (
-            <Button
-              className="self-start rounded-md"
-              onPress={() => setIsAddingEntity(true)}
-            >
-              <Text>Add find</Text>
-            </Button>
+            (hasSearchTerm &&
+              !isDebouncing &&
+              !search.isLoading &&
+              !search.isError &&
+              finds.length === 0) ? (
+            <PageListContainer width="standard">
+              <Button
+                className="self-start rounded-md"
+                onPress={() => setIsAddingEntity(true)}
+              >
+                <Text>Add find</Text>
+              </Button>
+            </PageListContainer>
           ) : undefined
         }
         renderItem={({ item }) => (
-          <EntityResult entity={item} returnToShare={returnToShare} />
+          <PageListContainer width="standard">
+            <EntityResult entity={item} returnToShare={returnToShare} />
+          </PageListContainer>
         )}
       />
     </SafeAreaView>
@@ -405,9 +420,7 @@ function AddEntityForm({
               <Button
                 key={category.id}
                 size="sm"
-                variant={
-                  categorySlug === category.slug ? "default" : "outline"
-                }
+                variant={categorySlug === category.slug ? "default" : "outline"}
                 disabled={createEntity.isPending || uncertain || checking}
                 onPress={() => setCategorySlug(category.slug)}
               >

@@ -19,6 +19,7 @@ import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
 import {
@@ -72,7 +73,10 @@ export function PickDetailScreen() {
       <FlatList
         data={personalPick.items}
         keyExtractor={(item) => item.entity_id}
-        contentContainerClassName="grow px-4 py-6 md:mx-auto md:max-w-4xl md:px-6 md:py-12"
+        contentContainerClassName={pageContainerClassName(
+          "profile",
+          "grow px-4 py-6 md:px-6 md:py-12",
+        )}
         ItemSeparatorComponent={PickItemSeparator}
         ListHeaderComponent={
           <View className="gap-6 pb-6">
@@ -176,54 +180,54 @@ export function PickDetailScreen() {
               className="rounded-xl active:opacity-80"
             >
               <Card className="flex-row items-center gap-3 rounded-xl border-border bg-card p-3 shadow-none sm:gap-5 sm:p-5">
-                <View className="items-center justify-center border-r border-border pr-3 sm:pr-5">
-                  <Text
-                    className="text-3xl text-primary sm:text-5xl"
-                    style={{
-                      fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
-                    }}
-                  >
-                    {String(item.position).padStart(2, "0")}
-                  </Text>
-                </View>
-                <View className="size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary sm:size-20">
-                  {item.entity.image_url ? (
-                    <Image
-                      source={{ uri: item.entity.image_url }}
-                      contentFit="cover"
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  ) : (
-                    <Icon
-                      as={MapPin}
-                      className="size-6 text-muted-foreground"
-                    />
-                  )}
-                </View>
-                <View className="min-w-0 flex-1 gap-1">
-                  <Text className="text-base font-semibold sm:text-lg">
-                    {item.entity.name}
-                  </Text>
-                  <Text variant="muted" className="text-sm">
-                    {[item.entity.category.label, item.entity.locality]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </Text>
-                  {item.note ? (
-                    <View className="mt-1 flex-row items-start gap-2">
-                      <Text className="text-lg font-semibold leading-5 text-primary">
-                        “
-                      </Text>
-                      <Text className="min-w-0 flex-1 text-sm leading-5">
-                        {item.note}
-                      </Text>
-                    </View>
-                  ) : null}
-                </View>
-                <Icon
-                  as={ChevronRight}
-                  className="size-4 shrink-0 text-muted-foreground"
-                />
+                  <View className="items-center justify-center border-r border-border pr-3 sm:pr-5">
+                    <Text
+                      className="text-3xl text-primary sm:text-5xl"
+                      style={{
+                        fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+                      }}
+                    >
+                      {String(item.position).padStart(2, "0")}
+                    </Text>
+                  </View>
+                  <View className="size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary sm:size-20">
+                    {item.entity.image_url ? (
+                      <Image
+                        source={{ uri: item.entity.image_url }}
+                        contentFit="cover"
+                        style={{ width: "100%", height: "100%" }}
+                      />
+                    ) : (
+                      <Icon
+                        as={MapPin}
+                        className="size-6 text-muted-foreground"
+                      />
+                    )}
+                  </View>
+                  <View className="min-w-0 flex-1 gap-1">
+                    <Text className="text-base font-semibold sm:text-lg">
+                      {item.entity.name}
+                    </Text>
+                    <Text variant="muted" className="text-sm">
+                      {[item.entity.category.label, item.entity.locality]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </Text>
+                    {item.note ? (
+                      <View className="mt-1 flex-row items-start gap-2">
+                        <Text className="text-lg font-semibold leading-5 text-primary">
+                          “
+                        </Text>
+                        <Text className="min-w-0 flex-1 text-sm leading-5">
+                          {item.note}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                  <Icon
+                    as={ChevronRight}
+                    className="size-4 shrink-0 text-muted-foreground"
+                  />
               </Card>
             </Pressable>
           </Link>
@@ -276,7 +280,12 @@ function PickLoadingState({ onBack }: { onBack: () => void }) {
           ),
         }}
       />
-      <View className="grow gap-6 px-4 py-6 md:mx-auto md:w-full md:max-w-4xl md:px-6 md:py-12">
+      <View
+        className={pageContainerClassName(
+          "profile",
+          "grow gap-6 px-4 py-6 md:px-6 md:py-12",
+        )}
+      >
         <View className="gap-4">
           <Skeleton className="h-3 w-28" />
           <View className="flex-row items-start justify-between gap-3">
@@ -324,7 +333,12 @@ function PickMissingState({
           ),
         }}
       />
-      <ScrollView contentContainerClassName="flex-grow items-center justify-center gap-2 px-6 py-6">
+      <ScrollView
+        contentContainerClassName={pageContainerClassName(
+          "profile",
+          "flex-grow items-center justify-center gap-2 px-6 py-6",
+        )}
+      >
         <Text variant="h2">Pick unavailable</Text>
         <Text variant="muted" className="text-center">
           {description ?? "This Pick may have been deleted."}

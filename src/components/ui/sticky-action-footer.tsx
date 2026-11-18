@@ -14,7 +14,7 @@ function StickyActionFooter({
     <SafeAreaView className="border-t border-border bg-card" edges={["bottom"]}>
       <View
         className={cn(
-          "mx-auto w-full max-w-2xl flex-row justify-end gap-3 px-6 py-4 sm:px-6",
+          "w-full flex-row justify-end gap-3 px-6 py-4 sm:px-6",
           className,
         )}
         {...props}

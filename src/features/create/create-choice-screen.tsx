@@ -19,12 +19,18 @@ import {
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { routes } from "@/lib/routes";
 
 export function CreateChoiceScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
-      <ScrollView contentContainerClassName="w-full gap-6 px-6 pb-8 pt-4 md:mx-auto md:max-w-3xl md:px-6 md:pb-12 md:pt-6">
+      <ScrollView
+        contentContainerClassName={pageContainerClassName(
+          "standard",
+          "gap-6 px-6 pb-8 pt-4 md:px-6 md:pb-12 md:pt-6",
+        )}
+      >
         <View className="gap-2 py-1">
           <Text variant="h1" className="text-left">
             Share your taste

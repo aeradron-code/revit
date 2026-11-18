@@ -10,6 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -53,7 +55,10 @@ export function DiscoverScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <FlatList<DiscoverRow>
         className="flex-1"
-        contentContainerClassName="mx-auto w-full max-w-3xl gap-3 px-2 py-3 md:py-6"
+        contentContainerClassName={pageContainerClassName(
+          "standard",
+          "gap-3 px-2 py-3 md:py-6",
+        )}
         data={data}
         keyExtractor={(row) =>
           `${row.type}:${row.type === "profile" ? row.item.username : row.item.id}`
@@ -112,21 +117,25 @@ export function DiscoverScreen() {
           !isDebouncing &&
           !results.isLoading &&
           !results.isError ? (
-            <SearchState
-              description="Try another search or choose a different result type."
-              title={`No ${filter === "entities" ? "finds" : filter} found`}
-            />
+            <PageListContainer width="standard">
+              <SearchState
+                description="Try another search or choose a different result type."
+                title={`No ${filter === "entities" ? "finds" : filter} found`}
+              />
+            </PageListContainer>
           ) : undefined
         }
-        renderItem={({ item }) =>
-          item.type === "profile" ? (
-            <ProfileResult profile={item.item} />
-          ) : item.type === "post" ? (
-            <PostResult post={item.item} />
-          ) : (
-            <EntityResult entity={item.item} />
-          )
-        }
+        renderItem={({ item }) => (
+          <PageListContainer width="standard">
+            {item.type === "profile" ? (
+              <ProfileResult profile={item.item} />
+            ) : item.type === "post" ? (
+              <PostResult post={item.item} />
+            ) : (
+              <EntityResult entity={item.item} />
+            )}
+          </PageListContainer>
+        )}
       />
     </SafeAreaView>
   );

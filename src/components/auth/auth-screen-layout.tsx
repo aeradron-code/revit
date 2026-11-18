@@ -4,6 +4,7 @@ import { View } from "react-native";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 
 export function AuthScreenLayout({
   children,
@@ -24,7 +25,7 @@ export function AuthScreenLayout({
         bottomOffset={24}
         contentContainerClassName={`flex-grow items-center justify-center bg-muted/30 px-5 py-10 sm:px-6 ${showBrandGradient ? "auth-brand-gradient" : ""}`}
       >
-        <View className="w-full max-w-md gap-7">
+        <View className={pageContainerClassName("auth", "gap-7")}>
           <View className="items-center gap-1.5">
             <Image
               source={require("../../../assets/images/revit-logo.svg")}

@@ -6,6 +6,8 @@ import type { ActivityNotification } from "@/api/notifications";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -80,7 +82,10 @@ export default function ActivityScreen() {
       />
       <FlatList
         className="flex-1"
-        contentContainerClassName="mx-auto w-full max-w-2xl gap-3 px-2 py-3 md:py-6"
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "gap-3 px-2 py-3 md:py-6",
+        )}
         data={notifications.data ?? []}
         keyExtractor={(notification) => notification.id}
         ListHeaderComponent={
@@ -107,10 +112,16 @@ export default function ActivityScreen() {
         }
         ListEmptyComponent={
           !notifications.isLoading && !notifications.isError ? (
-            <EmptyActivity />
+            <PageListContainer width="narrow">
+              <EmptyActivity />
+            </PageListContainer>
           ) : undefined
         }
-        renderItem={({ item }) => <ActivityItem notification={item} />}
+        renderItem={({ item }) => (
+          <PageListContainer width="narrow">
+            <ActivityItem notification={item} />
+          </PageListContainer>
+        )}
       />
     </SafeAreaView>
   );
