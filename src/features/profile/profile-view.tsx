@@ -1,9 +1,7 @@
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Link } from "expo-router";
 import { UserCheck, UserPlus } from "lucide-react-native";
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   RefreshControl,
   View,
@@ -33,6 +31,7 @@ import { useAuthUser } from "@/providers/auth-provider";
 import { useFollowStatus, useFollowToggle } from "@/queries/follows";
 import { useAskPostsByAuthor } from "@/queries/posts";
 
+import { AppList } from "@/components/ui/app-list";
 import { useFollowCounts } from "@/queries/profiles";
 import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 import { useMyBlockStatus } from "@/queries/safety";
@@ -72,15 +71,15 @@ export function ProfileView({
       className="flex-1 bg-background"
       edges={isOwnProfile ? ["left", "right"] : ["bottom"]}
     >
-      <FlatList
+      <AppList
         className="flex-1"
         contentContainerClassName={pageContainerClassName(
           "profile",
-          "gap-1 md:px-6 md:py-6",
+          "md:px-6 md:py-6",
         )}
+        contentGap={4}
         data={postItems}
         keyExtractor={(post) => post.id}
-        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="gap-1 py-1">

@@ -3,7 +3,7 @@ import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { ChevronRight, Edit3, MapPin, Trash2 } from "lucide-react-native";
 import { useState } from "react";
-import { FlatList, Platform, Pressable, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,6 +31,7 @@ import {
 import { useFollowStatus } from "@/queries/follows";
 import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 
+import { AppList } from "@/components/ui/app-list";
 export function PickDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuthUser();
@@ -70,7 +71,7 @@ export function PickDetailScreen() {
           ),
         }}
       />
-      <FlatList
+      <AppList
         data={personalPick.items}
         keyExtractor={(item) => item.entity_id}
         contentContainerClassName={pageContainerClassName(
@@ -180,54 +181,54 @@ export function PickDetailScreen() {
               className="rounded-xl active:opacity-80"
             >
               <Card className="flex-row items-center gap-3 rounded-xl border-border bg-card p-3 shadow-none sm:gap-5 sm:p-5">
-                  <View className="items-center justify-center border-r border-border pr-3 sm:pr-5">
-                    <Text
-                      className="text-3xl text-primary sm:text-5xl"
-                      style={{
-                        fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
-                      }}
-                    >
-                      {String(item.position).padStart(2, "0")}
-                    </Text>
-                  </View>
-                  <View className="size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary sm:size-20">
-                    {item.entity.image_url ? (
-                      <Image
-                        source={{ uri: item.entity.image_url }}
-                        contentFit="cover"
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    ) : (
-                      <Icon
-                        as={MapPin}
-                        className="size-6 text-muted-foreground"
-                      />
-                    )}
-                  </View>
-                  <View className="min-w-0 flex-1 gap-1">
-                    <Text className="text-base font-semibold sm:text-lg">
-                      {item.entity.name}
-                    </Text>
-                    <Text variant="muted" className="text-sm">
-                      {[item.entity.category.label, item.entity.locality]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </Text>
-                    {item.note ? (
-                      <View className="mt-1 flex-row items-start gap-2">
-                        <Text className="text-lg font-semibold leading-5 text-primary">
-                          “
-                        </Text>
-                        <Text className="min-w-0 flex-1 text-sm leading-5">
-                          {item.note}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
-                  <Icon
-                    as={ChevronRight}
-                    className="size-4 shrink-0 text-muted-foreground"
-                  />
+                <View className="items-center justify-center border-r border-border pr-3 sm:pr-5">
+                  <Text
+                    className="text-3xl text-primary sm:text-5xl"
+                    style={{
+                      fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+                    }}
+                  >
+                    {String(item.position).padStart(2, "0")}
+                  </Text>
+                </View>
+                <View className="size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary sm:size-20">
+                  {item.entity.image_url ? (
+                    <Image
+                      source={{ uri: item.entity.image_url }}
+                      contentFit="cover"
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  ) : (
+                    <Icon
+                      as={MapPin}
+                      className="size-6 text-muted-foreground"
+                    />
+                  )}
+                </View>
+                <View className="min-w-0 flex-1 gap-1">
+                  <Text className="text-base font-semibold sm:text-lg">
+                    {item.entity.name}
+                  </Text>
+                  <Text variant="muted" className="text-sm">
+                    {[item.entity.category.label, item.entity.locality]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </Text>
+                  {item.note ? (
+                    <View className="mt-1 flex-row items-start gap-2">
+                      <Text className="text-lg font-semibold leading-5 text-primary">
+                        “
+                      </Text>
+                      <Text className="min-w-0 flex-1 text-sm leading-5">
+                        {item.note}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+                <Icon
+                  as={ChevronRight}
+                  className="size-4 shrink-0 text-muted-foreground"
+                />
               </Card>
             </Pressable>
           </Link>

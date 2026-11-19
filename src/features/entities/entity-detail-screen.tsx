@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { ChevronRight, MapPin, Trash2 } from "lucide-react-native";
 import {
   Pressable,
-  FlatList,
   RefreshControl,
   useWindowDimensions,
   View,
@@ -40,6 +39,7 @@ import { StarRating } from "@/features/ratings/star-rating";
 import { PostFeedSkeleton } from "@/features/posts/post-feed-skeleton";
 import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 
+import { AppList } from "@/components/ui/app-list";
 export function EntityDetailScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const entityId = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
@@ -103,7 +103,7 @@ function EntityDetails({ entityId }: { entityId: string }) {
 
   return (
     <>
-      <FlatList
+      <AppList
         className="flex-1"
         contentContainerClassName={pageContainerClassName(
           "wide",

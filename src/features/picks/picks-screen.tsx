@@ -1,9 +1,8 @@
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Link } from "expo-router";
 import { Image } from "expo-image";
 import { Bookmark } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { FlatList, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import type { PickDirectoryItem } from "@/api/picks";
 import type { Profile } from "@/api/profiles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,6 +23,7 @@ import {
   usePicksFromFollowing,
 } from "@/queries/picks";
 
+import { AppList } from "@/components/ui/app-list";
 type Filter = "your" | "followed" | "all";
 
 export function PicksScreen() {
@@ -59,15 +59,15 @@ export function PicksScreen() {
   };
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
-      <FlatList
+      <AppList
         className="flex-1"
         contentContainerClassName={pageContainerClassName(
           "standard",
-          "gap-2 px-2 py-3 md:py-6",
+          "px-2 py-3 md:py-6",
         )}
+        contentGap={8}
         data={!loading && !error ? items : []}
         keyExtractor={(pick) => pick.id}
-        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="w-full gap-4 pb-3">
@@ -207,13 +207,13 @@ function PickRow({ pick }: { pick: RowPick }) {
 
 function PickListSkeleton() {
   return (
-    <View accessibilityLabel="Loading Picks" className="gap-2">
+    <View accessibilityLabel="Loading Picks" className="w-full gap-2">
       {["first", "second", "third"].map((key) => (
         <View
           key={key}
           className="w-full flex-row items-center gap-3 rounded-lg border border-border bg-card p-3"
         >
-          <Skeleton className="size-16 shrink-0 rounded-md" />
+          <Skeleton className="h-16 w-12 shrink-0 rounded-md" />
           <View className="min-w-0 flex-1 gap-1">
             <Skeleton className="h-4 w-3/5" />
             <Skeleton className="h-3 w-4/5" />
@@ -222,6 +222,7 @@ function PickListSkeleton() {
               <Skeleton className="h-3 w-1/3" />
             </View>
           </View>
+          <Skeleton className="h-3 w-16 shrink-0" />
         </View>
       ))}
     </View>

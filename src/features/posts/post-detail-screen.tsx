@@ -1,16 +1,15 @@
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react-native";
 import { useRef, useState } from "react";
 import {
   Modal,
-  FlatList,
   Pressable,
   RefreshControl,
   useWindowDimensions,
   View,
 } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { PostWithDetails } from "@/api/posts";
 import { Button } from "@/components/ui/button";
 import { pageContainerClassName } from "@/components/ui/page-layout";
@@ -136,7 +135,7 @@ function SharePostDetail({
 
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View className="min-h-0 w-full flex-1 py-1 md:py-2">
+      <View className="min-h-0 w-full flex-1">
         <CommentSection
           listHeader={
             <SharePostCard
@@ -148,11 +147,11 @@ function SharePostDetail({
           comments={comments}
           postId={post.id}
           renderList={(content) => (
-            <FlatList
+            <AppList
               {...content}
               className="flex-1"
-              contentContainerClassName="gap-3 pb-2 md:px-6"
-              renderScrollComponent={renderKeyboardAwareListScroll}
+              contentContainerClassName="pt-1 pb-3 md:px-6 md:pt-2 md:pb-4"
+              contentGap={12}
               keyboardShouldPersistTaps="handled"
               refreshControl={
                 <RefreshControl
@@ -195,7 +194,7 @@ function AskPostDetail({
 
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View className="min-h-0 w-full flex-1 py-4 md:py-6">
+      <View className="min-h-0 w-full flex-1">
         <CommentSection
           listHeader={
             <AskPostCard
@@ -209,11 +208,11 @@ function AskPostDetail({
           comments={comments}
           postId={post.id}
           renderList={(content) => (
-            <FlatList
+            <AppList
               {...content}
               className="flex-1"
-              contentContainerClassName="gap-3 px-4 pb-2 md:px-6"
-              renderScrollComponent={renderKeyboardAwareListScroll}
+              contentContainerClassName="px-4 pt-4 pb-6 md:px-6 md:pt-6 md:pb-8"
+              contentGap={12}
               keyboardShouldPersistTaps="handled"
               refreshControl={
                 <RefreshControl

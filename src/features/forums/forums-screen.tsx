@@ -1,9 +1,9 @@
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Link } from "expo-router";
 import { Users } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { FlatList, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { ForumSummary } from "@/api/forums";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -51,18 +51,18 @@ export function ForumsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
-      <FlatList
+      <AppList
         className="flex-1"
         contentContainerClassName={pageContainerClassName(
           "standard",
-          "gap-5 px-2 py-3 md:py-6",
+          "px-2 py-3 md:py-6",
         )}
+        contentGap={20}
         data={!forums.isLoading && !forums.isError ? visibleForums : []}
         keyExtractor={(forum) => forum.id}
-        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
-          <View className="w-full gap-4">
+          <View className="w-full gap-4 pb-3">
             <Text variant="muted" className="leading-5">
               Explore forums, share common experiences, and get real insights.
             </Text>
@@ -190,17 +190,20 @@ function ForumListItem({ forum }: { forum: ForumSummary }) {
 
 function ForumListSkeleton() {
   return (
-    <View accessibilityLabel="Loading forums" className="gap-5">
+    <View accessibilityLabel="Loading forums" className="w-full gap-5">
       {["first", "second", "third"].map((key) => (
         <View
           key={key}
           className="w-full flex-row items-center gap-3 rounded-lg border border-border bg-card p-3"
         >
-          <Skeleton className="size-10 rounded-lg" />
+          <Skeleton className="size-12 shrink-0 rounded-lg" />
           <View className="min-w-0 flex-1 gap-0.5">
             <Skeleton className="h-4 w-2/5" />
             <Skeleton className="h-3 w-4/5" />
-            <Skeleton className="h-3 w-1/3" />
+            <View className="flex-row items-center gap-1.5">
+              <Skeleton className="size-3.5 shrink-0 rounded-full" />
+              <Skeleton className="h-3 w-1/3" />
+            </View>
           </View>
         </View>
       ))}

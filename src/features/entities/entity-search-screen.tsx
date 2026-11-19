@@ -1,11 +1,11 @@
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import type * as ImagePicker from "expo-image-picker";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { randomUUID } from "expo-crypto";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import { FlatList, View } from "react-native";
+import { View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { Entity } from "@/api/entities";
 import type { ResourceCreationAttempt } from "@/api/creation-recovery";
 import { ResourceRecoveryGate } from "@/features/create/resource-recovery-gate";
@@ -117,12 +117,13 @@ function EntitySearchForm({
           ),
         }}
       />
-      <FlatList
+      <AppList
         className="flex-1"
         contentContainerClassName={pageContainerClassName(
           "standard",
-          "gap-6 px-4 py-4 md:px-6 md:py-6",
+          "px-4 py-4 md:px-6 md:py-6",
         )}
+        contentGap={24}
         data={
           !initialAdd &&
           !creationLocked &&
@@ -134,7 +135,6 @@ function EntitySearchForm({
             : []
         }
         keyExtractor={(entity) => entity.id}
-        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="gap-6">
@@ -638,7 +638,7 @@ function EntityResult({
 
 function EntitySearchResultsSkeleton() {
   return (
-    <View accessibilityLabel="Loading Find results" className="gap-6">
+    <View accessibilityLabel="Loading Find results" className="w-full gap-6">
       {["first", "second"].map((key) => (
         <View
           key={key}

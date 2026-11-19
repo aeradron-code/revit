@@ -1,4 +1,3 @@
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, router } from "expo-router";
 import {
@@ -9,14 +8,9 @@ import {
   Star,
 } from "lucide-react-native";
 import { useState } from "react";
-import {
-  FlatList,
-  Platform,
-  Pressable,
-  RefreshControl,
-  View,
-} from "react-native";
+import { Platform, Pressable, RefreshControl, View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { HomeFeedPost } from "@/api/feed";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
@@ -47,14 +41,14 @@ export function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
-      <FlatList
+      <AppList
         contentContainerClassName={pageContainerClassName(
           "content",
-          "gap-1 py-1 md:gap-2 md:px-6 md:py-6",
+          "py-1 md:px-6 md:py-6",
         )}
+        contentGap={{ base: 4, md: 8 }}
         data={posts}
         keyExtractor={(post) => post.id}
-        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <FeedHeader

@@ -1,10 +1,10 @@
 import { ScrollView } from "react-native";
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Globe, Plus, Trash2, Users } from "lucide-react-native";
 import { useState } from "react";
-import { FlatList, useWindowDimensions, View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { PostWithDetails } from "@/api/posts";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
@@ -160,7 +160,7 @@ export function ForumDetailScreen() {
           ),
         }}
       />
-      <FlatList
+      <AppList
         className="min-h-0 flex-1"
         contentContainerClassName={pageContainerClassName(
           "extraWide",
@@ -168,7 +168,6 @@ export function ForumDetailScreen() {
         )}
         data={postItems}
         keyExtractor={(post) => post.id}
-        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponentStyle={{ marginBottom: 8 }}
         ItemSeparatorComponent={() => <View className="h-1" />}

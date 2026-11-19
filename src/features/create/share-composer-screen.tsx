@@ -385,7 +385,7 @@ function ShareComposerForm({ userId }: { userId: string }) {
                 {categorySlug &&
                 search.trim().length >= 2 &&
                 (isDebouncing || results.isLoading) ? (
-                  <FindSearchSkeleton rows={1} className="gap-3" />
+                  <FindSearchSkeleton leadingPin rows={1} className="gap-3" />
                 ) : null}
                 {categorySlug && !isDebouncing && results.isError ? (
                   <Text variant="small" className="text-destructive">

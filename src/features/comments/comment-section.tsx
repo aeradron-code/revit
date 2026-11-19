@@ -3,8 +3,8 @@ import { MessageCircle } from "lucide-react-native";
 import { memo, useCallback } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { useRef, useState } from "react";
-import type { ListRenderItem } from "react-native";
 import { View } from "react-native";
+import type { LegendListRenderItemProps } from "@legendapp/list/react-native";
 
 import type { CommentThread, CommentWithAuthor } from "@/api/comments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -48,7 +48,7 @@ export type CommentListContent = {
   keyExtractor: (item: CommentListRow) => string;
   ListHeaderComponent: ReactElement;
   ListFooterComponent: ReactElement;
-  renderItem: ListRenderItem<CommentListRow>;
+  renderItem: (info: LegendListRenderItemProps<CommentListRow>) => ReactNode;
 };
 
 export type CommentListRow =
@@ -279,7 +279,9 @@ export function CommentSection({
     </PageListContainer>
   );
 
-  const renderComment: ListRenderItem<CommentListRow> = ({ item }) => {
+  const renderComment = ({
+    item,
+  }: LegendListRenderItemProps<CommentListRow>) => {
     if (item.kind === "reply") {
       return (
         <PageListContainer>
@@ -627,7 +629,7 @@ function CommentItem({
 
 export function CommentListSkeleton() {
   return (
-    <View className="gap-3">
+    <View accessibilityLabel="Loading comments" className="w-full gap-3">
       {["first", "second"].map((key) => (
         <View
           key={key}

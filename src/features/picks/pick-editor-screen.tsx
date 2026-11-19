@@ -1,10 +1,10 @@
 import { ScrollView } from "react-native";
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { ChevronDown, ChevronUp, MapPin, Trash2 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, FlatList, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { Entity } from "@/api/entities";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
@@ -177,15 +177,15 @@ export function PickEditorScreen() {
           ),
         }}
       />
-      <FlatList
+      <AppList
         className="flex-1"
         contentContainerClassName={pageContainerClassName(
           "narrow",
-          "gap-3 px-2 pb-8 pt-4 md:pb-12 md:pt-6",
+          "px-2 pb-8 pt-4 md:pb-12 md:pt-6",
         )}
+        contentGap={12}
         data={items}
         keyExtractor={(item) => item.entity.id}
-        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <Card className="gap-5 border-border bg-card p-5 shadow-none md:p-6">

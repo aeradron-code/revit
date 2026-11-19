@@ -1,6 +1,7 @@
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, FlatList, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { FollowProfile } from "@/api/follows";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -47,7 +48,7 @@ export function FollowListScreen({ kind }: FollowListScreenProps) {
           ),
         }}
       />
-      <FlatList
+      <AppList
         data={items}
         keyExtractor={(item) => item.id}
         contentContainerClassName={pageContainerClassName(
@@ -193,7 +194,7 @@ function FollowListState({
 
 function FollowListSkeleton() {
   return (
-    <View accessibilityLabel="Loading profiles" className="gap-2">
+    <View accessibilityLabel="Loading profiles" className="w-full gap-2">
       {["first", "second", "third"].map((key) => (
         <View
           key={key}

@@ -1,9 +1,9 @@
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Link } from "expo-router";
 import { MapPin } from "lucide-react-native";
 import { useState } from "react";
-import { FlatList, View } from "react-native";
+import { View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { DiscoveryPost, DiscoveryProfile } from "@/api/discover";
 import type { Entity } from "@/api/entities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -53,17 +53,17 @@ export function DiscoverScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
-      <FlatList<DiscoverRow>
+      <AppList<DiscoverRow>
         className="flex-1"
         contentContainerClassName={pageContainerClassName(
           "standard",
-          "gap-3 px-2 py-3 md:py-6",
+          "px-2 py-3 md:py-6",
         )}
+        contentGap={12}
         data={data}
         keyExtractor={(row) =>
           `${row.type}:${row.type === "profile" ? row.item.username : row.item.id}`
         }
-        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="gap-4 pb-2">
@@ -232,7 +232,7 @@ function EntityResult({ entity }: { entity: Entity }) {
 
 function DiscoverResultsSkeleton({ filter }: { filter: ResultFilter }) {
   return (
-    <View accessibilityLabel="Loading search results" className="gap-3">
+    <View accessibilityLabel="Loading search results" className="w-full gap-3">
       {["first", "second"].map((key) => (
         <View
           key={key}
