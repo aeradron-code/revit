@@ -485,6 +485,48 @@ export function getAskPostsByAuthor(
   );
 }
 
+export function getGlobalPostsByAuthor(
+  authorId: string,
+  offset = 0,
+  requestSignal?: AbortSignal,
+): Promise<PostPage> {
+  return runApiRequest(
+    async (signal) => {
+      const {
+        data,
+        error,
+        status: errorResponseStatus,
+      } = await supabase
+        .from("posts")
+        .select(POST_DETAILS_SELECT)
+        .eq("author_id", authorId)
+        .is("forum_id", null)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
+        .range(offset, offset + POST_PAGE_SIZE)
+        .abortSignal(signal);
+
+      throwIfSupabaseError(
+        error,
+        API_ERROR_MESSAGES.LOAD_PROFILE_POSTS,
+        errorResponseStatus,
+      );
+
+      const hasNextPage = data.length > POST_PAGE_SIZE;
+      const items = await attachEngagement(
+        await signPostMedia(data.slice(0, POST_PAGE_SIZE)),
+        requestSignal,
+      );
+
+      return {
+        items,
+        nextOffset: hasNextPage ? offset + POST_PAGE_SIZE : undefined,
+      };
+    },
+    { retries: 1, signal: requestSignal },
+  );
+}
+
 export function getForumPosts(
   forumId: string,
   offset = 0,

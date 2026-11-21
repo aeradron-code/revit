@@ -17,7 +17,6 @@ import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
-import { pageContainerClassName } from "@/components/ui/page-layout";
 import { AskPostCard } from "@/features/posts/ask-post-card";
 import { PostFeedSkeleton } from "@/features/posts/post-feed-skeleton";
 import { SharePostCard } from "@/features/posts/share-post-card";
@@ -42,10 +41,8 @@ export function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <AppList
-        contentContainerClassName={pageContainerClassName(
-          "content",
-          "py-1 md:px-6 md:py-6",
-        )}
+        contentWidth="feed"
+        contentContainerClassName="py-1 md:py-6"
         contentGap={{ base: 4, md: 8 }}
         data={posts}
         keyExtractor={(post) => post.id}
@@ -213,7 +210,7 @@ function FeedEmpty({
     );
   }
   return (
-    <View className="items-start gap-3 rounded-lg border border-border bg-card p-4 shadow-none sm:flex-row sm:items-center">
+    <View className="mt-3 items-start gap-3 rounded-lg border border-border bg-card p-4 shadow-none sm:flex-row sm:items-center">
       <View className="size-10 items-center justify-center rounded-md bg-accent">
         <Icon as={Sparkles} className="size-5 text-accent-foreground" />
       </View>

@@ -36,6 +36,7 @@ export function useCreatePersonalPick(authorId: string) {
     mutationFn: createPersonalPick,
     onSuccess: (pick) =>
       Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.entities.all }),
         queryClient.invalidateQueries({
           queryKey: queryKeys.picks.byAuthor(authorId),
         }),
@@ -54,6 +55,7 @@ export function useUpdatePersonalPick(pickId: string, authorId: string) {
       updatePersonalPick(pickId, input),
     onSuccess: (pick) =>
       Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.entities.all }),
         queryClient.invalidateQueries({
           queryKey: queryKeys.picks.byAuthor(authorId),
         }),
@@ -71,9 +73,12 @@ export function useDeletePersonalPick(pickId: string, authorId: string) {
     mutationFn: () => deletePersonalPick(pickId),
     onSuccess: async () => {
       queryClient.removeQueries({ queryKey: queryKeys.picks.byId(pickId) });
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.picks.byAuthor(authorId),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.entities.all }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.picks.byAuthor(authorId),
+        }),
+      ]);
     },
   });
 }

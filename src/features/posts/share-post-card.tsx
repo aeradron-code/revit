@@ -81,7 +81,7 @@ export function SharePostCard({
           <Button
             accessibilityRole="link"
             className="flex flex-row gap-2 items-center"
-            accessibilityLabel={`View ${entity.name}`}
+            accessibilityLabel={`View ${entity.name}; rated ${post.ratingScore} out of 5 stars`}
             size="content"
             variant="ghost"
           >

@@ -12,6 +12,7 @@ import { ImagePickerCarousel } from "@/components/media/image-picker-carousel";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
@@ -246,9 +247,11 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
                 </Text>
               </View>
             </View>
-            <View className="flex-row gap-2">
+            <View accessibilityRole="tablist" className="flex-row gap-2">
               <Button
                 className="flex-1"
+                accessibilityRole="tab"
+                accessibilityState={{ selected: type === "ASK" }}
                 disabled={isSaving}
                 variant={type === "ASK" ? "default" : "outline"}
                 onPress={() => selectType("ASK")}
@@ -257,6 +260,8 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
               </Button>
               <Button
                 className="flex-1"
+                accessibilityRole="tab"
+                accessibilityState={{ selected: type === "SHARE" }}
                 disabled={isSaving}
                 variant={type === "SHARE" ? "default" : "outline"}
                 onPress={() => selectType("SHARE")}
@@ -290,9 +295,12 @@ function ForumPostComposerForm({ userId, id }: { userId: string; id: string }) {
                       <FindSearchSkeleton rows={1} />
                     ) : null}
                     {!isDebouncing && results.isError ? (
-                      <Text className="text-destructive" variant="small">
-                        {results.error.message}
-                      </Text>
+                      <FeedbackState
+                        actionLabel="Retry"
+                        onAction={() => void results.refetch()}
+                        title="Couldn’t load these finds."
+                        variant="error"
+                      />
                     ) : null}
                     {!isDebouncing
                       ? results.data?.map((item) => (

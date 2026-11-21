@@ -7,6 +7,7 @@ import { Platform, Pressable, View } from "react-native";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import {
   Dialog,
   DialogContent,
@@ -167,9 +168,21 @@ export function PickDetailScreen() {
             </View>
 
             {toggleFollow.isError || followedPicks.isError ? (
-              <Text variant="muted">
-                Couldn’t update or load followed Picks. Please try again.
-              </Text>
+              <FeedbackState
+                actionLabel="Retry"
+                className="w-full"
+                onAction={() => {
+                  if (followedPicks.isError) {
+                    void followedPicks.refetch();
+                  } else {
+                    toggleFollow.mutate(
+                      !(followedPicks.data ?? []).includes(id),
+                    );
+                  }
+                }}
+                title="Couldn’t update followed Picks."
+                variant="error"
+              />
             ) : null}
           </View>
         }

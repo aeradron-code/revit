@@ -13,8 +13,10 @@ import Svg, {
   Rect,
   Stop,
 } from "react-native-svg";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Profile } from "@/api/profiles";
+import type { HomeFeedPost } from "@/api/feed";
+import type { PickDirectoryItem } from "@/api/picks";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
@@ -25,16 +27,24 @@ import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { AskPostCard } from "@/features/posts/ask-post-card";
+import { SharePostCard } from "@/features/posts/share-post-card";
+import { PickRow } from "@/features/picks/picks-screen";
 import { getInitials } from "@/lib/format";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
 import { useFollowStatus, useFollowToggle } from "@/queries/follows";
-import { useAskPostsByAuthor } from "@/queries/posts";
+import { useProfilePostsByAuthor } from "@/queries/feed";
+import { usePersonalPicksByAuthor } from "@/queries/picks";
 
 import { AppList } from "@/components/ui/app-list";
 import { useFollowCounts } from "@/queries/profiles";
 import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 import { useMyBlockStatus } from "@/queries/safety";
+
+type ProfileListItem =
+  | { type: "post"; item: HomeFeedPost }
+  | { type: "pick"; item: PickDirectoryItem };
+type ProfileTab = "posts" | "picks";
 
 type ProfileViewProps = {
   isOwnProfile?: boolean;
@@ -48,11 +58,17 @@ export function ProfileView({
   const user = useAuthUser();
   const isOwn = isOwnProfile || user?.id === profile.id;
   const counts = useFollowCounts(profile.id);
-  const posts = useAskPostsByAuthor(profile.id);
+  const [tab, setTab] = useState<ProfileTab>("posts");
+  const posts = useProfilePostsByAuthor(profile.id);
+  const picks = usePersonalPicksByAuthor(isOwn ? profile.id : "");
   const postItems = useMemo(
     () => posts.data?.pages.flatMap((page) => page.items) ?? [],
     [posts.data],
   );
+  const listItems: ProfileListItem[] =
+    tab === "posts"
+      ? postItems.map((item) => ({ type: "post", item }))
+      : (picks.data ?? []).map((item) => ({ type: "pick", item }));
   const followStatus = useFollowStatus(user?.id ?? "", profile.id);
   const followToggle = useFollowToggle(user?.id ?? "", profile.id);
   const blockStatus = useMyBlockStatus(user?.id ?? "", profile.id);
@@ -62,7 +78,8 @@ export function ProfileView({
     await Promise.all([
       counts.refetch(),
       posts.refetch(),
-      ...(isOwn ? [] : [followStatus.refetch()]),
+      ...(isOwn ? [picks.refetch()] : []),
+      ...(isOwn ? [] : [followStatus.refetch(), blockStatus.refetch()]),
     ]);
   };
 
@@ -78,8 +95,8 @@ export function ProfileView({
           "md:px-6 md:py-6",
         )}
         contentGap={4}
-        data={postItems}
-        keyExtractor={(post) => post.id}
+        data={listItems}
+        keyExtractor={(item) => `${item.type}:${item.item.id}`}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="gap-1 py-1">
@@ -219,10 +236,22 @@ export function ProfileView({
                     username={profile.username ?? ""}
                   />
                   {!isOwn && (followStatus.isError || followToggle.isError) ? (
-                    <Text variant="small" className="text-destructive">
-                      {followToggle.error?.message ??
-                        "We couldn’t load the follow status. Pull to refresh."}
-                    </Text>
+                    <FeedbackState
+                      actionLabel="Retry"
+                      className="w-full"
+                      onAction={() => {
+                        if (followStatus.isError) {
+                          void followStatus.refetch();
+                        } else {
+                          followToggle.mutate(!(followStatus.data ?? false));
+                        }
+                      }}
+                      title={
+                        followToggle.error?.message ??
+                        "Couldn’t load the follow status."
+                      }
+                      variant="error"
+                    />
                   ) : null}
                 </View>
               </View>
@@ -235,19 +264,49 @@ export function ProfileView({
                 variant="error"
               />
             ) : null}
+            {isOwn ? (
+              <View accessibilityRole="tablist" className="flex-row gap-2 pt-2">
+                <Button
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: tab === "posts" }}
+                  size="sm"
+                  variant={tab === "posts" ? "default" : "outline"}
+                  onPress={() => setTab("posts")}
+                >
+                  <Text>Posts</Text>
+                </Button>
+                <Button
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: tab === "picks" }}
+                  size="sm"
+                  variant={tab === "picks" ? "default" : "outline"}
+                  onPress={() => setTab("picks")}
+                >
+                  <Text>Picks</Text>
+                </Button>
+              </View>
+            ) : null}
           </View>
         }
         ListEmptyComponent={
           <PageListContainer>
-            <ProfilePostsEmpty
-              isError={posts.isError}
-              isLoading={posts.isLoading}
-              retry={() => void posts.refetch()}
-            />
+            {tab === "posts" ? (
+              <ProfilePostsEmpty
+                isError={posts.isError}
+                isLoading={posts.isLoading}
+                retry={() => void posts.refetch()}
+              />
+            ) : (
+              <ProfilePicksEmpty
+                isError={picks.isError}
+                isLoading={picks.isLoading}
+                retry={() => void picks.refetch()}
+              />
+            )}
           </PageListContainer>
         }
         ListFooterComponent={
-          posts.hasNextPage ? (
+          tab === "posts" && posts.hasNextPage ? (
             <PageListContainer className="my-4">
               <Button
                 disabled={posts.isFetchingNextPage}
@@ -265,7 +324,13 @@ export function ProfileView({
         }
         renderItem={({ item }) => (
           <PageListContainer>
-            <AskPostCard post={item} />
+            {item.type === "pick" ? (
+              <PickRow pick={item.item} />
+            ) : item.item.post_type === "ASK" ? (
+              <AskPostCard post={item.item} />
+            ) : (
+              <SharePostCard post={item.item} entity={item.item.entity} />
+            )}
           </PageListContainer>
         )}
         refreshControl={
@@ -273,6 +338,7 @@ export function ProfileView({
             refreshing={
               counts.isRefetching ||
               posts.isRefetching ||
+              (isOwn && picks.isRefetching) ||
               followStatus.isRefetching
             }
             onRefresh={() => void refresh()}
@@ -297,7 +363,7 @@ function ProfilePostsEmpty({
       <View className="gap-3 pt-3">
         <ActivityIndicator />
         <Text variant="muted" className="self-center">
-          Loading Ask posts…
+          Loading posts…
         </Text>
       </View>
     );
@@ -307,12 +373,44 @@ function ProfilePostsEmpty({
       <FeedbackState
         actionLabel="Retry"
         onAction={retry}
-        title="Couldn’t load Ask posts."
+        title="Couldn’t load posts."
         variant="error"
       />
     );
   }
-  return <FeedbackState title="No Ask posts yet" />;
+  return <FeedbackState title="No posts yet" />;
+}
+
+function ProfilePicksEmpty({
+  isError,
+  isLoading,
+  retry,
+}: {
+  isError: boolean;
+  isLoading: boolean;
+  retry: () => void;
+}) {
+  if (isLoading) {
+    return (
+      <View className="gap-3 pt-3">
+        <ActivityIndicator />
+        <Text variant="muted" className="self-center">
+          Loading Picks…
+        </Text>
+      </View>
+    );
+  }
+  if (isError) {
+    return (
+      <FeedbackState
+        actionLabel="Retry"
+        onAction={retry}
+        title="Couldn’t load Picks."
+        variant="error"
+      />
+    );
+  }
+  return <FeedbackState title="No Picks yet" />;
 }
 
 function FollowCounts({

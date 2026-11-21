@@ -404,9 +404,12 @@ function AddEntityForm({
 
       <LabeledField label="Category">
         {categories.isError ? (
-          <Text className="text-destructive" variant="small">
-            Could not load categories.
-          </Text>
+          <FeedbackState
+            actionLabel="Retry"
+            onAction={() => void categories.refetch()}
+            title="Couldn’t load categories."
+            variant="error"
+          />
         ) : null}
         <View className="flex-row flex-wrap gap-2">
           {(categories.data ?? [])
@@ -419,6 +422,10 @@ function AddEntityForm({
             .map((category) => (
               <Button
                 key={category.id}
+                accessibilityRole="tab"
+                accessibilityState={{
+                  selected: categorySlug === category.slug,
+                }}
                 size="sm"
                 variant={categorySlug === category.slug ? "default" : "outline"}
                 disabled={createEntity.isPending || uncertain || checking}

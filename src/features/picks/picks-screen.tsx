@@ -80,7 +80,10 @@ export function PicksScreen() {
               value={search}
               onChangeText={setSearch}
             />
-            <View className="flex-row flex-wrap gap-2">
+            <View
+              accessibilityRole="tablist"
+              className="flex-row flex-wrap gap-2"
+            >
               {(
                 [
                   ["your", "Your"],
@@ -90,6 +93,8 @@ export function PicksScreen() {
               ).map(([value, label]) => (
                 <Button
                   key={value}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: filter === value }}
                   size="sm"
                   variant={filter === value ? "default" : "outline"}
                   onPress={() => setFilter(value)}
@@ -116,7 +121,7 @@ export function PicksScreen() {
                       ? "No Picks yet"
                       : filter === "followed"
                         ? "No followed Picks yet"
-                        : "No Picks from people you follow"
+                        : "No Picks to discover yet"
                 }
                 description={
                   filter === "your" && !search.trim()
@@ -140,7 +145,7 @@ export function PicksScreen() {
 type RowPick = Omit<PickDirectoryItem, "author"> & {
   author: PickDirectoryItem["author"] | Profile | null;
 };
-function PickRow({ pick }: { pick: RowPick }) {
+export function PickRow({ pick }: { pick: RowPick }) {
   const images = pick.imagePreviews;
   const initials = (pick.author?.display_name ?? "?")
     .trim()

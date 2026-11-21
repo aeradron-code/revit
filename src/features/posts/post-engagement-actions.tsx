@@ -54,7 +54,13 @@ export function PostEngagementActions({
     <View className="flex-1 flex-row items-center gap-1">
       {onRatingPress ? (
         <Button
-          accessibilityLabel="Rate this post"
+          accessibilityLabel={
+            ratingLoading
+              ? "Rate this post. Community average is loading."
+              : averageScore === null
+                ? "Rate this post. No community ratings yet."
+                : `Rate this post. Community average ${averageScore.toFixed(1)} out of 5 stars.`
+          }
           accessibilityState={{ expanded: ratingExpanded }}
           disabled={!canInteract}
           className={`gap-1.5 border px-3 ${ratingExpanded ? "border-primary bg-selected" : "border-transparent"}`}

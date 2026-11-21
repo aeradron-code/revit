@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
@@ -62,7 +63,11 @@ export function SafetyOptionsMenu({
   const [reportError, setReportError] = useState<string | null>(null);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const reportMutation = useSubmitContentReport();
-  const blockStatus = useMyBlockStatus(user?.id ?? "", ownerId ?? "");
+  const blockStatus = useMyBlockStatus(
+    user?.id ?? "",
+    ownerId ?? "",
+    menuPosition !== null,
+  );
   const blockMutation = useSetUserBlocked(user?.id ?? "", ownerId ?? "");
 
   if (!user || user.id === ownerId) return null;
@@ -98,11 +103,11 @@ export function SafetyOptionsMenu({
   const blockOrUnblock = async () => {
     if (!ownerId || blockMutation.isPending) return;
     if (blockStatus.data) {
-      closeMenu();
       try {
         await blockMutation.mutateAsync(false);
+        closeMenu();
       } catch {
-        // The inline error remains visible beside the options menu.
+        // Keep the menu open so the error and retry action stay in context.
       }
       return;
     }
@@ -179,35 +184,38 @@ export function SafetyOptionsMenu({
                   variant="ghost"
                 >
                   <Text>
-                    {blockStatus.data
-                      ? (unblockMenuLabel ?? "Unblock user")
-                      : (blockMenuLabel ?? "Block user")}
+                    {blockStatus.isLoading
+                      ? "Checking block status…"
+                      : blockMutation.isPending
+                        ? "Updating…"
+                        : blockStatus.data
+                          ? (unblockMenuLabel ?? "Unblock user")
+                          : (blockMenuLabel ?? "Block user")}
                   </Text>
                 </Button>
+              ) : null}
+              {blockStatus.isError ? (
+                <FeedbackState
+                  actionLabel="Retry"
+                  className="mx-1 my-1"
+                  onAction={() => void blockStatus.refetch()}
+                  title="Couldn’t check block status."
+                  variant="error"
+                />
+              ) : null}
+              {blockMutation.isError && !blockConfirmationOpen ? (
+                <FeedbackState
+                  actionLabel="Retry"
+                  className="mx-1 my-1"
+                  onAction={() => void blockOrUnblock()}
+                  title="Couldn’t update the block."
+                  variant="error"
+                />
               ) : null}
             </View>
           ) : null}
         </View>
       </Modal>
-
-      {blockMutation.isError && !blockConfirmationOpen ? (
-        <Text
-          accessibilityLiveRegion="polite"
-          className="text-xs text-destructive"
-          role="alert"
-        >
-          Couldn’t update the block. Please try again.
-        </Text>
-      ) : null}
-      {blockStatus.isError ? (
-        <Text
-          accessibilityLiveRegion="polite"
-          className="text-xs text-destructive"
-          role="alert"
-        >
-          Couldn’t load block status. Please try again.
-        </Text>
-      ) : null}
 
       {reportOpen ? (
         <Dialog
@@ -294,9 +302,10 @@ export function SafetyOptionsMenu({
               </DialogDescription>
             </DialogHeader>
             {blockMutation.isError ? (
-              <Text className="text-destructive" variant="small">
-                Couldn’t block this user. Please try again.
-              </Text>
+              <FeedbackState
+                title="Couldn’t block this user. Please try again."
+                variant="error"
+              />
             ) : null}
             <DialogFooter>
               <Button

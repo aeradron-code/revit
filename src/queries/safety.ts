@@ -11,9 +11,14 @@ import {
 } from "@/api/safety";
 import { queryKeys } from "@/lib/query/query-keys";
 
-export function useMyBlockStatus(viewerId: string, targetId: string) {
+export function useMyBlockStatus(
+  viewerId: string,
+  targetId: string,
+  shouldFetch = true,
+) {
   return useQuery({
-    enabled: Boolean(viewerId && targetId && viewerId !== targetId),
+    enabled:
+      shouldFetch && Boolean(viewerId && targetId && viewerId !== targetId),
     queryFn: ({ signal }) => getMyBlockStatus(targetId, signal),
     queryKey: queryKeys.safety.blockStatus(viewerId, targetId),
   });

@@ -109,7 +109,10 @@ type ButtonProps = React.ComponentPropsWithoutRef<typeof Pressable> &
 const Button = React.forwardRef<
   React.ElementRef<typeof Pressable>,
   ButtonProps
->(function Button({ className, variant, size, ...props }, ref) {
+>(function Button(
+  { className, variant, size, accessibilityRole = "button", ...props },
+  ref,
+) {
   const resolvedVariant = variant ?? "default";
   const disabledClass =
     resolvedVariant === "default"
@@ -132,7 +135,7 @@ const Button = React.forwardRef<
           props.disabled && disabledClass,
           className,
         )}
-        role="button"
+        accessibilityRole={accessibilityRole}
         {...props}
       />
     </TextClassContext.Provider>

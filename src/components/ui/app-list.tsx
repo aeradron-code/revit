@@ -4,6 +4,10 @@ import { Platform, StyleSheet, useWindowDimensions } from "react-native";
 import { withUniwind } from "uniwind";
 
 import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
+import {
+  pageWidthMaxWidth,
+  type PageWidth,
+} from "@/components/ui/page-layout";
 
 type ContentGap = number | { base: number; md?: number };
 
@@ -13,6 +17,8 @@ export type AppListProps<ItemT> = Omit<
 > & {
   className?: string;
   contentContainerClassName?: string;
+  /** Shared maximum width for list content; the scroll viewport stays full width. */
+  contentWidth?: PageWidth;
   /** Gap between the list header, rows, and footer, in logical pixels. */
   contentGap?: ContentGap;
 };
@@ -37,6 +43,7 @@ const WebLegendList = LegendList as unknown as <ItemT>(
 export function AppList<ItemT>({
   className,
   contentContainerClassName,
+  contentWidth,
   contentContainerStyle,
   contentGap,
   recycleItems,
@@ -56,9 +63,22 @@ export function AppList<ItemT>({
         : undefined;
 
   const listClassName = cn("min-h-0 w-full flex-1", className);
-  const contentClassName = cn("w-full", contentContainerClassName);
+  const contentClassName = cn(
+    "w-full",
+    contentContainerClassName,
+  );
+  const contentWidthStyle =
+    contentWidth && width >= 768
+      ? {
+          marginLeft: "auto" as const,
+          marginRight: "auto" as const,
+          maxWidth: pageWidthMaxWidth(contentWidth),
+          width: "100%" as const,
+        }
+      : undefined;
   const mergedContentStyle = [
     gap === undefined ? undefined : { gap },
+    contentWidthStyle,
     contentContainerStyle,
   ];
   const sharedProps = {

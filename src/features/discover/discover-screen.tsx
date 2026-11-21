@@ -76,10 +76,15 @@ export function DiscoverScreen() {
               onChangeText={setQuery}
             />
             {hasSearchTerm ? (
-              <View className="flex-row flex-wrap gap-2">
+              <View
+                accessibilityRole="tablist"
+                className="flex-row flex-wrap gap-2"
+              >
                 {(["people", "posts", "entities"] as const).map((item) => (
                   <Button
                     key={item}
+                    accessibilityRole="tab"
+                    accessibilityState={{ selected: filter === item }}
                     size="sm"
                     variant={filter === item ? "default" : "outline"}
                     onPress={() => setFilter(item)}

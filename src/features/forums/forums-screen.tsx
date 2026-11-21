@@ -74,7 +74,10 @@ export function ForumsScreen() {
               onChangeText={setSearch}
             />
 
-            <View className="flex-row flex-wrap gap-2">
+            <View
+              accessibilityRole="tablist"
+              className="flex-row flex-wrap gap-2"
+            >
               {(
                 [
                   ["your", "Your"],
@@ -84,6 +87,8 @@ export function ForumsScreen() {
               ).map(([value, label]) => (
                 <Button
                   key={value}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: filter === value }}
                   size="sm"
                   variant={filter === value ? "default" : "outline"}
                   onPress={() => setFilter(value)}

@@ -119,9 +119,13 @@ export function ForumDetailScreen() {
       />
 
       {membership.isError ? (
-        <Text className="text-destructive" variant="small">
-          {membership.error.message}
-        </Text>
+        <FeedbackState
+          actionLabel="Retry"
+          className="w-full"
+          onAction={() => membership.mutate(!forumData.isMember)}
+          title={membership.error.message}
+          variant="error"
+        />
       ) : null}
 
       {forumData.rules ? (

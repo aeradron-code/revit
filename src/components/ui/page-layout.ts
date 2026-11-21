@@ -9,24 +9,31 @@ export type PageWidth =
   | "wide"
   | "profile"
   | "extraWide"
+  | "feed"
   | "full";
 
-const pageWidths: Record<PageWidth, string> = {
-  content: "md:max-w-[36rem]",
-  compact: "md:max-w-lg",
-  auth: "md:max-w-md",
-  narrow: "md:max-w-2xl",
-  standard: "md:max-w-3xl",
-  wide: "md:max-w-5xl",
-  profile: "md:max-w-4xl",
-  extraWide: "md:max-w-6xl",
-  full: "",
-};
+const pageWidths: Record<PageWidth, { className: string; maxWidth?: number }> =
+  {
+    content: { className: "md:max-w-[38rem]", maxWidth: 608 },
+    compact: { className: "md:max-w-lg", maxWidth: 512 },
+    auth: { className: "md:max-w-md", maxWidth: 448 },
+    narrow: { className: "md:max-w-2xl", maxWidth: 672 },
+    standard: { className: "md:max-w-3xl", maxWidth: 768 },
+    wide: { className: "md:max-w-5xl", maxWidth: 1024 },
+    profile: { className: "md:max-w-4xl", maxWidth: 896 },
+    extraWide: { className: "md:max-w-6xl", maxWidth: 1152 },
+    feed: { className: "md:max-w-[40rem]", maxWidth: 640 },
+    full: { className: "" },
+  };
+
+export function pageWidthMaxWidth(width: PageWidth) {
+  return pageWidths[width].maxWidth;
+}
 
 /** Shared width and centering rules for page-level content on larger screens. */
 export function pageContainerClassName(
   width: PageWidth = "standard",
   className?: string,
 ) {
-  return cn("w-full md:mx-auto", pageWidths[width], className);
+  return cn("w-full md:mx-auto", pageWidths[width].className, className);
 }

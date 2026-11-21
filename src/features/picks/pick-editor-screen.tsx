@@ -249,9 +249,12 @@ export function PickEditorScreen() {
                 </View>
               ) : null}
               {!isDebouncing && entitySearch.isError ? (
-                <Text className="text-destructive" variant="small">
-                  {entitySearch.error.message}
-                </Text>
+                <FeedbackState
+                  actionLabel="Retry"
+                  onAction={() => void entitySearch.refetch()}
+                  title="Couldn’t load finds."
+                  variant="error"
+                />
               ) : null}
               {!isDebouncing
                 ? entitySearch.data?.map((entity) => {

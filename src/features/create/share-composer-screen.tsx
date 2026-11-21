@@ -352,10 +352,17 @@ function ShareComposerForm({ userId }: { userId: string }) {
                     onAction={() => void categories.refetch()}
                   />
                 ) : null}
-                <View className="flex-row flex-wrap gap-2">
+                <View
+                  accessibilityRole="tablist"
+                  className="flex-row flex-wrap gap-2"
+                >
                   {(categories.data ?? []).map((category) => (
                     <Button
                       key={category.id}
+                      accessibilityRole="tab"
+                      accessibilityState={{
+                        selected: categorySlug === category.slug,
+                      }}
                       size="sm"
                       variant={
                         categorySlug === category.slug ? "default" : "outline"
@@ -388,9 +395,12 @@ function ShareComposerForm({ userId }: { userId: string }) {
                   <FindSearchSkeleton leadingPin rows={1} className="gap-3" />
                 ) : null}
                 {categorySlug && !isDebouncing && results.isError ? (
-                  <Text variant="small" className="text-destructive">
-                    {results.error.message}
-                  </Text>
+                  <FeedbackState
+                    actionLabel="Retry"
+                    onAction={() => void results.refetch()}
+                    title="Couldn’t load these finds."
+                    variant="error"
+                  />
                 ) : null}
                 {categorySlug && !isDebouncing
                   ? results.data?.map((item) => (

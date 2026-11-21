@@ -43,6 +43,7 @@ export default function SettingsScreen() {
   const [deleted, setDeleted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const usernameError = getUsernameError(username);
 
   const openProfileEditor = () => {
     setDisplayName(profile?.display_name ?? "");
@@ -59,8 +60,8 @@ export default function SettingsScreen() {
       setError("Enter the name people should see.");
       return;
     }
-    if (!/^[a-z0-9_]{3,30}$/.test(normalizedUsername)) {
-      setError("Use 3–30 lowercase letters, numbers, or underscores.");
+    if (usernameError) {
+      setError(usernameError);
       return;
     }
     setSavingProfile(true);
@@ -286,6 +287,20 @@ export default function SettingsScreen() {
                 onChangeText={(value) => setUsername(value.toLowerCase())}
                 placeholder="your_username"
               />
+              {usernameError ? (
+                <Text
+                  accessibilityLiveRegion="polite"
+                  className="text-destructive"
+                  role="alert"
+                  variant="small"
+                >
+                  {usernameError}
+                </Text>
+              ) : (
+                <Text variant="muted" className="text-xs">
+                  3–30 characters: lowercase letters, numbers, or underscores.
+                </Text>
+              )}
             </View>
             <View className="gap-1.5">
               <Text variant="small">Bio</Text>
@@ -317,7 +332,10 @@ export default function SettingsScreen() {
             >
               <Text>Cancel</Text>
             </Button>
-            <Button disabled={savingProfile} onPress={() => void saveProfile()}>
+            <Button
+              disabled={savingProfile || Boolean(usernameError)}
+              onPress={() => void saveProfile()}
+            >
               <Text>{savingProfile ? "Saving…" : "Save changes"}</Text>
             </Button>
           </DialogFooter>
@@ -369,6 +387,15 @@ export default function SettingsScreen() {
       </Dialog>
     </SafeAreaView>
   );
+}
+
+function getUsernameError(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return "Username is required.";
+  if (!/^[a-z0-9_]{3,30}$/.test(normalized)) {
+    return "Use 3–30 characters: lowercase letters, numbers, or underscores.";
+  }
+  return null;
 }
 
 function SettingsHeader() {

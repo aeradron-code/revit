@@ -29,6 +29,7 @@ export const queryKeys = {
     all: ["entities"] as const,
     categories: () => [...queryKeys.entities.all, "categories"] as const,
     byId: (id: string) => [...queryKeys.entities.all, "id", id] as const,
+    usage: (id: string) => [...queryKeys.entities.all, "usage", id] as const,
     search: (query: string, category?: string) =>
       [...queryKeys.entities.all, "search", category ?? "all", query] as const,
   },
