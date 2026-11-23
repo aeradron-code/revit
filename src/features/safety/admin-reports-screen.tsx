@@ -9,7 +9,6 @@ import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { pageContainerClassName } from "@/components/ui/page-layout";
-import { PageListContainer } from "@/components/ui/page-list-container";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -46,10 +45,8 @@ export function AdminReportsScreen() {
       ) : (
         <AppList
           className="flex-1"
-          contentContainerClassName={pageContainerClassName(
-            "standard",
-            "p-4 md:p-6",
-          )}
+          contentWidth="standard"
+          contentContainerClassName="p-4 md:p-6"
           contentGap={12}
           data={items}
           keyExtractor={(item) => item.id}
@@ -73,24 +70,20 @@ export function AdminReportsScreen() {
           }
           ListEmptyComponent={
             reports.isLoading || reports.isError ? undefined : (
-              <PageListContainer width="standard">
-                <FeedbackState title="No reports yet." />
-              </PageListContainer>
+              <FeedbackState title="No reports yet." />
             )
           }
           renderItem={({ item }) => (
-            <PageListContainer width="standard">
-              <ReportCard
-                report={item}
-                isUpdating={markReviewed.isPending}
-                reviewError={
-                  markReviewed.isError && markReviewed.variables === item.id
-                    ? API_ERROR_MESSAGES.REVIEW_REPORT
-                    : null
-                }
-                onReview={() => markReviewed.mutate(item.id)}
-              />
-            </PageListContainer>
+            <ReportCard
+              report={item}
+              isUpdating={markReviewed.isPending}
+              reviewError={
+                markReviewed.isError && markReviewed.variables === item.id
+                  ? API_ERROR_MESSAGES.REVIEW_REPORT
+                  : null
+              }
+              onReview={() => markReviewed.mutate(item.id)}
+            />
           )}
         />
       )}

@@ -73,12 +73,10 @@ export function PickDetailScreen() {
         }}
       />
       <AppList
+        contentWidth="profile"
         data={personalPick.items}
         keyExtractor={(item) => item.entity_id}
-        contentContainerClassName={pageContainerClassName(
-          "profile",
-          "grow px-4 py-6 md:px-6 md:py-12",
-        )}
+        contentContainerClassName="grow px-4 py-6 md:px-6 md:py-12"
         ItemSeparatorComponent={PickItemSeparator}
         ListHeaderComponent={
           <View className="gap-6 pb-6">

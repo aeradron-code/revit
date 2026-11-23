@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { PageListContainer } from "@/components/ui/page-list-container";
+import type { PageWidth } from "@/components/ui/page-layout";
 import { Icon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -38,6 +39,7 @@ import {
 type CommentSectionProps = {
   canInteract?: boolean;
   comments: ReturnType<typeof useTopLevelComments>;
+  contentWidth?: PageWidth;
   postId: string;
   listHeader?: ReactNode;
   renderList: (content: CommentListContent) => ReactNode;
@@ -58,6 +60,7 @@ export type CommentListRow =
 export function CommentSection({
   canInteract = true,
   comments,
+  contentWidth = "content",
   postId,
   listHeader: pageHeader,
   renderList,
@@ -188,7 +191,7 @@ export function CommentSection({
   };
 
   const listHeader = (
-    <PageListContainer>
+    <PageListContainer width={contentWidth}>
       <View className="gap-3 md:gap-6">
         {pageHeader}
         <View className="gap-3">
@@ -249,7 +252,7 @@ export function CommentSection({
   );
 
   const listFooter = (
-    <PageListContainer>
+    <PageListContainer width={contentWidth}>
       <View className="gap-2">
         {comments.hasNextPage ? (
           <Button
@@ -284,7 +287,7 @@ export function CommentSection({
   }: LegendListRenderItemProps<CommentListRow>) => {
     if (item.kind === "reply") {
       return (
-        <PageListContainer>
+        <PageListContainer width={contentWidth}>
           <View className="ml-4 border-l-2 border-secondary pl-3 sm:ml-8 sm:pl-4">
             <CommentItem
               comment={item.comment}
@@ -301,7 +304,7 @@ export function CommentSection({
 
     const comment = item.comment;
     return (
-      <PageListContainer>
+      <PageListContainer width={contentWidth}>
         <CommentThreadItem
           comment={comment}
           currentUserId={user?.id}
@@ -627,10 +630,12 @@ function CommentItem({
   );
 }
 
-export function CommentListSkeleton() {
+export function CommentListSkeleton({ rows = 2 }: { rows?: number } = {}) {
+  const rowKeys = ["first", "second"].slice(0, rows);
+
   return (
     <View accessibilityLabel="Loading comments" className="w-full gap-3">
-      {["first", "second"].map((key) => (
+      {rowKeys.map((key) => (
         <View
           key={key}
           className="gap-2 rounded-lg border border-border bg-card p-3"

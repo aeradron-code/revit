@@ -5,9 +5,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function PostCardSkeleton({
   kind = "share",
   withMedia = false,
+  mediaHeight,
 }: {
   kind?: "ask" | "share";
   withMedia?: boolean;
+  /** Optional height for loading contexts with a fixed vertical budget. */
+  mediaHeight?: number;
 }) {
   return (
     <View className="w-full gap-0 overflow-hidden rounded-none border-y border-border bg-card px-3 md:rounded-lg md:border">
@@ -39,7 +42,14 @@ export function PostCardSkeleton({
           <Skeleton className="h-4 w-4/5" />
         </View>
         {withMedia ? (
-          <Skeleton className="w-full rounded-md" style={{ aspectRatio: 1 }} />
+          <Skeleton
+            className="w-full rounded-md"
+            style={
+              mediaHeight === undefined
+                ? { aspectRatio: 1 }
+                : { height: mediaHeight }
+            }
+          />
         ) : null}
       </View>
       <View className="w-full flex-row items-center gap-2 px-1 py-2">

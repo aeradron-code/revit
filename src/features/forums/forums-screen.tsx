@@ -8,8 +8,6 @@ import type { ForumSummary } from "@/api/forums";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FeedbackState } from "@/components/ui/feedback-state";
-import { pageContainerClassName } from "@/components/ui/page-layout";
-import { PageListContainer } from "@/components/ui/page-list-container";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -53,11 +51,9 @@ export function ForumsScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <AppList
         className="flex-1"
-        contentContainerClassName={pageContainerClassName(
-          "standard",
-          "px-2 py-3 md:py-6",
-        )}
-        contentGap={20}
+        contentWidth="standard"
+        contentContainerClassName="px-2 py-3 md:py-6"
+        contentGap={8}
         data={!forums.isLoading && !forums.isError ? visibleForums : []}
         keyExtractor={(forum) => forum.id}
         keyboardShouldPersistTaps="handled"
@@ -125,11 +121,7 @@ export function ForumsScreen() {
             />
           ) : undefined
         }
-        renderItem={({ item }) => (
-          <PageListContainer width="standard">
-            <ForumListItem forum={item} />
-          </PageListContainer>
-        )}
+        renderItem={({ item }) => <ForumListItem forum={item} />}
       />
     </SafeAreaView>
   );
@@ -195,7 +187,7 @@ function ForumListItem({ forum }: { forum: ForumSummary }) {
 
 function ForumListSkeleton() {
   return (
-    <View accessibilityLabel="Loading forums" className="w-full gap-5">
+    <View accessibilityLabel="Loading forums" className="w-full gap-2">
       {["first", "second", "third"].map((key) => (
         <View
           key={key}

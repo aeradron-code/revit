@@ -9,8 +9,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FeedbackState } from "@/components/ui/feedback-state";
-import { pageContainerClassName } from "@/components/ui/page-layout";
-import { PageListContainer } from "@/components/ui/page-list-container";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -61,10 +59,8 @@ export function PicksScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <AppList
         className="flex-1"
-        contentContainerClassName={pageContainerClassName(
-          "standard",
-          "px-2 py-3 md:py-6",
-        )}
+        contentWidth="standard"
+        contentContainerClassName="px-2 py-3 md:py-6"
         contentGap={8}
         data={!loading && !error ? items : []}
         keyExtractor={(pick) => pick.id}
@@ -132,11 +128,7 @@ export function PicksScreen() {
             ) : null}
           </View>
         }
-        renderItem={({ item }) => (
-          <PageListContainer width="standard">
-            <PickRow pick={item} />
-          </PageListContainer>
-        )}
+        renderItem={({ item }) => <PickRow pick={item} />}
       />
     </SafeAreaView>
   );

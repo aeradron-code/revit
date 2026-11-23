@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { pageContainerClassName } from "@/components/ui/page-layout";
-import { PageListContainer } from "@/components/ui/page-list-container";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
@@ -179,10 +178,8 @@ export function PickEditorScreen() {
       />
       <AppList
         className="flex-1"
-        contentContainerClassName={pageContainerClassName(
-          "narrow",
-          "px-2 pb-8 pt-4 md:pb-12 md:pt-6",
-        )}
+        contentWidth="narrow"
+        contentContainerClassName="px-2 pb-8 pt-4 md:pb-12 md:pt-6"
         contentGap={12}
         data={items}
         keyExtractor={(item) => item.entity.id}
@@ -307,34 +304,28 @@ export function PickEditorScreen() {
           </Card>
         }
         ListEmptyComponent={
-          <PageListContainer width="narrow">
-            <FeedbackState
-              description="Search above and add at least one find to continue."
-              title="No finds added"
-            />
-          </PageListContainer>
+          <FeedbackState
+            description="Search above and add at least one find to continue."
+            title="No finds added"
+          />
         }
         ListFooterComponent={
           mutationError ? (
-            <PageListContainer width="narrow" className="mt-2">
-              <Text className="text-destructive" variant="small">
-                {mutationError.message}
-              </Text>
-            </PageListContainer>
+            <Text className="mt-2 text-destructive" variant="small">
+              {mutationError.message}
+            </Text>
           ) : undefined
         }
         renderItem={({ item, index }) => (
-          <PageListContainer width="narrow">
-            <PickEditorItem
-              item={item}
-              index={index}
-              count={items.length}
-              isSaving={isSaving}
-              moveItem={moveItem}
-              removeItem={removeItem}
-              updateNote={updateNote}
-            />
-          </PageListContainer>
+          <PickEditorItem
+            item={item}
+            index={index}
+            count={items.length}
+            isSaving={isSaving}
+            moveItem={moveItem}
+            removeItem={removeItem}
+            updateNote={updateNote}
+          />
         )}
       />
     </SafeAreaView>

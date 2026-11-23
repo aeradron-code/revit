@@ -12,7 +12,7 @@ import {
 import { AppList } from "@/components/ui/app-list";
 import type { PostWithDetails } from "@/api/posts";
 import { Button } from "@/components/ui/button";
-import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import {
   Dialog,
   DialogContent,
@@ -137,6 +137,7 @@ function SharePostDetail({
     <PostDetailFrame onBack={goBackFromPost} title="Post">
       <View className="min-h-0 w-full flex-1">
         <CommentSection
+          contentWidth="feed"
           listHeader={
             <SharePostCard
               isDetail
@@ -150,7 +151,8 @@ function SharePostDetail({
             <AppList
               {...content}
               className="flex-1"
-              contentContainerClassName="pt-1 pb-3 md:px-6 md:pt-2 md:pb-4"
+              contentWidth="feed"
+              contentContainerClassName="pt-1 pb-3 md:pt-2 md:pb-4"
               contentGap={12}
               keyboardShouldPersistTaps="handled"
               refreshControl={
@@ -196,6 +198,7 @@ function AskPostDetail({
     <PostDetailFrame onBack={goBackFromPost} title="Post">
       <View className="min-h-0 w-full flex-1">
         <CommentSection
+          contentWidth="feed"
           listHeader={
             <AskPostCard
               isDetail
@@ -211,7 +214,8 @@ function AskPostDetail({
             <AppList
               {...content}
               className="flex-1"
-              contentContainerClassName="px-4 pt-4 pb-6 md:px-6 md:pt-6 md:pb-8"
+              contentWidth="feed"
+              contentContainerClassName="px-4 pt-4 pb-6 md:pt-6 md:pb-8"
               contentGap={12}
               keyboardShouldPersistTaps="handled"
               refreshControl={
@@ -426,19 +430,29 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
 }
 
 function PostDetailLoading() {
+  const { height, width } = useWindowDimensions();
+  const verticalPadding = width >= 768 ? 48 : 32;
+  const availableHeight = Math.max(0, height - 56 - verticalPadding - 32);
+  const commentRows = availableHeight >= 450 ? 1 : 0;
+  const mediaHeight = Math.max(
+    0,
+    Math.min(220, availableHeight - 210 - commentRows * 132 - 12),
+  );
+
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View
-        className={pageContainerClassName(
-          "content",
-          "min-h-0 flex-1 px-4 py-4 md:px-6 md:py-6",
-        )}
+      <PageListContainer
+        width="feed"
+        className="min-h-0 flex-1 overflow-hidden px-4 py-4 md:py-6"
       >
         <View className="w-full gap-3">
-          <PostCardSkeleton withMedia />
-          <CommentListSkeleton />
+          <PostCardSkeleton
+            withMedia={mediaHeight > 0}
+            mediaHeight={mediaHeight}
+          />
+          {commentRows > 0 ? <CommentListSkeleton rows={commentRows} /> : null}
         </View>
-      </View>
+      </PageListContainer>
     </PostDetailFrame>
   );
 }

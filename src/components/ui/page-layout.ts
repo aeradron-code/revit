@@ -30,6 +30,18 @@ export function pageWidthMaxWidth(width: PageWidth) {
   return pageWidths[width].maxWidth;
 }
 
+/** Inline responsive width rule shared by list viewports and list rows. */
+export function pageWidthStyle(width: PageWidth, viewportWidth: number) {
+  if (viewportWidth < 768) return undefined;
+
+  return {
+    marginLeft: "auto" as const,
+    marginRight: "auto" as const,
+    maxWidth: pageWidthMaxWidth(width),
+    width: "100%" as const,
+  };
+}
+
 /** Shared width and centering rules for page-level content on larger screens. */
 export function pageContainerClassName(
   width: PageWidth = "standard",

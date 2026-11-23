@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
-import { View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 
 import {
   pageContainerClassName,
+  pageWidthStyle,
   type PageWidth,
 } from "@/components/ui/page-layout";
 
@@ -16,7 +17,14 @@ export function PageListContainer({
   className?: string;
   width?: PageWidth;
 }) {
+  const { width: viewportWidth } = useWindowDimensions();
+
   return (
-    <View className={pageContainerClassName(width, className)}>{children}</View>
+    <View
+      className={pageContainerClassName(width, className)}
+      style={pageWidthStyle(width, viewportWidth)}
+    >
+      {children}
+    </View>
   );
 }

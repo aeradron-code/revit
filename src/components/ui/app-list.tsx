@@ -5,7 +5,7 @@ import { withUniwind } from "uniwind";
 
 import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import {
-  pageWidthMaxWidth,
+  pageWidthStyle,
   type PageWidth,
 } from "@/components/ui/page-layout";
 
@@ -67,15 +67,9 @@ export function AppList<ItemT>({
     "w-full",
     contentContainerClassName,
   );
-  const contentWidthStyle =
-    contentWidth && width >= 768
-      ? {
-          marginLeft: "auto" as const,
-          marginRight: "auto" as const,
-          maxWidth: pageWidthMaxWidth(contentWidth),
-          width: "100%" as const,
-        }
-      : undefined;
+  const contentWidthStyle = contentWidth
+    ? pageWidthStyle(contentWidth, width)
+    : undefined;
   const mergedContentStyle = [
     gap === undefined ? undefined : { gap },
     contentWidthStyle,

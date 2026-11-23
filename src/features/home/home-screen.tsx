@@ -43,10 +43,11 @@ export function HomeScreen() {
       <AppList
         contentWidth="feed"
         contentContainerClassName="py-1 md:py-6"
-        contentGap={{ base: 4, md: 8 }}
         data={posts}
         keyExtractor={(post) => post.id}
         keyboardShouldPersistTaps="handled"
+        ListHeaderComponentStyle={{ marginBottom: 8 }}
+        ItemSeparatorComponent={() => <View className="h-1" />}
         ListHeaderComponent={
           <FeedHeader
             feedMode={feedMode}
@@ -210,7 +211,7 @@ function FeedEmpty({
     );
   }
   return (
-    <View className="mt-3 items-start gap-3 rounded-lg border border-border bg-card p-4 shadow-none sm:flex-row sm:items-center">
+    <View className="items-start gap-3 rounded-lg border border-border bg-card p-4 shadow-none sm:flex-row sm:items-center">
       <View className="size-10 items-center justify-center rounded-md bg-accent">
         <Icon as={Sparkles} className="size-5 text-accent-foreground" />
       </View>

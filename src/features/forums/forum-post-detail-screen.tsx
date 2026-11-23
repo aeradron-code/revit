@@ -7,6 +7,7 @@ import type { PostWithDetails } from "@/api/posts";
 import type { SharePostWithDetails } from "@/api/shares";
 import { FeedbackState } from "@/components/ui/feedback-state";
 import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import {
   CommentListSkeleton,
   CommentSection,
@@ -44,17 +45,15 @@ export function ForumPostDetailScreen() {
   if (!forumId || !postId || !viewerId || post.isLoading) {
     return (
       <ForumPostFrame forumId={forumId}>
-        <View
-          className={pageContainerClassName(
-            "content",
-            "min-h-0 flex-1 px-4 py-4 md:px-6 md:py-6",
-          )}
+        <PageListContainer
+          width="feed"
+          className="min-h-0 flex-1 px-4 py-4 md:py-6"
         >
           <View className="w-full gap-3">
             <PostCardSkeleton withMedia />
             <CommentListSkeleton />
           </View>
-        </View>
+        </PageListContainer>
       </ForumPostFrame>
     );
   }
@@ -109,6 +108,7 @@ export function ForumPostDetailScreen() {
       <View className="min-h-0 w-full flex-1">
         <CommentSection
           canInteract={canInteract}
+          contentWidth="feed"
           listHeader={
             <AskPostCard canInteract={canInteract} isDetail post={post.data} />
           }
@@ -118,7 +118,8 @@ export function ForumPostDetailScreen() {
             <AppList
               {...content}
               className="flex-1"
-              contentContainerClassName="px-4 pt-4 pb-6 md:px-6 md:pt-6 md:pb-8"
+              contentWidth="feed"
+              contentContainerClassName="px-4 pt-4 pb-6 md:pt-6 md:pb-8"
               contentGap={12}
               keyboardShouldPersistTaps="handled"
               refreshControl={
@@ -157,17 +158,15 @@ function ForumSharePostDetail({
   if (entity.isLoading || score.isLoading) {
     return (
       <ForumPostFrame forumId={post.forum_id ?? ""}>
-        <View
-          className={pageContainerClassName(
-            "content",
-            "min-h-0 flex-1 px-4 py-4 md:px-6 md:py-6",
-          )}
+        <PageListContainer
+          width="feed"
+          className="min-h-0 flex-1 px-4 py-4 md:py-6"
         >
           <View className="w-full gap-3">
             <PostCardSkeleton withMedia />
             <CommentListSkeleton />
           </View>
-        </View>
+        </PageListContainer>
       </ForumPostFrame>
     );
   }
@@ -199,6 +198,7 @@ function ForumSharePostDetail({
       <View className="min-h-0 w-full flex-1">
         <CommentSection
           canInteract={canInteract}
+          contentWidth="feed"
           listHeader={
             <SharePostCard
               canInteract={canInteract}
@@ -213,7 +213,8 @@ function ForumSharePostDetail({
             <AppList
               {...content}
               className="flex-1"
-              contentContainerClassName="px-4 pt-4 pb-6 md:px-6 md:pt-6 md:pb-8"
+              contentWidth="feed"
+              contentContainerClassName="px-4 pt-4 pb-6 md:pt-6 md:pb-8"
               contentGap={12}
               keyboardShouldPersistTaps="handled"
               refreshControl={

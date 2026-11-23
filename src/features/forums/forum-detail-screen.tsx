@@ -39,6 +39,8 @@ import {
   useForumPosts,
 } from "@/queries/forums";
 
+const FORUM_SIDEBAR_BREAKPOINT = 1300;
+
 export function ForumDetailScreen() {
   const { width: windowWidth } = useWindowDimensions();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -57,7 +59,7 @@ export function ForumDetailScreen() {
   }
 
   const isOwner = forumData.owner_id === user?.id;
-  const showForumSidebarBesideFeed = windowWidth >= 768;
+  const showForumSidebarBesideFeed = windowWidth >= FORUM_SIDEBAR_BREAKPOINT;
   const forumSidebarWidth = Math.min(320, Math.round(windowWidth * 0.3));
   const postItems = posts.data?.pages.flatMap((page) => page.items) ?? [];
   const aboutCommunity = (
@@ -150,6 +152,76 @@ export function ForumDetailScreen() {
       ) : null}
     </Card>
   );
+  const forumHeader = (
+    <View className="overflow-hidden rounded-lg border border-border bg-card shadow-none">
+      <ForumCoverDisplay
+        forumId={forumData.id}
+        forumName={forumData.name}
+        imageUrl={forumData.coverImageUrl}
+        className="rounded-t-md"
+      />
+      <View className="p-3">
+        <View className="flex-row items-center gap-3">
+          <ForumAvatar
+            name={forumData.name}
+            imageUrl={forumData.imageUrl}
+            size={48}
+          />
+          <View className="min-w-0 flex-1">
+            <Text className="text-lg font-semibold">{forumData.name}</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+  const mobileListHeader = (
+    <View className="gap-1 md:gap-4">
+      {forumHeader}
+      {aboutCommunity}
+      {!forumData.isMember ? (
+        <Text variant="muted">
+          Join to post, comment, or rate an Ask in this forum.
+        </Text>
+      ) : null}
+    </View>
+  );
+  const postListEmpty = (
+    <>
+      {posts.isLoading ? <PostsLoadingState /> : null}
+      {posts.isError ? (
+        <FeedbackState
+          actionLabel="Retry"
+          onAction={() => void posts.refetch()}
+          title="Couldn’t load forum posts."
+          variant="error"
+        />
+      ) : null}
+      {!posts.isLoading && !posts.isError ? (
+        <FeedbackState title="No forum posts yet" />
+      ) : null}
+    </>
+  );
+  const postListFooter = posts.isFetchNextPageError ? (
+    <FeedbackState
+      actionLabel="Try again"
+      onAction={() => void posts.fetchNextPage()}
+      title="Couldn’t load more forum posts."
+      variant="error"
+    />
+  ) : posts.hasNextPage ? (
+    <Button
+      disabled={posts.isFetchingNextPage}
+      variant="outline"
+      onPress={() => void posts.fetchNextPage()}
+    >
+      <Text>
+        {posts.isFetchingNextPage ? "Loading more posts…" : "Load more posts"}
+      </Text>
+    </Button>
+  ) : undefined;
+  const renderPostItem = ({ item }: { item: PostWithDetails }) => (
+    <ForumPostCard post={item} canInteract={forumData.isMember || isOwner} />
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
@@ -164,152 +236,55 @@ export function ForumDetailScreen() {
           ),
         }}
       />
-      <AppList
-        className="min-h-0 flex-1"
-        contentContainerClassName={pageContainerClassName(
-          "extraWide",
-          "py-1 md:px-6 md:py-2",
-        )}
-        data={postItems}
-        keyExtractor={(post) => post.id}
-        keyboardShouldPersistTaps="handled"
-        ListHeaderComponentStyle={{ marginBottom: 8 }}
-        ItemSeparatorComponent={() => <View className="h-1" />}
-        ListHeaderComponent={
-          <View className="gap-1 md:gap-4">
-            <View className="overflow-hidden rounded-lg border border-border bg-card shadow-none">
-              <ForumCoverDisplay
-                forumId={forumData.id}
-                forumName={forumData.name}
-                imageUrl={forumData.coverImageUrl}
-                className="rounded-t-md"
-              />
-              <View className="p-3">
-                <View className="flex-row items-center gap-3">
-                  <ForumAvatar
-                    name={forumData.name}
-                    imageUrl={forumData.imageUrl}
-                    size={48}
-                  />
-                  <View className="min-w-0 flex-1">
-                    <Text className="text-lg font-semibold">
-                      {forumData.name}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-            {!showForumSidebarBesideFeed ? aboutCommunity : null}
+      {showForumSidebarBesideFeed ? (
+        <ScrollView
+          className="min-h-0 flex-1"
+          keyboardShouldPersistTaps="handled"
+        >
+          <View
+            className={pageContainerClassName("extraWide", "gap-4 px-6 py-2")}
+          >
+            {forumHeader}
             {!forumData.isMember ? (
               <Text variant="muted">
                 Join to post, comment, or rate an Ask in this forum.
               </Text>
             ) : null}
+            <View className="flex-row items-start justify-center gap-3">
+              <View className="min-w-0 flex-1 gap-1" style={{ maxWidth: 640 }}>
+                {postItems.length === 0
+                  ? postListEmpty
+                  : postItems.map((post) => (
+                      <ForumPostCard
+                        key={post.id}
+                        post={post}
+                        canInteract={forumData.isMember || isOwner}
+                      />
+                    ))}
+                {postListFooter}
+              </View>
+              <View style={{ width: forumSidebarWidth, flexShrink: 0 }}>
+                {aboutCommunity}
+              </View>
+            </View>
           </View>
-        }
-        ListEmptyComponent={
-          <PageListContainer width="wide">
-            <View className="relative w-full flex-row gap-3">
-              <View className="min-w-0 flex-1">
-                <PageListContainer>
-                  {posts.isLoading ? <PostsLoadingState /> : null}
-                  {posts.isError ? (
-                    <FeedbackState
-                      actionLabel="Retry"
-                      onAction={() => void posts.refetch()}
-                      title="Couldn’t load forum posts."
-                      variant="error"
-                    />
-                  ) : null}
-                  {!posts.isLoading && !posts.isError ? (
-                    <FeedbackState title="No forum posts yet" />
-                  ) : null}
-                </PageListContainer>
-              </View>
-              {showForumSidebarBesideFeed ? (
-                <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
-              ) : null}
-              {showForumSidebarBesideFeed ? (
-                <View
-                  className="absolute right-0 top-0 w-full gap-3"
-                  style={{ width: forumSidebarWidth }}
-                >
-                  {aboutCommunity}
-                </View>
-              ) : null}
-            </View>
-          </PageListContainer>
-        }
-        ListFooterComponent={
-          posts.isFetchNextPageError ? (
-            <PageListContainer width="wide">
-              <View className="relative flex-row gap-3">
-                <View className="min-w-0 flex-1">
-                  <PageListContainer>
-                    <FeedbackState
-                      actionLabel="Try again"
-                      onAction={() => void posts.fetchNextPage()}
-                      title="Couldn’t load more forum posts."
-                      variant="error"
-                    />
-                  </PageListContainer>
-                </View>
-                {showForumSidebarBesideFeed ? (
-                  <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
-                ) : null}
-              </View>
-            </PageListContainer>
-          ) : posts.hasNextPage ? (
-            <PageListContainer width="wide">
-              <View className="flex-row gap-3">
-                <View className="min-w-0 flex-1">
-                  <PageListContainer>
-                    <Button
-                      disabled={posts.isFetchingNextPage}
-                      variant="outline"
-                      onPress={() => void posts.fetchNextPage()}
-                    >
-                      <Text>
-                        {posts.isFetchingNextPage
-                          ? "Loading more posts…"
-                          : "Load more posts"}
-                      </Text>
-                    </Button>
-                  </PageListContainer>
-                </View>
-                {showForumSidebarBesideFeed ? (
-                  <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
-                ) : null}
-              </View>
-            </PageListContainer>
-          ) : undefined
-        }
-        renderItem={({ item, index }) => (
-          <PageListContainer width="wide">
-            <View className="relative w-full flex-row gap-3">
-              <View className="min-w-0 flex-1">
-                <PageListContainer>
-                  <ForumPostCard
-                    post={item}
-                    canInteract={forumData.isMember || isOwner}
-                  />
-                </PageListContainer>
-              </View>
-              {showForumSidebarBesideFeed ? (
-                <View style={{ width: forumSidebarWidth, flexShrink: 0 }} />
-              ) : null}
-              {showForumSidebarBesideFeed && index === 0 ? (
-                <View
-                  className="absolute right-0 top-0 w-full gap-3"
-                  style={{ width: forumSidebarWidth }}
-                >
-                  {aboutCommunity}
-                </View>
-              ) : null}
-            </View>
-          </PageListContainer>
-        )}
-      />
+        </ScrollView>
+      ) : (
+        <AppList
+          className="min-h-0 flex-1"
+          contentWidth="extraWide"
+          contentContainerClassName="py-1 md:px-6 md:py-2"
+          data={postItems}
+          keyExtractor={(post) => post.id}
+          keyboardShouldPersistTaps="handled"
+          ListHeaderComponentStyle={{ marginBottom: 8 }}
+          ItemSeparatorComponent={() => <View className="h-1" />}
+          ListHeaderComponent={mobileListHeader}
+          ListEmptyComponent={postListEmpty}
+          ListFooterComponent={postListFooter}
+          renderItem={renderPostItem}
+        />
+      )}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
@@ -390,7 +365,7 @@ function ForumSharePostCard({
 
 function LoadingState() {
   const { width } = useWindowDimensions();
-  const isWide = width >= 768;
+  const isWide = width >= FORUM_SIDEBAR_BREAKPOINT;
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
@@ -425,7 +400,7 @@ function LoadingState() {
         <PageListContainer width="wide">
           <View className="relative w-full flex-row gap-3">
             <View className="min-w-0 flex-1">
-              <PageListContainer>
+              <PageListContainer width="feed">
                 <PostFeedSkeleton rows={2} gapClassName="gap-1" />
               </PageListContainer>
             </View>

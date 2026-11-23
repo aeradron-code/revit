@@ -37,7 +37,6 @@ import {
   useSharePostsByEntity,
 } from "@/queries/shares";
 import { StarRating } from "@/features/ratings/star-rating";
-import { PostFeedSkeleton } from "@/features/posts/post-feed-skeleton";
 import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 
 import { AppList } from "@/components/ui/app-list";
@@ -113,10 +112,8 @@ function EntityDetails({ entityId }: { entityId: string }) {
     <>
       <AppList
         className="flex-1"
-        contentContainerClassName={pageContainerClassName(
-          "wide",
-          "py-1 md:px-6 md:py-6",
-        )}
+        contentWidth="wide"
+        contentContainerClassName="py-1 md:px-6 md:py-6"
         data={sharePosts}
         keyExtractor={(post) => post.id}
         ListHeaderComponent={
@@ -260,9 +257,12 @@ function EntityDetails({ entityId }: { entityId: string }) {
           </View>
         }
         ListEmptyComponent={
-          <PageListContainer>
+          <PageListContainer width="feed">
             {posts.isLoading ? (
-              <PostFeedSkeleton rows={2} gapClassName="gap-0" />
+              <View className="gap-2">
+                <RatingRowSkeleton />
+                <RatingRowSkeleton />
+              </View>
             ) : null}
             {posts.isError ? (
               <FeedbackState
@@ -282,7 +282,7 @@ function EntityDetails({ entityId }: { entityId: string }) {
         }
         ListFooterComponent={
           posts.hasNextPage ? (
-            <PageListContainer className="py-2">
+            <PageListContainer width="feed" className="py-2">
               <Button
                 disabled={posts.isFetchingNextPage}
                 variant="outline"
@@ -297,7 +297,7 @@ function EntityDetails({ entityId }: { entityId: string }) {
           ) : undefined
         }
         renderItem={({ item }) => (
-          <PageListContainer>
+          <PageListContainer width="feed">
             <RatingRow post={item} />
           </PageListContainer>
         )}
@@ -466,6 +466,27 @@ function RatingRow({ post }: { post: SharePostWithDetails }) {
         </View>
       </Pressable>
     </Link>
+  );
+}
+
+function RatingRowSkeleton() {
+  return (
+    <View className="w-full flex-row flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4">
+      <Skeleton className="size-10 shrink-0 rounded-full" />
+      <View className="min-w-0 flex-1 gap-1">
+        <Skeleton className="h-4 w-2/5" />
+        <Skeleton className="h-3 w-3/5" />
+      </View>
+      <View className="flex-row gap-1">
+        {["one", "two", "three", "four", "five"].map((star) => (
+          <Skeleton key={star} className="size-[18px] rounded-sm" />
+        ))}
+      </View>
+      <View className="flex-row items-center gap-1">
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="size-4 rounded-sm" />
+      </View>
+    </View>
   );
 }
 
