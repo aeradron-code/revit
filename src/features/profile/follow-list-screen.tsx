@@ -1,6 +1,7 @@
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, FlatList, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { FollowProfile } from "@/api/follows";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -45,10 +46,11 @@ export function FollowListScreen({ kind }: FollowListScreenProps) {
           ),
         }}
       />
-      <FlatList
+      <AppList
+        contentWidth="standard"
         data={items}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="w-full grow px-6 md:mx-auto md:max-w-3xl md:px-6 md:py-6"
+        contentContainerClassName="grow px-6 md:px-6 md:py-6"
         ItemSeparatorComponent={() => <View className="h-2" />}
         ListEmptyComponent={
           <FollowListState
@@ -66,7 +68,9 @@ export function FollowListScreen({ kind }: FollowListScreenProps) {
         }
         ListFooterComponent={
           list.isFetchingNextPage ? (
-            <ActivityIndicator className="my-5" />
+            <View className="items-center py-5">
+              <ActivityIndicator />
+            </View>
           ) : undefined
         }
         onEndReached={() => {
@@ -180,7 +184,7 @@ function FollowListState({
 
 function FollowListSkeleton() {
   return (
-    <View accessibilityLabel="Loading profiles" className="gap-2">
+    <View accessibilityLabel="Loading profiles" className="w-full gap-2">
       {["first", "second", "third"].map((key) => (
         <View
           key={key}

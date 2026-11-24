@@ -1,36 +1,36 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
-  deleteAskRating,
-  getAskRatingSummary,
-  getMyAskRating,
+  deletePostRating,
+  getPostRatingSummary,
+  getMyPostRating,
   type Rating,
   type RatingSummary,
-  saveAskRating,
+  savePostRating,
 } from "@/api/ratings";
 import { queryKeys } from "@/lib/query/query-keys";
 
-export function useMyAskRating(postId: string, raterId: string) {
+export function useMyPostRating(postId: string, raterId: string) {
   return useQuery({
     enabled: postId.length > 0 && raterId.length > 0,
-    queryFn: ({ signal }) => getMyAskRating(postId, raterId, signal),
+    queryFn: ({ signal }) => getMyPostRating(postId, raterId, signal),
     queryKey: queryKeys.ratings.mine(postId, raterId),
   });
 }
 
-export function useAskRatingSummary(
+export function usePostRatingSummary(
   postId: string,
   viewerId: string,
   enabled = true,
 ) {
   return useQuery({
     enabled: enabled && postId.length > 0 && viewerId.length > 0,
-    queryFn: ({ signal }) => getAskRatingSummary(postId, signal),
+    queryFn: ({ signal }) => getPostRatingSummary(postId, signal),
     queryKey: queryKeys.ratings.summary(postId, viewerId),
   });
 }
 
-export function useSetMyAskRating(postId: string, raterId: string) {
+export function useSetMyPostRating(postId: string, raterId: string) {
   const queryClient = useQueryClient();
   const queryKey = queryKeys.ratings.mine(postId, raterId);
   const summaryQueryKey = queryKeys.ratings.summary(postId, raterId);
@@ -38,8 +38,8 @@ export function useSetMyAskRating(postId: string, raterId: string) {
   return useMutation({
     mutationFn: (score: number | null) =>
       score === null
-        ? deleteAskRating(postId, raterId).then(() => null)
-        : saveAskRating(postId, raterId, score),
+        ? deletePostRating(postId, raterId).then(() => null)
+        : savePostRating(postId, raterId, score),
     onMutate: async (score) => {
       await Promise.all([
         queryClient.cancelQueries({ exact: true, queryKey }),

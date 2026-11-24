@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
 import { InlineCommentDrawer } from "@/features/comments/inline-comment-drawer";
-import { AskRatingControl } from "@/features/ratings/ask-rating-control";
+import { PostRatingControl } from "@/features/ratings/post-rating-control";
 import { routes } from "@/lib/routes";
 
 import { PostEngagementActions } from "./post-engagement-actions";
@@ -52,7 +52,7 @@ export function AskPostCard({
   );
 
   return (
-    <Card className="mx-auto w-full max-w-xl self-center gap-0 overflow-hidden rounded-none border-x-0 pb-0 pt-0 md:rounded-lg md:border">
+    <Card className="w-full gap-0 overflow-hidden rounded-none border-x-0 pb-0 pt-0 md:rounded-lg md:border">
       <CardHeader className="md:pt-3 pt-2.5 pb-2">
         <PostAuthorHeader
           author={post.author}
@@ -110,7 +110,7 @@ export function AskPostCard({
           />
         </View>
         {isRatingExpanded && canInteract ? (
-          <AskRatingControl
+          <PostRatingControl
             onClose={() => setExpandedDrawer(null)}
             postId={post.id}
           />

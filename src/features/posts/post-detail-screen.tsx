@@ -1,18 +1,18 @@
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react-native";
 import { useRef, useState } from "react";
 import {
   Modal,
-  FlatList,
   Pressable,
   RefreshControl,
   useWindowDimensions,
   View,
 } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { PostWithDetails } from "@/api/posts";
 import { Button } from "@/components/ui/button";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import {
   Dialog,
   DialogContent,
@@ -135,8 +135,9 @@ function SharePostDetail({
 
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View className="min-h-0 flex-1 py-1 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-2">
+      <View className="min-h-0 w-full flex-1">
         <CommentSection
+          contentWidth="feed"
           listHeader={
             <SharePostCard
               isDetail
@@ -147,11 +148,12 @@ function SharePostDetail({
           comments={comments}
           postId={post.id}
           renderList={(content) => (
-            <FlatList
+            <AppList
               {...content}
               className="flex-1"
-              contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
-              renderScrollComponent={renderKeyboardAwareListScroll}
+              contentWidth="feed"
+              contentContainerClassName="pt-1 pb-3 md:pt-2 md:pb-4"
+              contentGap={12}
               keyboardShouldPersistTaps="handled"
               refreshControl={
                 <RefreshControl
@@ -194,8 +196,9 @@ function AskPostDetail({
 
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
+      <View className="min-h-0 w-full flex-1">
         <CommentSection
+          contentWidth="feed"
           listHeader={
             <AskPostCard
               isDetail
@@ -208,11 +211,12 @@ function AskPostDetail({
           comments={comments}
           postId={post.id}
           renderList={(content) => (
-            <FlatList
+            <AppList
               {...content}
               className="flex-1"
-              contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
-              renderScrollComponent={renderKeyboardAwareListScroll}
+              contentWidth="feed"
+              contentContainerClassName="px-4 pt-4 pb-6 md:pt-6 md:pb-8"
+              contentGap={12}
               keyboardShouldPersistTaps="handled"
               refreshControl={
                 <RefreshControl
@@ -426,14 +430,29 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
 }
 
 function PostDetailLoading() {
+  const { height, width } = useWindowDimensions();
+  const verticalPadding = width >= 768 ? 48 : 32;
+  const availableHeight = Math.max(0, height - 56 - verticalPadding - 32);
+  const commentRows = availableHeight >= 450 ? 1 : 0;
+  const mediaHeight = Math.max(
+    0,
+    Math.min(220, availableHeight - 210 - commentRows * 132 - 12),
+  );
+
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">
-      <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
-        <View className="mx-auto w-full max-w-[36rem] gap-3">
-          <PostCardSkeleton withMedia />
-          <CommentListSkeleton />
+      <PageListContainer
+        width="feed"
+        className="min-h-0 flex-1 overflow-hidden px-4 py-4 md:py-6"
+      >
+        <View className="w-full gap-3">
+          <PostCardSkeleton
+            withMedia={mediaHeight > 0}
+            mediaHeight={mediaHeight}
+          />
+          {commentRows > 0 ? <CommentListSkeleton rows={commentRows} /> : null}
         </View>
-      </View>
+      </PageListContainer>
     </PostDetailFrame>
   );
 }

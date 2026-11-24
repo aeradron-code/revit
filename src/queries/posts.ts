@@ -77,10 +77,15 @@ export function useCreateForumSharePost(forumId: string) {
       runAskCreationWithRecovery(input, "FORUM_SHARE", (prepared) =>
         createForumSharePost({ ...input, ...prepared }),
       ),
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.forums.postsByForum(forumId),
-      }),
+    onSuccess: (_post, input) =>
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.entities.usage(input.entityId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.forums.postsByForum(forumId),
+        }),
+      ]),
   });
 }
 
@@ -146,6 +151,7 @@ export function useDeletePost() {
         queryClient.invalidateQueries({ queryKey: queryKeys.comments.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.shares.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.ratings.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.entities.all }),
         queryClient.invalidateQueries({
           queryKey: queryKeys.notifications.all,
         }),

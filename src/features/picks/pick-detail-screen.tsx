@@ -3,10 +3,11 @@ import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { ChevronRight, Edit3, MapPin, Trash2 } from "lucide-react-native";
 import { useState } from "react";
-import { FlatList, Platform, Pressable, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FeedbackState } from "@/components/ui/feedback-state";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
 import {
@@ -30,6 +32,7 @@ import {
 import { useFollowStatus } from "@/queries/follows";
 import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 
+import { AppList } from "@/components/ui/app-list";
 export function PickDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuthUser();
@@ -69,10 +72,11 @@ export function PickDetailScreen() {
           ),
         }}
       />
-      <FlatList
+      <AppList
+        contentWidth="profile"
         data={personalPick.items}
         keyExtractor={(item) => item.entity_id}
-        contentContainerClassName="grow px-4 py-6 md:mx-auto md:max-w-4xl md:px-6 md:py-12"
+        contentContainerClassName="grow px-4 py-6 md:px-6 md:py-12"
         ItemSeparatorComponent={PickItemSeparator}
         ListHeaderComponent={
           <View className="gap-6 pb-6">
@@ -162,9 +166,21 @@ export function PickDetailScreen() {
             </View>
 
             {toggleFollow.isError || followedPicks.isError ? (
-              <Text variant="muted">
-                Couldn’t update or load followed Picks. Please try again.
-              </Text>
+              <FeedbackState
+                actionLabel="Retry"
+                className="w-full"
+                onAction={() => {
+                  if (followedPicks.isError) {
+                    void followedPicks.refetch();
+                  } else {
+                    toggleFollow.mutate(
+                      !(followedPicks.data ?? []).includes(id),
+                    );
+                  }
+                }}
+                title="Couldn’t update followed Picks."
+                variant="error"
+              />
             ) : null}
           </View>
         }
@@ -276,7 +292,12 @@ function PickLoadingState({ onBack }: { onBack: () => void }) {
           ),
         }}
       />
-      <View className="grow gap-6 px-4 py-6 md:mx-auto md:w-full md:max-w-4xl md:px-6 md:py-12">
+      <View
+        className={pageContainerClassName(
+          "profile",
+          "grow gap-6 px-4 py-6 md:px-6 md:py-12",
+        )}
+      >
         <View className="gap-4">
           <Skeleton className="h-3 w-28" />
           <View className="flex-row items-start justify-between gap-3">
@@ -324,7 +345,12 @@ function PickMissingState({
           ),
         }}
       />
-      <ScrollView contentContainerClassName="flex-grow items-center justify-center gap-2 px-6 py-6">
+      <ScrollView
+        contentContainerClassName={pageContainerClassName(
+          "profile",
+          "flex-grow items-center justify-center gap-2 px-6 py-6",
+        )}
+      >
         <Text variant="h2">Pick unavailable</Text>
         <Text variant="muted" className="text-center">
           {description ?? "This Pick may have been deleted."}

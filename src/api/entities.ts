@@ -11,6 +11,7 @@ import {
   API_ERROR_CODES,
   API_ERROR_MESSAGES,
   ApiError,
+  normalizeApiError,
   validationError,
 } from "./errors";
 import { runApiRequest } from "./request";
@@ -309,4 +310,42 @@ export function deleteEntity(entityId: string): Promise<void> {
     }
     if (!data) throw new ApiError(API_ERROR_MESSAGES.FIND_DELETE_DENIED);
   });
+}
+
+export async function getEntityUsage(
+  entityId: string,
+  requestSignal?: AbortSignal,
+): Promise<{ isUsed: boolean }> {
+  return runApiRequest(
+    async (signal) => {
+      const [posts, picks] = await Promise.all([
+        supabase
+          .from("posts")
+          .select("id", { count: "exact", head: true })
+          .eq("entity_id", entityId)
+          .abortSignal(signal),
+        supabase
+          .from("pick_items")
+          .select("entity_id", { count: "exact", head: true })
+          .eq("entity_id", entityId)
+          .abortSignal(signal),
+      ]);
+
+      throwIfSupabaseError(
+        posts.error,
+        API_ERROR_MESSAGES.LOAD_THIS_FIND,
+        posts.status,
+      );
+      throwIfSupabaseError(
+        picks.error,
+        API_ERROR_MESSAGES.LOAD_THIS_FIND,
+        picks.status,
+      );
+      if (posts.count === null || picks.count === null) {
+        throw normalizeApiError(undefined, API_ERROR_MESSAGES.LOAD_THIS_FIND);
+      }
+      return { isUsed: posts.count > 0 || picks.count > 0 };
+    },
+    { retries: 1, signal: requestSignal },
+  );
 }

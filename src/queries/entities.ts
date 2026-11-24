@@ -3,6 +3,7 @@ import {
   type CreateEntityInput,
   createEntity,
   deleteEntity,
+  getEntityUsage,
   getEntity,
   getEntityCategories,
   searchEntities,
@@ -62,5 +63,13 @@ export function useDeleteEntity(id: string) {
         client.invalidateQueries({ queryKey: queryKeys.discover.all }),
       ]);
     },
+  });
+}
+
+export function useEntityUsage(id: string, enabled = true) {
+  return useQuery({
+    enabled: id.length > 0 && enabled,
+    queryFn: ({ signal }) => getEntityUsage(id, signal),
+    queryKey: queryKeys.entities.usage(id),
   });
 }

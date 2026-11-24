@@ -51,6 +51,7 @@ export function useDeleteForum() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.forums.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.posts.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.entities.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.comments.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.ratings.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.shares.all }),

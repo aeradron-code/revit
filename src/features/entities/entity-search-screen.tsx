@@ -1,11 +1,11 @@
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import type * as ImagePicker from "expo-image-picker";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { randomUUID } from "expo-crypto";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import { FlatList, View } from "react-native";
+import { View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { Entity } from "@/api/entities";
 import type { ResourceCreationAttempt } from "@/api/creation-recovery";
 import { ResourceRecoveryGate } from "@/features/create/resource-recovery-gate";
@@ -115,9 +115,11 @@ function EntitySearchForm({
           ),
         }}
       />
-      <FlatList
+      <AppList
         className="flex-1"
-        contentContainerClassName="mx-auto w-full gap-6 px-4 py-4 md:max-w-3xl md:px-6 md:py-6"
+        contentWidth="standard"
+        contentContainerClassName="px-4 py-4 md:px-6 md:py-6"
+        contentGap={24}
         data={
           !initialAdd &&
           !creationLocked &&
@@ -129,7 +131,6 @@ function EntitySearchForm({
             : []
         }
         keyExtractor={(entity) => entity.id}
-        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="gap-6">
@@ -162,7 +163,9 @@ function EntitySearchForm({
               />
             ) : null}
 
-            {!initialAdd && hasSearchTerm && (isDebouncing || search.isLoading) ? (
+            {!initialAdd &&
+            hasSearchTerm &&
+            (isDebouncing || search.isLoading) ? (
               <EntitySearchResultsSkeleton />
             ) : null}
 
@@ -203,11 +206,11 @@ function EntitySearchForm({
               onLockChange={setCreationLocked}
             />
           ) : creationLocked ||
-          (hasSearchTerm &&
-            !isDebouncing &&
-            !search.isLoading &&
-            !search.isError &&
-            finds.length === 0) ? (
+            (hasSearchTerm &&
+              !isDebouncing &&
+              !search.isLoading &&
+              !search.isError &&
+              finds.length === 0) ? (
             <Button
               className="self-start rounded-md"
               onPress={() => setIsAddingEntity(true)}
@@ -389,9 +392,12 @@ function AddEntityForm({
 
       <LabeledField label="Category">
         {categories.isError ? (
-          <Text className="text-destructive" variant="small">
-            Could not load categories.
-          </Text>
+          <FeedbackState
+            actionLabel="Retry"
+            onAction={() => void categories.refetch()}
+            title="Couldn’t load categories."
+            variant="error"
+          />
         ) : null}
         <View className="flex-row flex-wrap gap-2">
           {(categories.data ?? [])
@@ -404,10 +410,12 @@ function AddEntityForm({
             .map((category) => (
               <Button
                 key={category.id}
+                accessibilityRole="tab"
+                accessibilityState={{
+                  selected: categorySlug === category.slug,
+                }}
                 size="sm"
-                variant={
-                  categorySlug === category.slug ? "default" : "outline"
-                }
+                variant={categorySlug === category.slug ? "default" : "outline"}
                 disabled={createEntity.isPending || uncertain || checking}
                 onPress={() => setCategorySlug(category.slug)}
               >
@@ -625,7 +633,7 @@ function EntityResult({
 
 function EntitySearchResultsSkeleton() {
   return (
-    <View accessibilityLabel="Loading Find results" className="gap-6">
+    <View accessibilityLabel="Loading Find results" className="w-full gap-6">
       {["first", "second"].map((key) => (
         <View
           key={key}

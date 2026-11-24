@@ -1,4 +1,3 @@
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, router } from "expo-router";
 import {
@@ -9,14 +8,9 @@ import {
   Star,
 } from "lucide-react-native";
 import { useState } from "react";
-import {
-  FlatList,
-  Platform,
-  Pressable,
-  RefreshControl,
-  View,
-} from "react-native";
+import { Platform, Pressable, RefreshControl, View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { HomeFeedPost } from "@/api/feed";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
@@ -46,12 +40,14 @@ export function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
-      <FlatList
-        contentContainerClassName="gap-1 md:gap-2 md:px-6 md:py-6 py-1"
+      <AppList
+        contentWidth="feed"
+        contentContainerClassName="py-1 md:py-6"
         data={posts}
         keyExtractor={(post) => post.id}
-        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
+        ListHeaderComponentStyle={{ marginBottom: 8 }}
+        ItemSeparatorComponent={() => <View className="h-1" />}
         ListHeaderComponent={
           <FeedHeader
             feedMode={feedMode}
@@ -91,7 +87,7 @@ function FeedHeader({
   onRefresh: () => void;
 }) {
   return (
-    <View className="mx-auto w-full max-w-xl">
+    <View>
       <View className="gap-3 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
         <View className="min-w-0 flex-1 flex-row items-center gap-3">
           <View className="size-10 items-center justify-center rounded-full bg-primary/10">
@@ -179,14 +175,10 @@ function FeedModeButton({
 }
 
 function HomeFeedItem({ post }: { post: HomeFeedPost }) {
-  return (
-    <View className="mx-auto w-full max-w-3xl">
-      {post.post_type === "ASK" ? (
-        <AskPostCard post={post} />
-      ) : (
-        <SharePostCard post={post} entity={post.entity} />
-      )}
-    </View>
+  return post.post_type === "ASK" ? (
+    <AskPostCard post={post} />
+  ) : (
+    <SharePostCard post={post} entity={post.entity} />
   );
 }
 
@@ -204,7 +196,6 @@ function FeedEmpty({
     return (
       <FeedbackState
         actionLabel="Retry"
-        className="mx-auto w-full max-w-3xl"
         onAction={() => void feed.refetch()}
         title="Couldn’t load your feed."
         variant="error"
@@ -214,20 +205,19 @@ function FeedEmpty({
   if (feedMode === "for-you") {
     return (
       <FeedbackState
-        className="mx-auto w-full max-w-3xl"
         description="There are no recommendations to show right now."
         title="Nothing here yet"
       />
     );
   }
   return (
-    <View className="mx-auto w-full max-w-3xl items-start gap-3 rounded-lg border border-border bg-card p-4 shadow-none sm:flex-row sm:items-center">
+    <View className="items-start gap-3 rounded-lg border border-border bg-card p-4 shadow-none sm:flex-row sm:items-center">
       <View className="size-10 items-center justify-center rounded-md bg-accent">
         <Icon as={Sparkles} className="size-5 text-accent-foreground" />
       </View>
       <View className="min-w-0 flex-1 gap-1.5">
         <Text className="text-base font-bold">Your feed will appear here.</Text>
-        <Text variant="muted" className="max-w-xl text-sm leading-5">
+        <Text variant="muted" className="text-sm leading-5">
           Follow a few people and their Ask posts and ratings will land here.
         </Text>
       </View>
@@ -242,7 +232,7 @@ function FeedEmpty({
 function FeedFooter({ feed }: { feed: ReturnType<typeof useHomeFeed> }) {
   if (!feed.hasNextPage && !feed.isFetchingNextPage) return null;
   return (
-    <View className="mx-auto w-full max-w-3xl items-center py-2">
+    <View className="items-center py-2">
       <Button
         disabled={!feed.hasNextPage || feed.isFetchingNextPage}
         variant="outline"

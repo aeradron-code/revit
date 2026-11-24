@@ -18,6 +18,7 @@ import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { SearchInput } from "@/components/ui/search-input";
 import { Text } from "@/components/ui/text";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/features/ratings/star-rating";
 import { PostRecoveryGate } from "@/features/create/post-recovery-gate";
@@ -284,7 +285,10 @@ function ShareComposerForm({ userId }: { userId: string }) {
         bottomOffset={24}
         pointerEvents={uncertain || isSaving || checking ? "none" : "auto"}
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="w-full gap-6 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "gap-6 px-2 pb-8 pt-4 md:px-6 md:pb-12 md:pt-6",
+        )}
       >
         <Card className="gap-4 border-border bg-card p-4 shadow-none">
           <View className="gap-2">
@@ -348,10 +352,17 @@ function ShareComposerForm({ userId }: { userId: string }) {
                     onAction={() => void categories.refetch()}
                   />
                 ) : null}
-                <View className="flex-row flex-wrap gap-2">
+                <View
+                  accessibilityRole="tablist"
+                  className="flex-row flex-wrap gap-2"
+                >
                   {(categories.data ?? []).map((category) => (
                     <Button
                       key={category.id}
+                      accessibilityRole="tab"
+                      accessibilityState={{
+                        selected: categorySlug === category.slug,
+                      }}
                       size="sm"
                       variant={
                         categorySlug === category.slug ? "default" : "outline"
@@ -381,12 +392,15 @@ function ShareComposerForm({ userId }: { userId: string }) {
                 {categorySlug &&
                 search.trim().length >= 2 &&
                 (isDebouncing || results.isLoading) ? (
-                  <FindSearchSkeleton rows={1} className="gap-3" />
+                  <FindSearchSkeleton leadingPin rows={1} className="gap-3" />
                 ) : null}
                 {categorySlug && !isDebouncing && results.isError ? (
-                  <Text variant="small" className="text-destructive">
-                    {results.error.message}
-                  </Text>
+                  <FeedbackState
+                    actionLabel="Retry"
+                    onAction={() => void results.refetch()}
+                    title="Couldn’t load these finds."
+                    variant="error"
+                  />
                 ) : null}
                 {categorySlug && !isDebouncing
                   ? results.data?.map((item) => (

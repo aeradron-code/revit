@@ -21,7 +21,7 @@ import { useAuth } from "@/providers/auth-provider";
 const navigationItems = [
   { href: routes.home, Icon: House, title: "Home" },
   { href: routes.discover, Icon: Compass, title: "Discover" },
-  { href: routes.create, Icon: PlusCircle, title: "Create on revit" },
+  { href: routes.create, Icon: PlusCircle, title: "Create" },
   { href: routes.forums, Icon: UsersRound, title: "Forums" },
   { href: routes.picks, Icon: Bookmark, title: "Picks" },
 ] as const;

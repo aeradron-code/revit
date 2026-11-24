@@ -5,6 +5,7 @@ import { ScrollView } from "react-native";
 import type { IdempotentPostKind } from "@/api/posts";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { routes } from "@/lib/routes";
@@ -74,7 +75,10 @@ function Shell({
         }}
       />
       <ScrollView
-        contentContainerClassName="flex-grow gap-3"
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "flex-grow gap-3",
+        )}
         keyboardShouldPersistTaps="handled"
       >
         {children}

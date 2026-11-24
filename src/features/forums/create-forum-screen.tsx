@@ -18,6 +18,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { Textarea } from "@/components/ui/textarea";
 import { successFeedback } from "@/lib/feedback";
 import { readLocalImage } from "@/lib/media/read-local-image";
@@ -203,7 +204,10 @@ function CreateForumForm({ userId }: { userId: string }) {
         pointerEvents={uncertain || isSubmitting || checking ? "none" : "auto"}
         bottomOffset={24}
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="w-full gap-5 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:pb-12 md:pt-6"
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "gap-5 px-2 pb-8 pt-4 md:pb-12 md:pt-6",
+        )}
       >
         <Card className="gap-5 border-border bg-card p-5 shadow-none md:p-6">
           <View className="gap-1.5 border-b border-border pb-4">

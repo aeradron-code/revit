@@ -1,12 +1,14 @@
 import { Link, router, Stack, type Href } from "expo-router";
 import { useMemo } from "react";
-import { FlatList, View } from "react-native";
+import { View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { Report } from "@/api/safety";
 import { API_ERROR_MESSAGES } from "@/api/errors";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -37,13 +39,15 @@ export function AdminReportsScreen() {
         }}
       />
       {profile?.role !== "admin" ? (
-        <View className="mx-auto w-full max-w-3xl p-5">
+        <View className={pageContainerClassName("standard", "p-5")}>
           <FeedbackState title="You don’t have access to this page." />
         </View>
       ) : (
-        <FlatList
+        <AppList
           className="flex-1"
-          contentContainerClassName="mx-auto w-full max-w-3xl gap-3 p-4 md:p-6"
+          contentWidth="standard"
+          contentContainerClassName="p-4 md:p-6"
+          contentGap={12}
           data={items}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
@@ -153,9 +157,23 @@ function formatDate(value: string) {
 
 function ReportsSkeleton() {
   return (
-    <View className="gap-3 pt-2">
+    <View accessibilityLabel="Loading reports" className="w-full gap-3 pt-2">
       {[0, 1].map((index) => (
-        <Skeleton key={index} className="h-32 rounded-xl" />
+        <View
+          key={index}
+          className="w-full gap-3 rounded-xl border border-border bg-card p-4"
+        >
+          <View className="flex-row items-center justify-between gap-2">
+            <Skeleton className="h-4 w-2/5" />
+            <Skeleton className="h-4 w-1/5" />
+          </View>
+          <View className="w-full gap-1">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+          </View>
+          <Skeleton className="h-4 w-3/5" />
+          <Skeleton className="h-8 w-2/5 rounded-md" />
+        </View>
       ))}
     </View>
   );

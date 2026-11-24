@@ -1,11 +1,13 @@
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import type { ReactNode } from "react";
-import { FlatList, RefreshControl, View } from "react-native";
+import { RefreshControl, View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { PostWithDetails } from "@/api/posts";
 import type { SharePostWithDetails } from "@/api/shares";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import {
   CommentListSkeleton,
   CommentSection,
@@ -43,12 +45,15 @@ export function ForumPostDetailScreen() {
   if (!forumId || !postId || !viewerId || post.isLoading) {
     return (
       <ForumPostFrame forumId={forumId}>
-        <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
-          <View className="mx-auto w-full max-w-[36rem] gap-3">
+        <PageListContainer
+          width="feed"
+          className="min-h-0 flex-1 px-4 py-4 md:py-6"
+        >
+          <View className="w-full gap-3">
             <PostCardSkeleton withMedia />
             <CommentListSkeleton />
           </View>
-        </View>
+        </PageListContainer>
       </ForumPostFrame>
     );
   }
@@ -56,12 +61,14 @@ export function ForumPostDetailScreen() {
   if (post.isError) {
     return (
       <ForumPostFrame forumId={forumId}>
-        <FeedbackState
-          actionLabel="Retry"
-          onAction={() => void post.refetch()}
-          title="Couldn’t load this forum post."
-          variant="error"
-        />
+        <View className={pageContainerClassName("content")}>
+          <FeedbackState
+            actionLabel="Retry"
+            onAction={() => void post.refetch()}
+            title="Couldn’t load this forum post."
+            variant="error"
+          />
+        </View>
       </ForumPostFrame>
     );
   }
@@ -69,7 +76,9 @@ export function ForumPostDetailScreen() {
   if (!post.data) {
     return (
       <ForumPostFrame forumId={forumId}>
-        <FeedbackState title="This forum post is unavailable." />
+        <View className={pageContainerClassName("content")}>
+          <FeedbackState title="This forum post is unavailable." />
+        </View>
       </ForumPostFrame>
     );
   }
@@ -96,20 +105,22 @@ export function ForumPostDetailScreen() {
 
   return (
     <ForumPostFrame forumId={forumId}>
-      <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
+      <View className="min-h-0 w-full flex-1">
         <CommentSection
           canInteract={canInteract}
+          contentWidth="feed"
           listHeader={
             <AskPostCard canInteract={canInteract} isDetail post={post.data} />
           }
           comments={comments}
           postId={post.data.id}
           renderList={(content) => (
-            <FlatList
+            <AppList
               {...content}
               className="flex-1"
-              contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
-              renderScrollComponent={renderKeyboardAwareListScroll}
+              contentWidth="feed"
+              contentContainerClassName="px-4 pt-4 pb-6 md:pt-6 md:pb-8"
+              contentGap={12}
               keyboardShouldPersistTaps="handled"
               refreshControl={
                 <RefreshControl
@@ -147,12 +158,15 @@ function ForumSharePostDetail({
   if (entity.isLoading || score.isLoading) {
     return (
       <ForumPostFrame forumId={post.forum_id ?? ""}>
-        <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
-          <View className="mx-auto w-full max-w-[36rem] gap-3">
+        <PageListContainer
+          width="feed"
+          className="min-h-0 flex-1 px-4 py-4 md:py-6"
+        >
+          <View className="w-full gap-3">
             <PostCardSkeleton withMedia />
             <CommentListSkeleton />
           </View>
-        </View>
+        </PageListContainer>
       </ForumPostFrame>
     );
   }
@@ -160,12 +174,16 @@ function ForumSharePostDetail({
   if (entity.isError || score.isError || !entity.data || score.data == null) {
     return (
       <ForumPostFrame forumId={post.forum_id ?? ""}>
-        <FeedbackState
-          actionLabel="Retry"
-          onAction={() => void Promise.all([entity.refetch(), score.refetch()])}
-          title="Couldn’t load this forum Share post."
-          variant="error"
-        />
+        <View className={pageContainerClassName("content")}>
+          <FeedbackState
+            actionLabel="Retry"
+            onAction={() =>
+              void Promise.all([entity.refetch(), score.refetch()])
+            }
+            title="Couldn’t load this forum Share post."
+            variant="error"
+          />
+        </View>
       </ForumPostFrame>
     );
   }
@@ -177,9 +195,10 @@ function ForumSharePostDetail({
 
   return (
     <ForumPostFrame forumId={post.forum_id ?? ""}>
-      <View className="min-h-0 flex-1 px-4 py-4 md:mx-auto md:w-full md:max-w-3xl md:px-6 md:py-6">
+      <View className="min-h-0 w-full flex-1">
         <CommentSection
           canInteract={canInteract}
+          contentWidth="feed"
           listHeader={
             <SharePostCard
               canInteract={canInteract}
@@ -191,11 +210,12 @@ function ForumSharePostDetail({
           comments={comments}
           postId={post.id}
           renderList={(content) => (
-            <FlatList
+            <AppList
               {...content}
               className="flex-1"
-              contentContainerClassName="mx-auto w-full max-w-[36rem] gap-3 pb-2"
-              renderScrollComponent={renderKeyboardAwareListScroll}
+              contentWidth="feed"
+              contentContainerClassName="px-4 pt-4 pb-6 md:pt-6 md:pb-8"
+              contentGap={12}
               keyboardShouldPersistTaps="handled"
               refreshControl={
                 <RefreshControl

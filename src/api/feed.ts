@@ -1,6 +1,6 @@
 import { throwIfSupabaseError } from "./supabase-errors";
 import type { PostPage, PostWithDetails } from "@/api/posts";
-import { getGlobalPostsByIds } from "@/api/posts";
+import { getGlobalPostsByAuthor, getGlobalPostsByIds } from "@/api/posts";
 import type { Entity } from "@/api/entities";
 import { getEntitiesByIds } from "@/api/entities";
 import { supabase } from "@/lib/supabase/client";
@@ -23,6 +23,10 @@ export type HomeFeedPost =
 export type HomeFeedPage = Omit<PostPage, "items" | "nextOffset"> & {
   items: HomeFeedPost[];
   nextCursor?: HomeFeedCursor;
+};
+
+export type ProfilePostsPage = Omit<PostPage, "items"> & {
+  items: HomeFeedPost[];
 };
 
 export type HomeFeedCursor = {
@@ -73,11 +77,35 @@ export async function getHomeFeed(
       : undefined;
 
   const posts = await getGlobalPostsByIds(visiblePostIds, requestSignal);
+  return {
+    items: await addShareDetails(posts, requestSignal),
+    nextCursor,
+  };
+}
+
+export async function getProfilePostsByAuthor(
+  authorId: string,
+  offset = 0,
+  requestSignal?: AbortSignal,
+): Promise<ProfilePostsPage> {
+  const page = await getGlobalPostsByAuthor(authorId, offset, requestSignal);
+  return {
+    ...page,
+    items: await addShareDetails(
+      page.items,
+      requestSignal,
+      API_ERROR_MESSAGES.LOAD_PROFILE_POSTS,
+    ),
+  };
+}
+
+async function addShareDetails(
+  posts: PostWithDetails[],
+  requestSignal?: AbortSignal,
+  errorMessage: string = API_ERROR_MESSAGES.LOAD_YOUR_FEED,
+): Promise<HomeFeedPost[]> {
   if (posts.some((post) => post.post_type === "SHARE" && !post.entity_id)) {
-    throw normalizeApiError(
-      new Error("Share has no entity"),
-      API_ERROR_MESSAGES.LOAD_YOUR_FEED,
-    );
+    throw normalizeApiError(new Error("Share has no entity"), errorMessage);
   }
   const sharePosts = posts.filter(
     (
@@ -87,10 +115,7 @@ export async function getHomeFeed(
   );
 
   if (sharePosts.length === 0) {
-    return {
-      items: posts as HomeFeedPost[],
-      nextCursor,
-    };
+    return posts as HomeFeedPost[];
   }
 
   const [ratings, entities] = await Promise.all([
@@ -108,32 +133,29 @@ export async function getHomeFeed(
   );
   const entitiesById = new Map(entities.map((entity) => [entity.id, entity]));
 
-  return {
-    items: posts.flatMap((post) => {
-      if (post.post_type === "ASK") return [post as HomeFeedPost];
+  return posts.flatMap((post) => {
+    if (post.post_type === "ASK") return [post as HomeFeedPost];
 
-      const ratingScore = ratingsByPostId.get(post.id);
-      const entity = post.entity_id
-        ? entitiesById.get(post.entity_id)
-        : undefined;
+    const ratingScore = ratingsByPostId.get(post.id);
+    const entity = post.entity_id
+      ? entitiesById.get(post.entity_id)
+      : undefined;
 
-      if (ratingScore === undefined || !entity) {
-        throw normalizeApiError(
-          new Error("Share data is incomplete"),
-          API_ERROR_MESSAGES.LOAD_YOUR_FEED,
-        );
-      }
-      return [
-        {
-          ...post,
-          post_type: "SHARE" as const,
-          ratingScore,
-          entity,
-        },
-      ];
-    }),
-    nextCursor,
-  };
+    if (ratingScore === undefined || !entity) {
+      throw normalizeApiError(
+        new Error("Share data is incomplete"),
+        errorMessage,
+      );
+    }
+    return [
+      {
+        ...post,
+        post_type: "SHARE" as const,
+        ratingScore,
+        entity,
+      },
+    ];
+  });
 }
 
 function getShareScores(postIds: string[], requestSignal?: AbortSignal) {

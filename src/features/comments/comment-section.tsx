@@ -3,8 +3,8 @@ import { MessageCircle } from "lucide-react-native";
 import { memo, useCallback } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { useRef, useState } from "react";
-import type { ListRenderItem } from "react-native";
 import { View } from "react-native";
+import type { LegendListRenderItemProps } from "@legendapp/list/react-native";
 
 import type { CommentThread, CommentWithAuthor } from "@/api/comments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,6 +18,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { PageListContainer } from "@/components/ui/page-list-container";
+import type { PageWidth } from "@/components/ui/page-layout";
 import { Icon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -37,6 +39,7 @@ import {
 type CommentSectionProps = {
   canInteract?: boolean;
   comments: ReturnType<typeof useTopLevelComments>;
+  contentWidth?: PageWidth;
   postId: string;
   listHeader?: ReactNode;
   renderList: (content: CommentListContent) => ReactNode;
@@ -47,7 +50,7 @@ export type CommentListContent = {
   keyExtractor: (item: CommentListRow) => string;
   ListHeaderComponent: ReactElement;
   ListFooterComponent: ReactElement;
-  renderItem: ListRenderItem<CommentListRow>;
+  renderItem: (info: LegendListRenderItemProps<CommentListRow>) => ReactNode;
 };
 
 export type CommentListRow =
@@ -57,6 +60,7 @@ export type CommentListRow =
 export function CommentSection({
   canInteract = true,
   comments,
+  contentWidth = "content",
   postId,
   listHeader: pageHeader,
   renderList,
@@ -187,123 +191,140 @@ export function CommentSection({
   };
 
   const listHeader = (
-    <View className="gap-3 md:gap-6">
-      {pageHeader}
-      <View className="gap-3">
-        <View className="flex-row items-center justify-between gap-3 pl-1">
-          <Text className="text-xl font-semibold">Comments</Text>
-          <Text className="rounded-md bg-secondary px-2 py-1 text-sm text-secondary-foreground">
-            {totalCount} {totalCount === 1 ? "comment" : "comments"}
-          </Text>
-        </View>
-        <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
-          <Textarea
-            accessibilityLabel="Write a comment"
-            editable={canInteract && !createComment.isPending}
-            maxLength={2000}
-            onChangeText={changeBody}
-            placeholder={
-              canInteract
-                ? "Add to the conversation…"
-                : "Join this forum to comment"
-            }
-            value={body}
-          />
-          <View className="flex-row items-center justify-between gap-3">
-            <Text variant="muted">{body.length}/2000</Text>
-            <Button disabled={!canPost} onPress={() => void submit()}>
-              <Text>
-                {createComment.isPending ? "Posting…" : "Post comment"}
-              </Text>
-            </Button>
-          </View>
-          {createComment.isError ? (
-            <Text className="text-destructive" variant="small">
-              {createComment.error.message}
+    <PageListContainer width={contentWidth}>
+      <View className="gap-3 md:gap-6">
+        {pageHeader}
+        <View className="gap-3">
+          <View className="flex-row items-center justify-between gap-3 pl-1">
+            <Text className="text-xl font-semibold">Comments</Text>
+            <Text className="rounded-md bg-secondary px-2 py-1 text-sm text-secondary-foreground">
+              {totalCount} {totalCount === 1 ? "comment" : "comments"}
             </Text>
+          </View>
+          <View className="gap-3 rounded-lg border border-border bg-card p-3 shadow-none">
+            <Textarea
+              accessibilityLabel="Write a comment"
+              editable={canInteract && !createComment.isPending}
+              maxLength={2000}
+              onChangeText={changeBody}
+              placeholder={
+                canInteract
+                  ? "Add to the conversation…"
+                  : "Join this forum to comment"
+              }
+              value={body}
+            />
+            <View className="flex-row items-center justify-between gap-3">
+              <Text variant="muted">{body.length}/2000</Text>
+              <Button disabled={!canPost} onPress={() => void submit()}>
+                <Text>
+                  {createComment.isPending ? "Posting…" : "Post comment"}
+                </Text>
+              </Button>
+            </View>
+            {createComment.isError ? (
+              <Text className="text-destructive" variant="small">
+                {createComment.error.message}
+              </Text>
+            ) : null}
+          </View>
+          {comments.isLoading ? <CommentListSkeleton /> : null}
+          {comments.isError && items.length === 0 ? (
+            <FeedbackState
+              actionLabel="Retry"
+              onAction={() => void comments.refetch()}
+              title="Couldn’t load comments."
+              variant="error"
+            />
+          ) : null}
+          {!comments.isLoading && !comments.isError && items.length === 0 ? (
+            <View className="items-center gap-2 rounded-lg border border-border bg-card px-4 py-6">
+              <View className="size-10 items-center justify-center rounded-full bg-muted">
+                <Icon as={MessageCircle} className="size-5 text-foreground" />
+              </View>
+              <Text className="font-semibold">No comments yet</Text>
+              <Text variant="muted">Start the conversation.</Text>
+            </View>
           ) : null}
         </View>
-        {comments.isLoading ? <CommentListSkeleton /> : null}
-        {comments.isError && items.length === 0 ? (
-          <FeedbackState
-            actionLabel="Retry"
-            onAction={() => void comments.refetch()}
-            title="Couldn’t load comments."
-            variant="error"
-          />
-        ) : null}
-        {!comments.isLoading && !comments.isError && items.length === 0 ? (
-          <View className="items-center gap-2 rounded-lg border border-border bg-card px-4 py-6">
-            <View className="size-10 items-center justify-center rounded-full bg-muted">
-              <Icon as={MessageCircle} className="size-5 text-foreground" />
-            </View>
-            <Text className="font-semibold">No comments yet</Text>
-            <Text variant="muted">Start the conversation.</Text>
-          </View>
-        ) : null}
       </View>
-    </View>
+    </PageListContainer>
   );
 
   const listFooter = (
-    <View className="gap-2">
-      {comments.hasNextPage ? (
-        <Button
-          disabled={comments.isFetchingNextPage}
-          variant="outline"
-          onPress={() => void comments.fetchNextPage()}
-        >
-          <Text>
-            {comments.isFetchingNextPage ? "Loading…" : "Load more comments"}
-          </Text>
-        </Button>
-      ) : null}
-      {comments.isFetchNextPageError ? (
-        <View className="items-start gap-2">
-          <Text className="text-destructive" variant="small">
-            More comments could not be loaded.
-          </Text>
-          <Button variant="link" onPress={() => void comments.fetchNextPage()}>
-            <Text>Try again</Text>
+    <PageListContainer width={contentWidth}>
+      <View className="gap-2">
+        {comments.hasNextPage ? (
+          <Button
+            disabled={comments.isFetchingNextPage}
+            variant="outline"
+            onPress={() => void comments.fetchNextPage()}
+          >
+            <Text>
+              {comments.isFetchingNextPage ? "Loading…" : "Load more comments"}
+            </Text>
           </Button>
-        </View>
-      ) : null}
-    </View>
+        ) : null}
+        {comments.isFetchNextPageError ? (
+          <View className="items-start gap-2">
+            <Text className="text-destructive" variant="small">
+              More comments could not be loaded.
+            </Text>
+            <Button
+              variant="link"
+              onPress={() => void comments.fetchNextPage()}
+            >
+              <Text>Try again</Text>
+            </Button>
+          </View>
+        ) : null}
+      </View>
+    </PageListContainer>
   );
 
-  const renderComment: ListRenderItem<CommentListRow> = ({ item }) => {
+  const renderComment = ({
+    item,
+  }: LegendListRenderItemProps<CommentListRow>) => {
     if (item.kind === "reply") {
       return (
-        <View className="ml-4 border-l-2 border-secondary pl-3 sm:ml-8 sm:pl-4">
-          <CommentItem
-            comment={item.comment}
-            isOwn={item.comment.author_id === user?.id}
-            onDelete={() => openDelete(item.comment)}
-            onEdit={() => openEditor(item.comment)}
-            canInteract={canInteract}
-            isReply
-          />
-        </View>
+        <PageListContainer width={contentWidth}>
+          <View className="ml-4 border-l-2 border-secondary pl-3 sm:ml-8 sm:pl-4">
+            <CommentItem
+              comment={item.comment}
+              isOwn={item.comment.author_id === user?.id}
+              onDelete={() => openDelete(item.comment)}
+              onEdit={() => openEditor(item.comment)}
+              canInteract={canInteract}
+              isReply
+            />
+          </View>
+        </PageListContainer>
       );
     }
 
     const comment = item.comment;
     return (
-      <CommentThreadItem
-        comment={comment}
-        currentUserId={user?.id}
-        onDelete={openDelete}
-        onEdit={openEditor}
-        onReply={openReply}
-        isReplyingTo={replyingTo?.id === comment.id}
-        isReplyPending={replyingTo?.id === comment.id && createReply.isPending}
-        replyError={
-          replyingTo?.id === comment.id ? createReply.error?.message : undefined
-        }
-        onCancelReply={cancelReply}
-        onSubmitReply={submitReply}
-        canInteract={canInteract}
-      />
+      <PageListContainer width={contentWidth}>
+        <CommentThreadItem
+          comment={comment}
+          currentUserId={user?.id}
+          onDelete={openDelete}
+          onEdit={openEditor}
+          onReply={openReply}
+          isReplyingTo={replyingTo?.id === comment.id}
+          isReplyPending={
+            replyingTo?.id === comment.id && createReply.isPending
+          }
+          replyError={
+            replyingTo?.id === comment.id
+              ? createReply.error?.message
+              : undefined
+          }
+          onCancelReply={cancelReply}
+          onSubmitReply={submitReply}
+          canInteract={canInteract}
+        />
+      </PageListContainer>
     );
   };
 
@@ -609,10 +630,12 @@ function CommentItem({
   );
 }
 
-export function CommentListSkeleton() {
+export function CommentListSkeleton({ rows = 2 }: { rows?: number } = {}) {
+  const rowKeys = ["first", "second"].slice(0, rows);
+
   return (
-    <View className="gap-3">
-      {["first", "second"].map((key) => (
+    <View accessibilityLabel="Loading comments" className="w-full gap-3">
+      {rowKeys.map((key) => (
         <View
           key={key}
           className="gap-2 rounded-lg border border-border bg-card p-3"

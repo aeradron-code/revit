@@ -5,6 +5,7 @@
   "dependencies": {
     "@expo/ui": "~58.0.23",
     "@hookform/resolvers": "^5.9.1",
+    "@legendapp/list": "^3.7.2",
     "@rn-primitives/avatar": "^1.5.2",
     "@rn-primitives/checkbox": "^1.5.2",
     "@rn-primitives/dialog": "^1.5.2",

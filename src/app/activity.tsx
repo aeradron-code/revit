@@ -1,7 +1,8 @@
 import { Link, router, Stack } from "expo-router";
 import { useEffect, useRef } from "react";
-import { FlatList, View } from "react-native";
+import { View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { ActivityNotification } from "@/api/notifications";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
@@ -78,14 +79,18 @@ export default function ActivityScreen() {
           ),
         }}
       />
-      <FlatList
+      <AppList
         className="flex-1"
-        contentContainerClassName="mx-auto w-full max-w-2xl gap-3 px-2 py-3 md:py-6"
+        contentWidth="narrow"
+        contentContainerClassName="px-2 py-3 md:py-6"
+        contentGap={4}
         data={notifications.data ?? []}
         keyExtractor={(notification) => notification.id}
         ListHeaderComponent={
           <View className="gap-4">
-            <Text variant="muted">Your latest social activity.</Text>
+            <Text variant="muted" className="pb-2">
+              Your latest social activity.
+            </Text>
             {notifications.isLoading ? <ActivityListSkeleton /> : null}
             {notifications.isError ? (
               <FeedbackState
@@ -178,7 +183,7 @@ function ActivityItem({
 
 function ActivityListSkeleton() {
   return (
-    <View accessibilityLabel="Loading activity" className="gap-3">
+    <View accessibilityLabel="Loading activity" className="w-full gap-1">
       {["first", "second", "third"].map((key) => (
         <View
           key={key}

@@ -9,7 +9,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
 import { useCommentCount } from "@/queries/comments";
-import { useAskRatingSummary } from "@/queries/ratings";
+import { usePostRatingSummary } from "@/queries/ratings";
 
 type PostEngagementActionsProps = {
   postId: string;
@@ -41,7 +41,7 @@ export function PostEngagementActions({
   const user = useAuthUser();
   const theme = useTheme();
   const viewerId = user?.id ?? "";
-  const rating = useAskRatingSummary(postId, viewerId, !engagement);
+  const rating = usePostRatingSummary(postId, viewerId, !engagement);
   const comments = useCommentCount(postId, viewerId, !engagement);
   const averageScore =
     engagement?.averageScore ?? rating.data?.averageScore ?? null;
@@ -54,7 +54,13 @@ export function PostEngagementActions({
     <View className="flex-1 flex-row items-center gap-1">
       {onRatingPress ? (
         <Button
-          accessibilityLabel="Rate this post"
+          accessibilityLabel={
+            ratingLoading
+              ? "Rate this post. Community average is loading."
+              : averageScore === null
+                ? "Rate this post. No community ratings yet."
+                : `Rate this post. Community average ${averageScore.toFixed(1)} out of 5 stars.`
+          }
           accessibilityState={{ expanded: ratingExpanded }}
           disabled={!canInteract}
           className={`gap-1.5 border px-3 ${ratingExpanded ? "border-primary bg-selected" : "border-transparent"}`}

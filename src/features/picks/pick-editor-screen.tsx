@@ -1,15 +1,16 @@
 import { ScrollView } from "react-native";
-import { renderKeyboardAwareListScroll } from "@/components/ui/keyboard-aware-list-scroll";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { ChevronDown, ChevronUp, MapPin, Trash2 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, FlatList, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
+import { AppList } from "@/components/ui/app-list";
 import type { Entity } from "@/api/entities";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
@@ -175,12 +176,13 @@ export function PickEditorScreen() {
           ),
         }}
       />
-      <FlatList
+      <AppList
         className="flex-1"
-        contentContainerClassName="mx-auto w-full max-w-2xl gap-3 px-2 pb-8 pt-4 md:pb-12 md:pt-6"
+        contentWidth="narrow"
+        contentContainerClassName="px-2 pb-8 pt-4 md:pb-12 md:pt-6"
+        contentGap={12}
         data={items}
         keyExtractor={(item) => item.entity.id}
-        renderScrollComponent={renderKeyboardAwareListScroll}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <Card className="gap-5 border-border bg-card p-5 shadow-none md:p-6">
@@ -244,9 +246,12 @@ export function PickEditorScreen() {
                 </View>
               ) : null}
               {!isDebouncing && entitySearch.isError ? (
-                <Text className="text-destructive" variant="small">
-                  {entitySearch.error.message}
-                </Text>
+                <FeedbackState
+                  actionLabel="Retry"
+                  onAction={() => void entitySearch.refetch()}
+                  title="Couldn’t load finds."
+                  variant="error"
+                />
               ) : null}
               {!isDebouncing
                 ? entitySearch.data?.map((entity) => {
@@ -413,7 +418,12 @@ function LoadingState() {
           ),
         }}
       />
-      <View className="w-full max-w-2xl gap-3 px-2 pb-8 pt-4 md:mx-auto md:pb-12 md:pt-6">
+      <View
+        className={pageContainerClassName(
+          "narrow",
+          "gap-3 px-2 pb-8 pt-4 md:pb-12 md:pt-6",
+        )}
+      >
         <View className="gap-5 rounded-lg border border-border bg-card p-5 md:p-6">
           <View className="gap-1.5 border-b border-border pb-4">
             <Skeleton className="h-8 w-2/5" />
@@ -472,7 +482,12 @@ function MessageState({
           ),
         }}
       />
-      <ScrollView contentContainerClassName="flex-grow items-center justify-center gap-2 px-6 py-6">
+      <ScrollView
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "flex-grow items-center justify-center gap-2 px-6 py-6",
+        )}
+      >
         <Text variant="h2">{title}</Text>
         <Text variant="muted" className="text-center">
           {description}

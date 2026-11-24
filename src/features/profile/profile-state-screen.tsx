@@ -7,11 +7,14 @@ import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 
 export function ProfileLoadingScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-      <View className="w-full gap-1 md:mx-auto md:max-w-4xl md:px-6 md:py-6">
+      <View
+        className={pageContainerClassName("profile", "gap-1 md:px-6 md:py-6")}
+      >
         <View className="overflow-hidden border border-border bg-card md:rounded-xl">
           <Skeleton className="h-28 w-full rounded-none sm:h-36" />
           <View className="px-5 pb-3 sm:flex-row sm:items-start sm:gap-5 sm:px-8 sm:pb-7">
@@ -52,22 +55,24 @@ export function ProfileMessageScreen({
 }) {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={edges}>
-      <ScrollView contentContainerClassName="flex-grow items-center justify-center px-6 py-6">
-        <View className="w-full max-w-lg items-center gap-3 rounded-lg border border-border bg-card p-4 shadow-none">
-          <View className="size-10 items-center justify-center rounded-md bg-secondary">
-            <Icon as={Sparkles} className="text-primary" />
+      <ScrollView contentContainerClassName="flex-grow px-6 py-6">
+        <View className={pageContainerClassName("compact")}>
+          <View className="items-center gap-3 rounded-lg border border-border bg-card p-4 shadow-none">
+            <View className="size-10 items-center justify-center rounded-md bg-secondary">
+              <Icon as={Sparkles} className="text-primary" />
+            </View>
+            <Text variant="h2" className="text-center">
+              {title}
+            </Text>
+            <Text variant="muted" className="text-center leading-5">
+              {description}
+            </Text>
+            {action ? (
+              <Button variant="outline" className="mt-2" onPress={action}>
+                <Text>Try again</Text>
+              </Button>
+            ) : null}
           </View>
-          <Text variant="h2" className="text-center">
-            {title}
-          </Text>
-          <Text variant="muted" className="max-w-md text-center leading-5">
-            {description}
-          </Text>
-          {action ? (
-            <Button variant="outline" className="mt-2" onPress={action}>
-              <Text>Try again</Text>
-            </Button>
-          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -4,12 +4,12 @@ import { useMemo, useState } from "react";
 import { ChevronRight, MapPin, Trash2 } from "lucide-react-native";
 import {
   Pressable,
-  FlatList,
   RefreshControl,
   useWindowDimensions,
   View,
 } from "react-native";
 import type { SharePostWithDetails } from "@/api/shares";
+import { API_ERROR_MESSAGES } from "@/api/errors";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FeedbackState } from "@/components/ui/feedback-state";
+import { pageContainerClassName } from "@/components/ui/page-layout";
+import { PageListContainer } from "@/components/ui/page-list-container";
 import { Icon } from "@/components/ui/icon";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,15 +31,15 @@ import { Text } from "@/components/ui/text";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
-import { useDeleteEntity, useEntity } from "@/queries/entities";
+import { useDeleteEntity, useEntity, useEntityUsage } from "@/queries/entities";
 import {
   useEntityRatingSummary,
   useSharePostsByEntity,
 } from "@/queries/shares";
 import { StarRating } from "@/features/ratings/star-rating";
-import { PostFeedSkeleton } from "@/features/posts/post-feed-skeleton";
 import { SafetyOptionsMenu } from "@/features/safety/safety-options-menu";
 
+import { AppList } from "@/components/ui/app-list";
 export function EntityDetailScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const entityId = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
@@ -96,14 +98,22 @@ function EntityDetails({ entityId }: { entityId: string }) {
     [posts.data],
   );
   const entityData = entity.data;
+  const usage = useEntityUsage(
+    entityId,
+    Boolean(user?.id && entityData?.created_by === user.id),
+  );
+  const isFindInUse =
+    usage.data?.isUsed === true ||
+    deleteEntity.error?.message === API_ERROR_MESSAGES.FIND_IN_USE;
 
   if (!entityData) return null;
 
   return (
     <>
-      <FlatList
+      <AppList
         className="flex-1"
-        contentContainerClassName="w-full py-1 md:mx-auto md:max-w-5xl md:px-6 md:py-6"
+        contentWidth="wide"
+        contentContainerClassName="py-1 md:px-6 md:py-6"
         data={sharePosts}
         keyExtractor={(post) => post.id}
         ListHeaderComponent={
@@ -146,71 +156,113 @@ function EntityDetails({ entityId }: { entityId: string }) {
                     <Text>{entityData.description}</Text>
                   ) : null}
                 </View>
-                <View className="flex-row flex-wrap items-center justify-between gap-3">
-                  <View className="flex-row flex-wrap items-center gap-2">
-                    <StarRating
-                      value={summary.data?.averageScore ?? null}
-                      readOnly
-                      allowHalf
-                      animated={false}
-                      starSize={20}
-                      gap={2}
-                    />
-                    <Text className="text-2xl font-semibold">
-                      {summary.isLoading || summary.isError
-                        ? "—"
-                        : (summary.data?.averageScore?.toFixed(1) ?? "—")}
-                    </Text>
-                    <Text variant="muted" className="pb-0.5 text-sm">
-                      {summary.isLoading || summary.isError
-                        ? "ratings"
-                        : `${summary.data?.ratingCount ?? 0} ${(summary.data?.ratingCount ?? 0) === 1 ? "rating" : "ratings"}`}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center gap-2">
-                    <Button
-                      onPress={() =>
-                        router.push({
-                          pathname: routes.createShare,
-                          params: { entityId },
-                        })
+                <View className="gap-3">
+                  <View className="flex-row flex-wrap items-center justify-between gap-3">
+                    <View
+                      accessible
+                      accessibilityRole="text"
+                      accessibilityLabel={
+                        summary.isLoading || summary.isError
+                          ? "Average rating unavailable"
+                          : `Average rating ${summary.data?.averageScore?.toFixed(1) ?? "not rated"} out of 5, ${summary.data?.ratingCount ?? 0} ${(summary.data?.ratingCount ?? 0) === 1 ? "rating" : "ratings"}`
                       }
+                      className="flex-row flex-wrap items-center gap-2"
                     >
-                      <Text>Rate this find</Text>
-                    </Button>
-                    <SafetyOptionsMenu
-                      ownerId={entityData.created_by}
-                      targetId={entityData.id}
-                      targetLabel="find"
-                      targetType="entity"
-                    />
-                    {user?.id && entityData.created_by === user.id ? (
+                      <StarRating
+                        value={summary.data?.averageScore ?? null}
+                        readOnly
+                        allowHalf
+                        animated={false}
+                        starSize={20}
+                        gap={2}
+                        accessibilityLabel={
+                          summary.data?.averageScore === null ||
+                          summary.data?.averageScore === undefined
+                            ? "No rating yet"
+                            : `Average ${summary.data.averageScore.toFixed(1)} out of 5 stars`
+                        }
+                      />
+                      <Text className="text-2xl font-semibold">
+                        {summary.isLoading || summary.isError
+                          ? "—"
+                          : (summary.data?.averageScore?.toFixed(1) ?? "—")}
+                      </Text>
+                      <Text variant="muted" className="pb-0.5 text-sm">
+                        {summary.isLoading || summary.isError
+                          ? "ratings"
+                          : `${summary.data?.ratingCount ?? 0} ${(summary.data?.ratingCount ?? 0) === 1 ? "rating" : "ratings"}`}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center gap-2">
                       <Button
-                        accessibilityLabel="Delete find"
-                        disabled={deleteEntity.isPending}
-                        size="icon"
-                        variant="destructive"
-                        className="size-11 p-0"
-                        onPress={() => setIsDeleteOpen(true)}
+                        onPress={() =>
+                          router.push({
+                            pathname: routes.createShare,
+                            params: { entityId },
+                          })
+                        }
                       >
-                        <Icon as={Trash2} className="size-4 text-white" />
+                        <Text>Rate this find</Text>
                       </Button>
-                    ) : null}
+                      <SafetyOptionsMenu
+                        ownerId={entityData.created_by}
+                        targetId={entityData.id}
+                        targetLabel="find"
+                        targetType="entity"
+                      />
+                      {user?.id && entityData.created_by === user.id ? (
+                        <Button
+                          accessibilityLabel="Delete find"
+                          disabled={
+                            deleteEntity.isPending ||
+                            usage.isLoading ||
+                            usage.isError ||
+                            isFindInUse
+                          }
+                          size="icon"
+                          variant="destructive"
+                          className="size-11 p-0"
+                          onPress={() => setIsDeleteOpen(true)}
+                        >
+                          <Icon as={Trash2} className="size-4 text-white" />
+                        </Button>
+                      ) : null}
+                    </View>
                   </View>
+                  {user?.id === entityData.created_by && isFindInUse ? (
+                    <Text className="text-sm" variant="muted">
+                      This find is used in a post or Pick and can’t be deleted.
+                    </Text>
+                  ) : null}
+                  {user?.id === entityData.created_by && usage.isError ? (
+                    <FeedbackState
+                      actionLabel="Retry"
+                      onAction={() => void usage.refetch()}
+                      title="Couldn’t check whether this find is in use."
+                      variant="error"
+                    />
+                  ) : null}
                 </View>
                 {summary.isError ? (
-                  <Text variant="small" className="text-destructive">
-                    {summary.error.message}
-                  </Text>
+                  <FeedbackState
+                    actionLabel="Retry"
+                    className="w-full"
+                    onAction={() => void summary.refetch()}
+                    title="Couldn’t load rating details."
+                    variant="error"
+                  />
                 ) : null}
               </View>
             </View>
           </View>
         }
         ListEmptyComponent={
-          <View className="mx-auto w-full max-w-[36rem]">
+          <PageListContainer width="feed">
             {posts.isLoading ? (
-              <PostFeedSkeleton rows={2} gapClassName="gap-0" />
+              <View className="gap-2">
+                <RatingRowSkeleton />
+                <RatingRowSkeleton />
+              </View>
             ) : null}
             {posts.isError ? (
               <FeedbackState
@@ -226,23 +278,29 @@ function EntityDetails({ entityId }: { entityId: string }) {
                 title="No ratings yet"
               />
             ) : null}
-          </View>
+          </PageListContainer>
         }
         ListFooterComponent={
           posts.hasNextPage ? (
-            <Button
-              disabled={posts.isFetchingNextPage}
-              variant="outline"
-              className="self-center"
-              onPress={() => void posts.fetchNextPage()}
-            >
-              <Text>
-                {posts.isFetchingNextPage ? "Loading…" : "Load more ratings"}
-              </Text>
-            </Button>
+            <PageListContainer width="feed" className="py-2">
+              <Button
+                disabled={posts.isFetchingNextPage}
+                variant="outline"
+                className="self-center"
+                onPress={() => void posts.fetchNextPage()}
+              >
+                <Text>
+                  {posts.isFetchingNextPage ? "Loading…" : "Load more ratings"}
+                </Text>
+              </Button>
+            </PageListContainer>
           ) : undefined
         }
-        renderItem={({ item }) => <RatingRow post={item} />}
+        renderItem={({ item }) => (
+          <PageListContainer width="feed">
+            <RatingRow post={item} />
+          </PageListContainer>
+        )}
         refreshControl={
           <RefreshControl
             refreshing={
@@ -263,11 +321,24 @@ function EntityDetails({ entityId }: { entityId: string }) {
           <DialogHeader>
             <DialogTitle>Delete this find?</DialogTitle>
             <DialogDescription>
-              This permanently deletes the find. Finds used in posts or Picks
-              cannot be deleted.
+              {usage.isLoading
+                ? "Checking whether this find is used…"
+                : usage.isError
+                  ? "Couldn’t check whether this find is in use. Retry the check before deleting."
+                  : isFindInUse
+                    ? "This find is used in a post or Pick. Remove those references before deleting it."
+                    : "This permanently deletes the find."}
             </DialogDescription>
           </DialogHeader>
-          {deleteEntity.isError ? (
+          {usage.isError ? (
+            <FeedbackState
+              actionLabel="Retry"
+              onAction={() => void usage.refetch()}
+              title="Couldn’t check whether this find is in use."
+              variant="error"
+            />
+          ) : null}
+          {deleteEntity.isError && !isFindInUse ? (
             <Text className="text-destructive">
               {deleteEntity.error.message}
             </Text>
@@ -278,12 +349,17 @@ function EntityDetails({ entityId }: { entityId: string }) {
             </Button>
             <Button
               variant="destructive"
-              disabled={deleteEntity.isPending}
+              disabled={
+                deleteEntity.isPending ||
+                usage.isLoading ||
+                usage.isError ||
+                isFindInUse
+              }
               onPress={() =>
                 void deleteEntity
                   .mutateAsync()
                   .then(() => router.replace(routes.discover))
-                  .catch(() => {})
+                  .catch(() => void usage.refetch())
               }
             >
               <Text>
@@ -354,8 +430,8 @@ function RatingRow({ post }: { post: SharePostWithDetails }) {
     <Link href={routes.post(post.id)} asChild>
       <Pressable
         accessibilityRole="link"
-        accessibilityLabel={`View ${post.author.display_name}'s rating and post`}
-        className="mx-auto w-full max-w-xl flex-row flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4 active:opacity-70"
+        accessibilityLabel={`View ${post.author.display_name}'s rating of ${post.ratingScore} out of 5 stars and post`}
+        className="w-full flex-row flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4 active:opacity-70"
       >
         <Avatar
           alt={`${post.author.display_name}'s avatar`}
@@ -393,12 +469,35 @@ function RatingRow({ post }: { post: SharePostWithDetails }) {
   );
 }
 
+function RatingRowSkeleton() {
+  return (
+    <View className="w-full flex-row flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4">
+      <Skeleton className="size-10 shrink-0 rounded-full" />
+      <View className="min-w-0 flex-1 gap-1">
+        <Skeleton className="h-4 w-2/5" />
+        <Skeleton className="h-3 w-3/5" />
+      </View>
+      <View className="flex-row gap-1">
+        {["one", "two", "three", "four", "five"].map((star) => (
+          <Skeleton key={star} className="size-[18px] rounded-sm" />
+        ))}
+      </View>
+      <View className="flex-row items-center gap-1">
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="size-4 rounded-sm" />
+      </View>
+    </View>
+  );
+}
+
 function EntityDetailLoading() {
   const { width } = useWindowDimensions();
   const horizontal = width >= 900;
 
   return (
-    <View className="w-full px-2 py-1 md:mx-auto md:max-w-5xl md:px-6 md:py-6">
+    <View
+      className={pageContainerClassName("wide", "px-2 py-1 md:px-6 md:py-6")}
+    >
       <View
         className={`gap-4 rounded-lg border border-border bg-card md:gap-6 ${
           horizontal ? "flex-row p-6" : "p-4"

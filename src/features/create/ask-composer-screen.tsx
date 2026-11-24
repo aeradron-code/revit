@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Text } from "@/components/ui/text";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { Textarea } from "@/components/ui/textarea";
 import { successFeedback } from "@/lib/feedback";
 import { routes } from "@/lib/routes";
@@ -73,7 +74,12 @@ function RecoveryMessage({
           ),
         }}
       />
-      <ScrollView contentContainerClassName="gap-3 pb-6">
+      <ScrollView
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "gap-3 pb-6",
+        )}
+      >
         <Text>{message}</Text>
         {retry ? (
           <Button onPress={retry} variant="outline">
@@ -163,7 +169,12 @@ function SavedAskRecovery({
           ),
         }}
       />
-      <ScrollView contentContainerClassName="gap-3 pb-6">
+      <ScrollView
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "gap-3 pb-6",
+        )}
+      >
         <Text variant="h1">Check your previous post</Text>
         <Text>
           Your previous post may have been published. Check its result before
@@ -348,7 +359,10 @@ function AskComposerForm() {
         className="flex-1"
         bottomOffset={24}
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="w-full gap-6 px-2 pb-8 pt-4 md:mx-auto md:max-w-2xl md:px-6 md:pb-12 md:pt-6"
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "gap-6 px-2 pb-8 pt-4 md:px-6 md:pb-12 md:pt-6",
+        )}
       >
         <Card className="gap-6 border-border bg-card pt-4 pb-6 px-4 shadow-none">
           <View className="gap-2 py-1">

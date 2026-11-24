@@ -128,6 +128,26 @@ $$;
 revoke all on function private.is_blocked_between(uuid, uuid) from public, anon, authenticated;
 grant execute on function private.is_blocked_between(uuid, uuid) to authenticated;
 
+-- Policies on comments cannot query comments directly: doing so recursively
+-- applies the comments SELECT policy while evaluating the INSERT policy.
+-- Keep the reply-parent check behind a definer function owned by the database
+-- migration role, and bind the check to the caller's authenticated user.
+create function private.can_reply_to_comment(p_comment_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.comments parent
+    where parent.id = p_comment_id
+      and not private.is_blocked_between((select auth.uid()), parent.author_id)
+  );
+$$;
+revoke all on function private.can_reply_to_comment(uuid) from public, anon, authenticated;
+grant execute on function private.can_reply_to_comment(uuid) to authenticated;
+
 -- Blocks hide each other's posts and comments and prevent new follows,
 -- comments, replies, and Ask ratings between the involved accounts.
 drop policy "Authenticated users can view posts" on public.posts;
@@ -176,11 +196,7 @@ create policy "Users can comment on accessible posts"
           where m.forum_id = p.forum_id and m.user_id = (select auth.uid())
         ))
     )
-    and (parent_id is null or exists (
-      select 1 from public.comments parent
-      where parent.id = comments.parent_id
-        and not private.is_blocked_between((select auth.uid()), parent.author_id)
-    ))
+    and (parent_id is null or private.can_reply_to_comment(parent_id))
   );
 
 drop policy "Users can follow profiles themselves" on public.follows;

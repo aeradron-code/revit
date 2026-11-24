@@ -102,6 +102,7 @@ export const API_ERROR_MESSAGES = {
   LOAD_FEED_POSTS: "We could not load feed posts.",
   LOAD_POST_ENGAGEMENT: "We could not load post engagement details.",
   LOAD_ASK_POSTS: "We could not load Ask posts.",
+  LOAD_PROFILE_POSTS: "We could not load profile posts.",
   LOAD_FORUM_POSTS: "We could not load forum posts.",
   UPDATE_THIS_ASK_POST: "We could not update this Ask post.",
   DELETE_THIS_POST: "We could not delete this post.",

@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
+import { pageContainerClassName } from "@/components/ui/page-layout";
 import { routes } from "@/lib/routes";
 import { useAuth } from "@/providers/auth-provider";
 import { useThemePreference } from "@/providers/theme-preference-provider";
@@ -42,6 +43,7 @@ export default function SettingsScreen() {
   const [deleted, setDeleted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const usernameError = getUsernameError(username);
 
   const openProfileEditor = () => {
     setDisplayName(profile?.display_name ?? "");
@@ -58,8 +60,8 @@ export default function SettingsScreen() {
       setError("Enter the name people should see.");
       return;
     }
-    if (!/^[a-z0-9_]{3,30}$/.test(normalizedUsername)) {
-      setError("Use 3–30 lowercase letters, numbers, or underscores.");
+    if (usernameError) {
+      setError(usernameError);
       return;
     }
     setSavingProfile(true);
@@ -110,7 +112,7 @@ export default function SettingsScreen() {
     return (
       <SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
         <SettingsHeader />
-        <View className="mx-auto w-full max-w-2xl gap-4 p-5 md:p-8">
+        <View className={pageContainerClassName("narrow", "gap-4 p-5 md:p-8")}>
           {deleted ? (
             <>
               <Text variant="h2">Account deleted</Text>
@@ -141,7 +143,10 @@ export default function SettingsScreen() {
       <SettingsHeader />
       <ScrollView
         className="flex-1"
-        contentContainerClassName="mx-auto w-full max-w-2xl gap-6 p-5 md:p-8"
+        contentContainerClassName={pageContainerClassName(
+          "narrow",
+          "gap-6 p-5 md:p-8",
+        )}
       >
         <View className="gap-1">
           <Text variant="muted">Manage your profile and app preferences.</Text>
@@ -282,6 +287,20 @@ export default function SettingsScreen() {
                 onChangeText={(value) => setUsername(value.toLowerCase())}
                 placeholder="your_username"
               />
+              {usernameError ? (
+                <Text
+                  accessibilityLiveRegion="polite"
+                  className="text-destructive"
+                  role="alert"
+                  variant="small"
+                >
+                  {usernameError}
+                </Text>
+              ) : (
+                <Text variant="muted" className="text-xs">
+                  3–30 characters: lowercase letters, numbers, or underscores.
+                </Text>
+              )}
             </View>
             <View className="gap-1.5">
               <Text variant="small">Bio</Text>
@@ -313,7 +332,10 @@ export default function SettingsScreen() {
             >
               <Text>Cancel</Text>
             </Button>
-            <Button disabled={savingProfile} onPress={() => void saveProfile()}>
+            <Button
+              disabled={savingProfile || Boolean(usernameError)}
+              onPress={() => void saveProfile()}
+            >
               <Text>{savingProfile ? "Saving…" : "Save changes"}</Text>
             </Button>
           </DialogFooter>
@@ -365,6 +387,15 @@ export default function SettingsScreen() {
       </Dialog>
     </SafeAreaView>
   );
+}
+
+function getUsernameError(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return "Username is required.";
+  if (!/^[a-z0-9_]{3,30}$/.test(normalized)) {
+    return "Use 3–30 characters: lowercase letters, numbers, or underscores.";
+  }
+  return null;
 }
 
 function SettingsHeader() {

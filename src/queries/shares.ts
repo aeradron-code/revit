@@ -80,6 +80,12 @@ export function useCreateShareRating() {
     onSuccess: (post, input) =>
       Promise.all([
         queryClient.invalidateQueries({
+          queryKey: queryKeys.entities.usage(input.entityId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.posts.byAuthor(input.authorId),
+        }),
+        queryClient.invalidateQueries({
           queryKey: queryKeys.shares.mine(input.entityId, input.authorId),
         }),
         queryClient.invalidateQueries({
@@ -108,6 +114,9 @@ export function useUpdateShareRating(
       updateShareRating(postId, input),
     onSuccess: (post) =>
       Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.posts.byAuthor(authorId),
+        }),
         queryClient.invalidateQueries({
           queryKey: queryKeys.shares.mine(entityId, authorId),
         }),
