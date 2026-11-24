@@ -13,7 +13,7 @@ export type RatingSummary = {
 const RATING_SELECT =
   "post_id, rater_id, score, created_at, updated_at" as const;
 
-export function getAskRatingSummary(
+export function getPostRatingSummary(
   postId: string,
   requestSignal?: AbortSignal,
 ): Promise<RatingSummary> {
@@ -24,7 +24,7 @@ export function getAskRatingSummary(
         error,
         status: errorResponseStatus,
       } = await supabase
-        .rpc("get_ask_rating_summary", { target_post_id: postId })
+        .rpc("get_post_rating_summary", { target_post_id: postId })
         .abortSignal(signal);
 
       throwIfSupabaseError(
@@ -44,7 +44,7 @@ export function getAskRatingSummary(
   );
 }
 
-export function getMyAskRating(
+export function getMyPostRating(
   postId: string,
   raterId: string,
   requestSignal?: AbortSignal,
@@ -75,6 +75,33 @@ export function getMyAskRating(
   );
 }
 
+export async function savePostRating(
+  postId: string,
+  raterId: string,
+  score: number,
+): Promise<Rating> {
+  if (!Number.isInteger(score) || score < 1 || score > 5) {
+    throw validationError(API_ERROR_MESSAGES.CHOOSE_A_RATING_FROM_1_TO_5, {
+      score: API_ERROR_MESSAGES.CHOOSE_A_RATING_FROM_1_TO_5,
+    });
+  }
+
+  return runApiRequest(async (signal) => {
+    const { data, error, status } = await supabase
+      .rpc("save_post_rating", {
+        p_post_id: postId,
+        p_rater_id: raterId,
+        p_score: score,
+      })
+      .abortSignal(signal)
+      .single();
+    throwIfSupabaseError(error, API_ERROR_MESSAGES.UPDATE_YOUR_RATING, status);
+    return data;
+  });
+}
+
+// Kept for existing Ask-specific callers while the shared post rating API is
+// used by both Ask and Share cards.
 export async function saveAskRating(
   postId: string,
   raterId: string,
@@ -100,7 +127,7 @@ export async function saveAskRating(
   });
 }
 
-export function deleteAskRating(
+export function deletePostRating(
   postId: string,
   raterId: string,
 ): Promise<void> {

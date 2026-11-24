@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { MapPin, MessageCircle } from "lucide-react-native";
+import { MapPin } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 
@@ -17,11 +17,11 @@ import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { Colors } from "@/constants/theme";
 import { InlineCommentDrawer } from "@/features/comments/inline-comment-drawer";
+import { PostRatingControl } from "@/features/ratings/post-rating-control";
 import { StarRating } from "@/features/ratings/star-rating";
 import { routes } from "@/lib/routes";
-import { useAuthUser } from "@/providers/auth-provider";
-import { useCommentCount } from "@/queries/comments";
 
+import { PostEngagementActions } from "./post-engagement-actions";
 import { PostMediaGallery } from "./post-media-gallery";
 import { PostAuthorHeader } from "./post-author-header";
 
@@ -38,12 +38,11 @@ export function SharePostCard({
   post,
   entity,
 }: SharePostCardProps) {
-  const user = useAuthUser();
-  const [commentsExpanded, setCommentsExpanded] = useState(false);
-  const comments = useCommentCount(post.id, user?.id ?? "", !post.engagement);
-  const commentCount = post.engagement?.commentCount ?? comments.data ?? 0;
-  const commentsLoading =
-    !post.engagement && (comments.isLoading || comments.isError);
+  const [expandedDrawer, setExpandedDrawer] = useState<
+    "comments" | "rating" | null
+  >(null);
+  const commentsExpanded = expandedDrawer === "comments";
+  const ratingExpanded = expandedDrawer === "rating";
   const postHref = post.forum_id
     ? routes.forumPost(post.forum_id, post.id)
     : routes.post(post.id);
@@ -127,42 +126,36 @@ export function SharePostCard({
       </CardContent>
 
       <CardFooter className="flex-col items-start w-full px-0">
-        <View className="w-full flex-row items-center justify-start px-2 py-2">
-          <View className="flex-1 flex-row items-center gap-3">
-            {isDetail ? (
-              <View className="min-h-10 flex-row items-center gap-1.5 rounded-md px-4 py-2.5">
-                <Icon
-                  as={MessageCircle}
-                  className="size-4 text-muted-foreground"
-                />
-                <Text className="text-[13px] font-medium text-muted-foreground">
-                  {commentsLoading ? "—" : commentCount}
-                </Text>
-              </View>
-            ) : (
-              <Button
-                accessibilityLabel={`View ${commentCount} ${commentCount === 1 ? "comment" : "comments"}`}
-                accessibilityState={{ expanded: commentsExpanded }}
-                disabled={!canInteract}
-                className={`h-8 gap-1.5 border ${commentsExpanded ? "border-primary bg-selected" : "border-transparent"}`}
-                variant="ghost"
-                onPress={() => {
-                  if (canInteract) {
-                    setCommentsExpanded((expanded) => !expanded);
-                  }
-                }}
-              >
-                <Icon
-                  as={MessageCircle}
-                  className="size-4 text-muted-foreground"
-                />
-                <Text className="text-[13px] font-medium text-muted-foreground">
-                  {commentsLoading ? "—" : commentCount}
-                </Text>
-              </Button>
-            )}
-          </View>
+        <View className="flex-row items-start p-2">
+          <PostEngagementActions
+            commentsExpanded={!isDetail && commentsExpanded}
+            canInteract={canInteract}
+            forumId={post.forum_id}
+            isDetail={isDetail}
+            onCommentPress={
+              isDetail
+                ? undefined
+                : () =>
+                    setExpandedDrawer((drawer) =>
+                      drawer === "comments" ? null : "comments",
+                    )
+            }
+            onRatingPress={() =>
+              setExpandedDrawer((drawer) =>
+                drawer === "rating" ? null : "rating",
+              )
+            }
+            postId={post.id}
+            ratingExpanded={ratingExpanded}
+            engagement={post.engagement}
+          />
         </View>
+        {ratingExpanded && canInteract ? (
+          <PostRatingControl
+            onClose={() => setExpandedDrawer(null)}
+            postId={post.id}
+          />
+        ) : null}
         {!isDetail && commentsExpanded && canInteract ? (
           <InlineCommentDrawer postId={post.id} />
         ) : null}

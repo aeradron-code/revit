@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
 import { InlineCommentDrawer } from "@/features/comments/inline-comment-drawer";
-import { AskRatingControl } from "@/features/ratings/ask-rating-control";
+import { PostRatingControl } from "@/features/ratings/post-rating-control";
 import { routes } from "@/lib/routes";
 
 import { PostEngagementActions } from "./post-engagement-actions";
@@ -110,7 +110,7 @@ export function AskPostCard({
           />
         </View>
         {isRatingExpanded && canInteract ? (
-          <AskRatingControl
+          <PostRatingControl
             onClose={() => setExpandedDrawer(null)}
             postId={post.id}
           />

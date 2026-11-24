@@ -1118,6 +1118,13 @@ export type Database = {
           rating_count: number
         }[]
       }
+      get_post_rating_summary: {
+        Args: { target_post_id: string }
+        Returns: {
+          average_score: number | null
+          rating_count: number
+        }[]
+      }
       get_comments_page: {
         Args: {
           p_before_created_at?: string
@@ -1278,6 +1285,22 @@ export type Database = {
         }[]
       }
       save_ask_rating: {
+        Args: { p_post_id: string; p_rater_id: string; p_score: number }
+        Returns: {
+          created_at: string
+          post_id: string
+          rater_id: string
+          score: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ratings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_post_rating: {
         Args: { p_post_id: string; p_rater_id: string; p_score: number }
         Returns: {
           created_at: string

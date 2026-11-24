@@ -9,7 +9,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { routes } from "@/lib/routes";
 import { useAuthUser } from "@/providers/auth-provider";
 import { useCommentCount } from "@/queries/comments";
-import { useAskRatingSummary } from "@/queries/ratings";
+import { usePostRatingSummary } from "@/queries/ratings";
 
 type PostEngagementActionsProps = {
   postId: string;
@@ -41,7 +41,7 @@ export function PostEngagementActions({
   const user = useAuthUser();
   const theme = useTheme();
   const viewerId = user?.id ?? "";
-  const rating = useAskRatingSummary(postId, viewerId, !engagement);
+  const rating = usePostRatingSummary(postId, viewerId, !engagement);
   const comments = useCommentCount(postId, viewerId, !engagement);
   const averageScore =
     engagement?.averageScore ?? rating.data?.averageScore ?? null;

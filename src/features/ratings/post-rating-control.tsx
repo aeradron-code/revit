@@ -7,21 +7,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { selectionFeedback } from "@/lib/feedback";
 import { useAuthUser } from "@/providers/auth-provider";
-import { useMyAskRating, useSetMyAskRating } from "@/queries/ratings";
+import { useMyPostRating, useSetMyPostRating } from "@/queries/ratings";
 import { StarRating } from "@/features/ratings/star-rating";
 
 const SCORES = [1, 2, 3, 4, 5] as const;
 
-type AskRatingControlProps = {
+type PostRatingControlProps = {
   postId: string;
   onClose?: () => void;
 };
 
-export function AskRatingControl({ onClose, postId }: AskRatingControlProps) {
+export function PostRatingControl({ onClose, postId }: PostRatingControlProps) {
   const user = useAuthUser();
   const raterId = user?.id ?? "";
-  const rating = useMyAskRating(postId, raterId);
-  const setRating = useSetMyAskRating(postId, raterId);
+  const rating = useMyPostRating(postId, raterId);
+  const setRating = useSetMyPostRating(postId, raterId);
   const currentScore = rating.data?.score ?? null;
 
   if (!user) return null;
