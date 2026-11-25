@@ -310,7 +310,7 @@ function PickLoadingState({ onBack }: { onBack: () => void }) {
           </View>
         </View>
         <View className="gap-3">
-          {["first", "second", "third"].map((key) => (
+          {["first", "second"].map((key) => (
             <View
               key={key}
               className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-3 sm:gap-5 sm:p-5"

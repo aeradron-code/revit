@@ -53,7 +53,7 @@ export function DiscoverScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
       <AppList<DiscoverRow>
         className="flex-1"
-        contentWidth={filter === "posts" ? "feed" : "standard"}
+        contentWidth="standard"
         contentContainerClassName="px-2 py-3 md:py-6"
         contentGap={12}
         data={data}

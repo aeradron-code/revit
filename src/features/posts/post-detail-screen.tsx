@@ -432,11 +432,12 @@ function AuthorActions({ post }: { post: PostWithDetails }) {
 function PostDetailLoading() {
   const { height, width } = useWindowDimensions();
   const verticalPadding = width >= 768 ? 48 : 32;
-  const availableHeight = Math.max(0, height - 56 - verticalPadding - 32);
-  const commentRows = availableHeight >= 450 ? 1 : 0;
+  // Keep the loading state within the viewport even while the post data is
+  // unavailable. The extra margin covers header and safe-area differences.
+  const availableHeight = Math.max(0, height - 64 - verticalPadding - 56);
   const mediaHeight = Math.max(
     0,
-    Math.min(220, availableHeight - 210 - commentRows * 132 - 12),
+    Math.min(200, availableHeight - 392),
   );
 
   return (
@@ -445,12 +446,12 @@ function PostDetailLoading() {
         width="feed"
         className="min-h-0 flex-1 overflow-hidden px-4 py-4 md:py-6"
       >
-        <View className="w-full gap-3">
+        <View className="min-h-0 w-full flex-1 gap-3 overflow-hidden">
           <PostCardSkeleton
             withMedia={mediaHeight > 0}
             mediaHeight={mediaHeight}
           />
-          {commentRows > 0 ? <CommentListSkeleton rows={commentRows} /> : null}
+          <CommentListSkeleton rows={1} />
         </View>
       </PageListContainer>
     </PostDetailFrame>

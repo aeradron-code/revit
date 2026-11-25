@@ -47,10 +47,14 @@ export function ImageCarouselViewer({
       className={className}
       showDots={showDots}
       showCounter={showCounter}
-      onImagePress={(_image, index) => {
-        const selected = images[index];
-        if (selected) onImagePress?.(selected, index);
-      }}
+      onImagePress={
+        onImagePress
+          ? (_image, index) => {
+              const selected = images[index];
+              if (selected) onImagePress(selected, index);
+            }
+          : undefined
+      }
     />
   );
 }

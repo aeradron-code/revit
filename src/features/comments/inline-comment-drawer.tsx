@@ -200,7 +200,7 @@ export function InlineCommentDrawer({ postId }: { postId: string }) {
       ) : null}
 
       {items.length > 0 ? (
-        <View className="gap-2">
+        <View className="gap-1">
           {items.map((comment) => (
             <View key={comment.id} className="gap-1.5">
               <View className="flex-row gap-3 rounded-lg bg-card px-3 py-2.5">
