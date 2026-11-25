@@ -43,19 +43,7 @@ export function ForumPostDetailScreen() {
   const comments = useTopLevelComments(postId, { viewerId });
 
   if (!forumId || !postId || !viewerId || post.isLoading) {
-    return (
-      <ForumPostFrame forumId={forumId}>
-        <PageListContainer
-          width="feed"
-          className="min-h-0 flex-1 px-4 py-4 md:py-6"
-        >
-          <View className="w-full gap-3">
-            <PostCardSkeleton withMedia />
-            <CommentListSkeleton />
-          </View>
-        </PageListContainer>
-      </ForumPostFrame>
-    );
+    return <ForumPostLoading forumId={forumId} />;
   }
 
   if (post.isError) {
@@ -156,19 +144,7 @@ function ForumSharePostDetail({
   const score = useShareRatingScore(post.id, user?.id ?? "");
 
   if (entity.isLoading || score.isLoading) {
-    return (
-      <ForumPostFrame forumId={post.forum_id ?? ""}>
-        <PageListContainer
-          width="feed"
-          className="min-h-0 flex-1 px-4 py-4 md:py-6"
-        >
-          <View className="w-full gap-3">
-            <PostCardSkeleton withMedia />
-            <CommentListSkeleton />
-          </View>
-        </PageListContainer>
-      </ForumPostFrame>
-    );
+    return <ForumPostLoading forumId={post.forum_id ?? ""} />;
   }
 
   if (entity.isError || score.isError || !entity.data || score.data == null) {
@@ -239,6 +215,22 @@ function ForumSharePostDetail({
           )}
         />
       </View>
+    </ForumPostFrame>
+  );
+}
+
+function ForumPostLoading({ forumId }: { forumId: string }) {
+  return (
+    <ForumPostFrame forumId={forumId}>
+      <PageListContainer
+        width="feed"
+        className="min-h-0 flex-1 px-4 py-4 md:py-6"
+      >
+        <View className="w-full gap-3">
+          <PostCardSkeleton withMedia />
+          <CommentListSkeleton rows={1} />
+        </View>
+      </PageListContainer>
     </ForumPostFrame>
   );
 }

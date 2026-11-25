@@ -401,7 +401,7 @@ function LoadingState() {
           <View className="relative w-full flex-row gap-3">
             <View className="min-w-0 flex-1">
               <PageListContainer width="feed">
-                <PostFeedSkeleton rows={2} gapClassName="gap-1" />
+                <PostFeedSkeleton rows={1} gapClassName="gap-1" />
               </PageListContainer>
             </View>
             {isWide ? <View style={{ width: 320, flexShrink: 0 }} /> : null}
@@ -441,7 +441,7 @@ function ForumAboutSkeleton() {
 }
 
 function PostsLoadingState() {
-  return <PostFeedSkeleton rows={2} gapClassName="gap-1" />;
+  return <PostFeedSkeleton rows={1} gapClassName="gap-1" />;
 }
 
 function MissingState({ description }: { description?: string }) {

@@ -73,7 +73,7 @@ export function ProfileView({
     tab === "posts"
       ? postItems.map((item) => ({ type: "post", item }))
       : (picks.data ?? []).map((item) => ({ type: "pick", item }));
-  const listContentWidth = tab === "posts" ? "feed" : "content";
+  const listContentWidth = "feed";
   const followStatus = useFollowStatus(user?.id ?? "", profile.id);
   const followToggle = useFollowToggle(user?.id ?? "", profile.id);
   const blockStatus = useMyBlockStatus(user?.id ?? "", profile.id);
