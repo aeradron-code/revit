@@ -85,10 +85,23 @@ export default function RootHtml({
           content="https://revitapp.in/revit-link-preview.png"
         />
         <ScrollViewStyleReset />
+        <script src="/theme-init.js" />
         {headNodes}
       </head>
       <body {...bodyAttributes}>
         {children}
+        {pathname === "/" ? (
+          <div
+            id="revit-session-bootstrap"
+            className="session-bootstrap-overlay"
+            hidden
+            role="status"
+            aria-live="polite"
+          >
+            <span className="session-bootstrap-spinner" aria-hidden="true" />
+            <span>Restoring your session…</span>
+          </div>
+        ) : null}
         {bodyNodes}
       </body>
     </html>

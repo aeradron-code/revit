@@ -19,6 +19,7 @@ export interface PagesContext {
   request: Request;
   env: PagesEnv;
   params?: Record<string, string | string[] | undefined>;
+  next?: (input?: Request | string, init?: RequestInit) => Promise<Response>;
 }
 
 export interface AuthUser {

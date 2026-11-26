@@ -50,7 +50,7 @@ export function ThemePreferenceProvider({ children }: { children: ReactNode }) {
     void readPreference().then((savedPreference) => {
       if (!mounted) return;
       setPreferenceState(savedPreference);
-      if (savedPreference) Uniwind.setTheme(savedPreference);
+      Uniwind.setTheme(savedPreference ?? "system");
     });
     return () => {
       mounted = false;
