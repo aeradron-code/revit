@@ -86,32 +86,8 @@ export default function RootHtml({
         />
         <ScrollViewStyleReset />
         {headNodes}
-        {pathname === "/" ? (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                try {
-                  const hasPersistedSupabaseSession = Object.keys(window.localStorage).some(
-                    (key) => /^sb-.+-auth-token(?:\\.\\d+)?$/.test(key),
-                  );
-
-                  if (hasPersistedSupabaseSession) {
-                    document.documentElement.setAttribute("data-revit-auth-pending", "true");
-                  }
-                } catch {
-                  // If browser storage is unavailable, let the normal app render.
-                }
-              `,
-            }}
-          />
-        ) : null}
       </head>
       <body {...bodyAttributes}>
-        {pathname === "/" ? (
-          <div id="revit-auth-bootstrap" role="status" aria-live="polite">
-            Restoring your session…
-          </div>
-        ) : null}
         {children}
         {bodyNodes}
       </body>

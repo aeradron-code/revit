@@ -1,4 +1,4 @@
-import type { Session, User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
 import {
@@ -14,6 +14,7 @@ import {
 
 import {
   handleAuthCallback,
+  type AuthSessionSnapshot,
   isPasswordRecoveryUrl,
   signOut as signOutRequest,
   subscribeToAuthState,
@@ -32,10 +33,10 @@ type AuthContextValue = {
   profile: Profile | null;
   profileError: Error | null;
   retryProfile: () => Promise<void>;
-  session: Session | null;
+  session: AuthSessionSnapshot | null;
   signOut: () => Promise<void>;
   updateProfile: (input: UpdateProfileInput) => Promise<void>;
-  user: User | null;
+  user: AuthIdentity | null;
 };
 
 type AuthIdentity = Pick<User, "id"> & { email: string | null };
@@ -51,7 +52,7 @@ export function needsProfileCompletion(profile: Profile | null) {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<AuthSessionSnapshot | null>(null);
   const [isSessionLoading, setIsSessionLoading] = useState(true);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const [passwordRecoveryError, setPasswordRecoveryError] = useState<
