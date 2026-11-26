@@ -5,32 +5,34 @@ import {
   router,
   Stack,
   ThemeProvider,
+  usePathname,
 } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { Fragment, useEffect } from "react";
 import { Platform, View } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Uniwind, useUniwind } from "uniwind";
 import "../global.css";
 
 import { PortalHost } from "@rn-primitives/portal";
-import { AuthenticatedShell } from "@/components/navigation/authenticated-shell";
 import { AppHeader } from "@/components/navigation/app-header";
-import { Text } from "@/components/ui/text";
+import { AuthenticatedShell } from "@/components/navigation/authenticated-shell";
 import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
 import { Colors } from "@/constants/theme";
+import { PublicLandingScreen } from "@/features/landing/public-landing-screen";
 import { ProfileMessageScreen } from "@/features/profile/profile-state-screen";
 import { routes } from "@/lib/routes";
 import { AppProvider } from "@/providers/app-provider";
-import { ThemePreferenceProvider } from "@/providers/theme-preference-provider";
 import {
   AuthProvider,
   needsProfileCompletion,
   useAuth,
 } from "@/providers/auth-provider";
+import { ThemePreferenceProvider } from "@/providers/theme-preference-provider";
 
 SplashScreen.preventAutoHideAsync();
 Uniwind.setTheme("system");
@@ -84,6 +86,7 @@ export default function TabLayout() {
 }
 
 function RootNavigator() {
+  const pathname = usePathname();
   const {
     isLoading,
     isPasswordRecovery,
@@ -96,6 +99,10 @@ function RootNavigator() {
   } = useAuth();
   const needsOnboarding = needsProfileCompletion(profile);
   const canEnterApp = Boolean(session) && !needsOnboarding;
+  const canRenderPublicRoute =
+    Platform.OS === "web" &&
+    !session &&
+    ["/", "/support", "/privacy", "/terms"].includes(pathname);
 
   useEffect(() => {
     if (!isLoading) {
@@ -103,7 +110,9 @@ function RootNavigator() {
     }
   }, [isLoading]);
 
-  if (isLoading) {
+  if (canRenderPublicRoute && pathname === "/") return <PublicLandingScreen />;
+
+  if (isLoading && !canRenderPublicRoute) {
     return <AuthLoadingScreen />;
   }
 
