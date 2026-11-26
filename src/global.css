@@ -127,3 +127,9 @@
     --glass-alpha: 36%;
     box-shadow: 0 4px 14px rgb(8 6 24 / 20%);
 }
+
+.public-landing-atmosphere {
+    background-image:
+        radial-gradient(ellipse 34rem 28rem at 13% 21%, rgb(37 99 235 / 12%), transparent 72%),
+        radial-gradient(ellipse 30rem 24rem at 94% 11%, rgb(124 58 237 / 7%), transparent 72%);
+}
