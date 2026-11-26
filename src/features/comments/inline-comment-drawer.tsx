@@ -1,4 +1,4 @@
-import { Send } from "lucide-react-native";
+import Send from "lucide-react-native/icons/send";
 import { ActivityIndicator, View } from "react-native";
 
 import type { CommentWithAuthor } from "@/api/comments";

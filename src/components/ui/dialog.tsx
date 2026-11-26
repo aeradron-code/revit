@@ -1,5 +1,5 @@
 import * as DialogPrimitive from "@rn-primitives/dialog";
-import { X } from "lucide-react-native";
+import X from "lucide-react-native/icons/x";
 import * as React from "react";
 import {
   type GestureResponderEvent,

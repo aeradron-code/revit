@@ -1,12 +1,10 @@
 import { usePathname } from "expo-router";
 import { TabList, TabSlot, Tabs, TabTrigger } from "expo-router/ui";
-import {
-  Bookmark,
-  Compass,
-  House,
-  Plus,
-  UsersRound,
-} from "lucide-react-native";
+import Bookmark from "lucide-react-native/icons/bookmark";
+import Compass from "lucide-react-native/icons/compass";
+import House from "lucide-react-native/icons/house";
+import Plus from "lucide-react-native/icons/plus";
+import UsersRound from "lucide-react-native/icons/users-round";
 import { Pressable, View } from "react-native";
 import { AppHeader } from "@/components/navigation/app-header";
 import { Text } from "@/components/ui/text";

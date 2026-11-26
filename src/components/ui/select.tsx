@@ -1,10 +1,8 @@
 import * as SelectPrimitive from "@rn-primitives/select";
-import {
-  Check,
-  ChevronDown,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "lucide-react-native";
+import Check from "lucide-react-native/icons/check";
+import ChevronDown from "lucide-react-native/icons/chevron-down";
+import ChevronDownIcon from "lucide-react-native/icons/chevron-down";
+import ChevronUpIcon from "lucide-react-native/icons/chevron-up";
 import * as React from "react";
 import { Platform, View } from "react-native";
 import { FadeIn, FadeOut, ReduceMotion } from "react-native-reanimated";

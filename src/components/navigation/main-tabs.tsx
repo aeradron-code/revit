@@ -1,13 +1,11 @@
 import { Tabs } from "expo-router";
-import {
-  Bookmark,
-  Compass,
-  House,
-  type LucideIcon,
-  Plus,
-  UserRound,
-  UsersRound,
-} from "lucide-react-native";
+import Bookmark from "lucide-react-native/icons/bookmark";
+import Compass from "lucide-react-native/icons/compass";
+import House from "lucide-react-native/icons/house";
+import Plus from "lucide-react-native/icons/plus";
+import UserRound from "lucide-react-native/icons/user-round";
+import UsersRound from "lucide-react-native/icons/users-round";
+import type { LucideIcon } from "lucide-react-native";
 import { type ColorValue, Platform, View, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUniwind } from "uniwind";

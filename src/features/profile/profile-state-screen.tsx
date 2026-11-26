@@ -1,5 +1,5 @@
 import type { SafeAreaViewProps } from "react-native-safe-area-context";
-import { Sparkles } from "lucide-react-native";
+import Sparkles from "lucide-react-native/icons/sparkles";
 import { ScrollView, View } from "react-native";
 
 import { Button } from "@/components/ui/button";

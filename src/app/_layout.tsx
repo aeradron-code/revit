@@ -35,7 +35,9 @@ import {
 import { ThemePreferenceProvider } from "@/providers/theme-preference-provider";
 
 SplashScreen.preventAutoHideAsync();
-Uniwind.setTheme("system");
+if (Platform.OS !== "web") {
+  Uniwind.setTheme("system");
+}
 
 const SafeAreaContainer = Platform.OS === "web" ? Fragment : SafeAreaProvider;
 
@@ -103,16 +105,27 @@ function RootNavigator() {
     Platform.OS === "web" &&
     !session &&
     ["/", "/support", "/privacy", "/terms"].includes(pathname);
+  const canRenderPublicAuthRoute =
+    Platform.OS === "web" &&
+    !session &&
+    ["/auth", "/auth/sign-up", "/auth/forgot-password", "/auth/reset"].includes(
+      pathname,
+    );
 
   useEffect(() => {
     if (!isLoading) {
       void SplashScreen.hideAsync();
+      if (Platform.OS === "web") {
+        document
+          .getElementById("revit-session-bootstrap")
+          ?.setAttribute("hidden", "");
+      }
     }
   }, [isLoading]);
 
   if (canRenderPublicRoute && pathname === "/") return <PublicLandingScreen />;
 
-  if (isLoading && !canRenderPublicRoute) {
+  if (isLoading && !canRenderPublicRoute && !canRenderPublicAuthRoute) {
     return <AuthLoadingScreen />;
   }
 

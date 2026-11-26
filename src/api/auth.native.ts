@@ -1,0 +1,212 @@
+import type { AuthChangeEvent } from "@supabase/supabase-js";
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
+import { supabase } from "@/lib/supabase/client";
+import {
+  isPasswordRecoveryUrl,
+  type AuthCallbackResult,
+  type AuthSessionSnapshot,
+} from "./auth.shared";
+import {
+  API_ERROR_CODES,
+  API_ERROR_MESSAGES,
+  normalizeApiError,
+} from "./errors";
+import { runApiRequest } from "./request";
+import { throwIfAuthError } from "./supabase-errors";
+
+type NativeAuthCallback = (
+  event: AuthChangeEvent,
+  session: AuthSessionSnapshot | null,
+) => void;
+
+export type { AuthCallbackResult, AuthSessionSnapshot } from "./auth.shared";
+export { isPasswordRecoveryUrl } from "./auth.shared";
+
+/** Keep Supabase's auth listener behind the same boundary as auth requests. */
+export function subscribeToAuthState(callback: NativeAuthCallback) {
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((event, session) => {
+    callback(
+      event,
+      session
+        ? { user: { id: session.user.id, email: session.user.email ?? null } }
+        : null,
+    );
+  });
+  return () => subscription.unsubscribe();
+}
+
+/** Exchange supported password-recovery callbacks without exposing the client to UI. */
+export async function handleAuthCallback(
+  url: string,
+): Promise<AuthCallbackResult> {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return isPasswordRecoveryUrl(url)
+      ? { status: "invalid" }
+      : { status: "ignored" };
+  }
+
+  const hashParams = new URLSearchParams(parsed.hash.replace(/^#/, ""));
+  const code = parsed.searchParams.get("code");
+  const accessToken = hashParams.get("access_token");
+  const refreshToken = hashParams.get("refresh_token");
+  const isRecoveryCallback =
+    url.includes("auth/update-password") &&
+    (parsed.searchParams.get("type") === "recovery" ||
+      hashParams.get("type") === "recovery" ||
+      Boolean(code) ||
+      Boolean(accessToken));
+
+  const callbackPath = parsed.pathname.replace(/\/$/, "");
+  if (!isRecoveryCallback && code && callbackPath === "/auth") {
+    try {
+      await runApiRequest(
+        async () => {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          throwIfAuthError(error, API_ERROR_MESSAGES.SIGN_IN);
+        },
+        { message: API_ERROR_MESSAGES.SIGN_IN },
+      );
+      return { status: "signed-in" };
+    } catch {
+      return { status: "invalid" };
+    }
+  }
+
+  if (!isRecoveryCallback) {
+    return isPasswordRecoveryUrl(url)
+      ? { status: "invalid" }
+      : { status: "ignored" };
+  }
+
+  if (!code && !(accessToken && refreshToken)) return { status: "invalid" };
+
+  try {
+    await runApiRequest(
+      async () => {
+        const { error } = code
+          ? await supabase.auth.exchangeCodeForSession(code)
+          : await supabase.auth.setSession({
+              access_token: accessToken as string,
+              refresh_token: refreshToken as string,
+            });
+        throwIfAuthError(error, API_ERROR_MESSAGES.PASSWORD_RESET_LINK_INVALID);
+      },
+      { message: API_ERROR_MESSAGES.PASSWORD_RESET_LINK_INVALID },
+    );
+    return { status: "recovery" };
+  } catch (error) {
+    const normalized = normalizeApiError(
+      error,
+      API_ERROR_MESSAGES.PASSWORD_RESET_LINK_UNAVAILABLE,
+    );
+    return {
+      status:
+        normalized.code === API_ERROR_CODES.NETWORK_ERROR ||
+        normalized.code === API_ERROR_CODES.TIMEOUT ||
+        normalized.code === API_ERROR_CODES.SERVER_ERROR
+          ? "unavailable"
+          : "invalid",
+    };
+  }
+}
+
+export function signIn(email: string, password: string) {
+  return runApiRequest(
+    async () => {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      throwIfAuthError(error, API_ERROR_MESSAGES.SIGN_IN);
+      return data;
+    },
+    { message: API_ERROR_MESSAGES.SIGN_IN },
+  );
+}
+
+export function signInWithGoogle() {
+  return runApiRequest(
+    async () => {
+      const redirectTo = Linking.createURL("auth");
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo,
+          skipBrowserRedirect: true,
+        },
+      });
+      throwIfAuthError(error, API_ERROR_MESSAGES.SIGN_IN);
+
+      if (!data.url) throw new Error(API_ERROR_MESSAGES.SIGN_IN);
+
+      const result = await WebBrowser.openAuthSessionAsync(
+        data.url,
+        redirectTo,
+      );
+      if (result.type !== "success") return;
+
+      const callbackUrl = new URL(result.url);
+      const code = callbackUrl.searchParams.get("code");
+      if (!code) throw new Error(API_ERROR_MESSAGES.SIGN_IN);
+
+      const { error: exchangeError } =
+        await supabase.auth.exchangeCodeForSession(code);
+      throwIfAuthError(exchangeError, API_ERROR_MESSAGES.SIGN_IN);
+    },
+    { message: API_ERROR_MESSAGES.SIGN_IN },
+  );
+}
+
+export function signUp(email: string, password: string) {
+  return runApiRequest(
+    async () => {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      throwIfAuthError(error, API_ERROR_MESSAGES.SIGN_UP);
+      return data;
+    },
+    { message: API_ERROR_MESSAGES.SIGN_UP },
+  );
+}
+
+export function requestPasswordReset(email: string, redirectTo: string) {
+  return runApiRequest(
+    async () => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      });
+      throwIfAuthError(error, API_ERROR_MESSAGES.RESET_PASSWORD);
+    },
+    { message: API_ERROR_MESSAGES.RESET_PASSWORD },
+  );
+}
+
+export function updatePassword(password: string) {
+  return runApiRequest(
+    async () => {
+      const { error } = await supabase.auth.updateUser({ password });
+      throwIfAuthError(error, API_ERROR_MESSAGES.UPDATE_PASSWORD);
+    },
+    { message: API_ERROR_MESSAGES.UPDATE_PASSWORD },
+  );
+}
+
+export function signOut() {
+  return runApiRequest(
+    async () => {
+      const { error } = await supabase.auth.signOut();
+      throwIfAuthError(error, API_ERROR_MESSAGES.SIGN_OUT);
+    },
+    { message: API_ERROR_MESSAGES.SIGN_OUT },
+  );
+}
+
+/** Clear this device's session after a server-side account deletion. */
+export async function clearLocalSession(): Promise<void> {
+  await supabase.auth.signOut({ scope: "local" });
+}

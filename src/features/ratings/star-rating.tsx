@@ -1,4 +1,5 @@
-import { Star, StarHalf } from "lucide-react-native";
+import Star from "lucide-react-native/icons/star";
+import StarHalf from "lucide-react-native/icons/star-half";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Platform, View, type ViewStyle } from "react-native";
 

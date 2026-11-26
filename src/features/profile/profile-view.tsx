@@ -1,5 +1,6 @@
 import { Link } from "expo-router";
-import { UserCheck, UserPlus } from "lucide-react-native";
+import UserCheck from "lucide-react-native/icons/user-check";
+import UserPlus from "lucide-react-native/icons/user-plus";
 import {
   ActivityIndicator,
   Pressable,

@@ -1,0 +1,19 @@
+{
+  "name": "revit-auth-session-store",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-26",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "SESSION_STORE",
+        "class_name": "SessionStore"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["SessionStore"]
+    }
+  ]
+}

@@ -1,7 +1,10 @@
 import { ScrollView } from "react-native";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
-import { ChevronRight, Edit3, MapPin, Trash2 } from "lucide-react-native";
+import ChevronRight from "lucide-react-native/icons/chevron-right";
+import Edit3 from "lucide-react-native/icons/pen-line";
+import MapPin from "lucide-react-native/icons/map-pin";
+import Trash2 from "lucide-react-native/icons/trash-2";
 import { useState } from "react";
 import { Platform, Pressable, View } from "react-native";
 import { AppHeader } from "@/components/navigation/app-header";

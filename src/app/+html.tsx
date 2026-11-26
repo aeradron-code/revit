@@ -35,6 +35,7 @@ export default function RootHtml({
     useServerDocumentContext();
   const metadata = pageMetadata[pathname as keyof typeof pageMetadata];
   const isIndexablePage = metadata !== undefined;
+  const isQaBuild = process.env.REVIT_QA_NO_INDEX === "true";
   const canonicalUrl = isIndexablePage
     ? `https://revitapp.in${pathname === "/" ? "/" : pathname}`
     : null;
@@ -55,7 +56,9 @@ export default function RootHtml({
         <meta name="description" content={description} />
         <meta
           name="robots"
-          content={isIndexablePage ? "index, follow" : "noindex, follow"}
+          content={
+            isQaBuild || !isIndexablePage ? "noindex, follow" : "index, follow"
+          }
         />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Revit" />
@@ -82,10 +85,23 @@ export default function RootHtml({
           content="https://revitapp.in/revit-link-preview.png"
         />
         <ScrollViewStyleReset />
+        <script src="/theme-init.js" />
         {headNodes}
       </head>
       <body {...bodyAttributes}>
         {children}
+        {pathname === "/" ? (
+          <div
+            id="revit-session-bootstrap"
+            className="session-bootstrap-overlay"
+            hidden
+            role="status"
+            aria-live="polite"
+          >
+            <span className="session-bootstrap-spinner" aria-hidden="true" />
+            <span>Restoring your session…</span>
+          </div>
+        ) : null}
         {bodyNodes}
       </body>
     </html>

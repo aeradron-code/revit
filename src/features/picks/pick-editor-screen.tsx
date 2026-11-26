@@ -1,6 +1,9 @@
 import { ScrollView } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { ChevronDown, ChevronUp, MapPin, Trash2 } from "lucide-react-native";
+import ChevronDown from "lucide-react-native/icons/chevron-down";
+import ChevronUp from "lucide-react-native/icons/chevron-up";
+import MapPin from "lucide-react-native/icons/map-pin";
+import Trash2 from "lucide-react-native/icons/trash-2";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 

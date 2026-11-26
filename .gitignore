@@ -20,6 +20,8 @@ expo-env.d.ts
 .env
 .env.*
 !.env.example
+.dev.vars
+.dev.vars.*
 
 # Tests and tooling
 /coverage/
@@ -46,6 +48,7 @@ pnpm-debug.log*
 
 # Hosting output
 /.vercel/
+.wrangler/
 
 # Operating-system files
 .DS_Store

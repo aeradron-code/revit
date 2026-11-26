@@ -1,14 +1,12 @@
 import { Image } from "expo-image";
 import { type Href, Link, usePathname } from "expo-router";
-import {
-  Bookmark,
-  ChevronRight,
-  Compass,
-  House,
-  Plus,
-  PlusCircle,
-  UsersRound,
-} from "lucide-react-native";
+import Bookmark from "lucide-react-native/icons/bookmark";
+import ChevronRight from "lucide-react-native/icons/chevron-right";
+import Compass from "lucide-react-native/icons/compass";
+import House from "lucide-react-native/icons/house";
+import Plus from "lucide-react-native/icons/plus";
+import PlusCircle from "lucide-react-native/icons/circle-plus";
+import UsersRound from "lucide-react-native/icons/users-round";
 import type { ReactNode } from "react";
 import { Pressable, View } from "react-native";
 

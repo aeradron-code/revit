@@ -1,5 +1,7 @@
 import { Redirect, router, useLocalSearchParams } from "expo-router";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react-native";
+import MoreVertical from "lucide-react-native/icons/ellipsis-vertical";
+import Pencil from "lucide-react-native/icons/pencil";
+import Trash2 from "lucide-react-native/icons/trash-2";
 import { useRef, useState } from "react";
 import {
   Modal,
@@ -435,10 +437,7 @@ function PostDetailLoading() {
   // Keep the loading state within the viewport even while the post data is
   // unavailable. The extra margin covers header and safe-area differences.
   const availableHeight = Math.max(0, height - 64 - verticalPadding - 56);
-  const mediaHeight = Math.max(
-    0,
-    Math.min(200, availableHeight - 392),
-  );
+  const mediaHeight = Math.max(0, Math.min(200, availableHeight - 392));
 
   return (
     <PostDetailFrame onBack={goBackFromPost} title="Post">

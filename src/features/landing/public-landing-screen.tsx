@@ -1,17 +1,21 @@
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import {
-  ArrowRight,
-  Bookmark,
-  Coffee,
-  Layers,
-  MapPin,
-  MessageCircle,
-  Star,
-  Users,
-} from "lucide-react-native";
+import ArrowRight from "lucide-react-native/icons/arrow-right";
+import Bookmark from "lucide-react-native/icons/bookmark";
+import Coffee from "lucide-react-native/icons/coffee";
+import Layers from "lucide-react-native/icons/layers";
+import MapPin from "lucide-react-native/icons/map-pin";
+import MessageCircle from "lucide-react-native/icons/message-circle";
+import Star from "lucide-react-native/icons/star";
+import Users from "lucide-react-native/icons/users";
 import { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import {
+  Image as NativeImage,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -148,12 +152,28 @@ export function PublicLandingScreen() {
               </View>
               <Card className="overflow-hidden gap-0 rounded-xl border-border pt-0 shadow-sm md:flex-1">
                 <View className="relative">
-                  <Image
-                    source={require("../../../assets/images/landing-cafe.jpg")}
-                    accessibilityLabel="Coffee and a cardamom bun beside an open book"
-                    contentFit="cover"
-                    style={{ width: "100%", aspectRatio: 2.15 }}
-                  />
+                  {Platform.OS === "web" ? (
+                    <img
+                      src={
+                        require("../../../assets/images/landing-cafe.jpg") as unknown as string
+                      }
+                      alt="Coffee and a cardamom bun beside an open book"
+                      fetchPriority="high"
+                      decoding="async"
+                      style={{
+                        width: "100%",
+                        aspectRatio: 2.15,
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <NativeImage
+                      source={require("../../../assets/images/landing-cafe.jpg")}
+                      accessibilityLabel="Coffee and a cardamom bun beside an open book"
+                      resizeMode="cover"
+                      style={{ width: "100%", aspectRatio: 2.15 }}
+                    />
+                  )}
                   <Badge
                     variant="secondary"
                     className="absolute bottom-3 left-3 bg-card"

@@ -1,5 +1,6 @@
 import { Image } from "expo-image";
-import { ChevronLeft, ChevronRight } from "lucide-react-native";
+import ChevronLeft from "lucide-react-native/icons/chevron-left";
+import ChevronRight from "lucide-react-native/icons/chevron-right";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,

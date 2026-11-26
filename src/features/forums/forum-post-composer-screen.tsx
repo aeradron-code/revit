@@ -4,7 +4,7 @@ import { randomUUID } from "expo-crypto";
 import { useEffect, useRef, useState } from "react";
 import { View } from "react-native";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
-import { UsersRound } from "lucide-react-native";
+import UsersRound from "lucide-react-native/icons/users-round";
 import type { Entity } from "@/api/entities";
 import { API_ERROR_MESSAGES, normalizeApiError } from "@/api/errors";
 import type { AskCreationAttempt } from "@/api/posts";
