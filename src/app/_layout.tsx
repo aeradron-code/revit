@@ -110,6 +110,16 @@ function RootNavigator() {
     }
   }, [isLoading]);
 
+  useEffect(() => {
+    if (
+      Platform.OS === "web" &&
+      !isLoading &&
+      typeof document !== "undefined"
+    ) {
+      document.documentElement.removeAttribute("data-revit-auth-pending");
+    }
+  }, [isLoading]);
+
   if (canRenderPublicRoute && pathname === "/") return <PublicLandingScreen />;
 
   if (isLoading && !canRenderPublicRoute) {

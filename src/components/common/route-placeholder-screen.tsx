@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react-native";
+import Sparkles from "lucide-react-native/icons/sparkles";
 import { ScrollView, View } from "react-native";
 
 import { Icon } from "@/components/ui/icon";

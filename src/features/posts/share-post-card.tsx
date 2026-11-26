@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { MapPin } from "lucide-react-native";
+import MapPin from "lucide-react-native/icons/map-pin";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 

@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { Users } from "lucide-react-native";
+import Users from "lucide-react-native/icons/users";
 import { useMemo, useState } from "react";
 import { Pressable, View } from "react-native";
 

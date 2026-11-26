@@ -1,4 +1,5 @@
-import { ArrowLeft, X } from "lucide-react-native";
+import ArrowLeft from "lucide-react-native/icons/arrow-left";
+import X from "lucide-react-native/icons/x";
 import type { ReactNode } from "react";
 import { View } from "react-native";
 

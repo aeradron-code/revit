@@ -133,3 +133,22 @@
         radial-gradient(ellipse 34rem 28rem at 13% 21%, rgb(37 99 235 / 12%), transparent 72%),
         radial-gradient(ellipse 30rem 24rem at 94% 11%, rgb(124 58 237 / 7%), transparent 72%);
 }
+
+#revit-auth-bootstrap {
+    display: none;
+}
+
+html[data-revit-auth-pending="true"] #root {
+    visibility: hidden;
+}
+
+html[data-revit-auth-pending="true"] #revit-auth-bootstrap {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: grid;
+    place-items: center;
+    background: #08090d;
+    color: #f4f6fc;
+    font: 500 0.9375rem/1.5 system-ui, sans-serif;
+}

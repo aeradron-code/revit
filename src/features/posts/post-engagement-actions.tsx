@@ -1,5 +1,6 @@
 import { Link } from "expo-router";
-import { MessageCircle, Star } from "lucide-react-native";
+import MessageCircle from "lucide-react-native/icons/message-circle";
+import Star from "lucide-react-native/icons/star";
 import { View } from "react-native";
 
 import { Button } from "@/components/ui/button";

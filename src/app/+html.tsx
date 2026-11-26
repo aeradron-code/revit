@@ -35,6 +35,7 @@ export default function RootHtml({
     useServerDocumentContext();
   const metadata = pageMetadata[pathname as keyof typeof pageMetadata];
   const isIndexablePage = metadata !== undefined;
+  const isQaBuild = process.env.REVIT_QA_NO_INDEX === "true";
   const canonicalUrl = isIndexablePage
     ? `https://revitapp.in${pathname === "/" ? "/" : pathname}`
     : null;
@@ -55,7 +56,9 @@ export default function RootHtml({
         <meta name="description" content={description} />
         <meta
           name="robots"
-          content={isIndexablePage ? "index, follow" : "noindex, follow"}
+          content={
+            isQaBuild || !isIndexablePage ? "noindex, follow" : "index, follow"
+          }
         />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Revit" />
@@ -83,8 +86,32 @@ export default function RootHtml({
         />
         <ScrollViewStyleReset />
         {headNodes}
+        {pathname === "/" ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                try {
+                  const hasPersistedSupabaseSession = Object.keys(window.localStorage).some(
+                    (key) => /^sb-.+-auth-token(?:\\.\\d+)?$/.test(key),
+                  );
+
+                  if (hasPersistedSupabaseSession) {
+                    document.documentElement.setAttribute("data-revit-auth-pending", "true");
+                  }
+                } catch {
+                  // If browser storage is unavailable, let the normal app render.
+                }
+              `,
+            }}
+          />
+        ) : null}
       </head>
       <body {...bodyAttributes}>
+        {pathname === "/" ? (
+          <div id="revit-auth-bootstrap" role="status" aria-live="polite">
+            Restoring your session…
+          </div>
+        ) : null}
         {children}
         {bodyNodes}
       </body>

@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { MessageCircle } from "lucide-react-native";
+import MessageCircle from "lucide-react-native/icons/message-circle";
 import { memo, useCallback } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { useRef, useState } from "react";

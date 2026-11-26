@@ -1,5 +1,5 @@
 import * as ImagePicker from "expo-image-picker";
-import { ImagePlus } from "lucide-react-native";
+import ImagePlus from "lucide-react-native/icons/image-plus";
 import { useState } from "react";
 import { View } from "react-native";
 
@@ -16,10 +16,7 @@ import {
   CarouselImageRemoveButton,
   SharedImageCarousel,
 } from "./shared-image-carousel";
-import {
-  getFallbackImageIdentity,
-  getImageIdentity,
-} from "./image-identity";
+import { getFallbackImageIdentity, getImageIdentity } from "./image-identity";
 
 export function ImagePickerCarousel({
   images,
@@ -98,9 +95,7 @@ export function ImagePickerCarousel({
           };
         }),
       );
-      const seenIdentities = new Set(
-        images.map(getFallbackImageIdentity),
-      );
+      const seenIdentities = new Set(images.map(getFallbackImageIdentity));
       const uniqueAssets = identifiedAssets
         .filter(({ identity }) => {
           if (seenIdentities.has(identity)) return false;
@@ -110,8 +105,7 @@ export function ImagePickerCarousel({
         .map(({ asset }) => asset);
       const additions = replaceExisting
         ? uniqueAssets.slice(0, pickerLimit)
-        : uniqueAssets
-            .slice(0, Math.max(0, maxImages - images.length));
+        : uniqueAssets.slice(0, Math.max(0, maxImages - images.length));
       const nextImages = replaceExisting
         ? additions
         : [...images, ...additions];

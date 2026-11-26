@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
 import { Image } from "expo-image";
-import { Bookmark } from "lucide-react-native";
+import Bookmark from "lucide-react-native/icons/bookmark";
 import { useMemo, useState } from "react";
 import { Pressable, View } from "react-native";
 import type { PickDirectoryItem } from "@/api/picks";

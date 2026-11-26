@@ -1,7 +1,9 @@
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
-import { ChevronRight, MapPin, Trash2 } from "lucide-react-native";
+import ChevronRight from "lucide-react-native/icons/chevron-right";
+import MapPin from "lucide-react-native/icons/map-pin";
+import Trash2 from "lucide-react-native/icons/trash-2";
 import {
   Pressable,
   RefreshControl,

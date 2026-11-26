@@ -1,12 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, router } from "expo-router";
-import {
-  ArrowRight,
-  MessageCircleQuestion,
-  RefreshCw,
-  Sparkles,
-  Star,
-} from "lucide-react-native";
+import ArrowRight from "lucide-react-native/icons/arrow-right";
+import MessageCircleQuestion from "lucide-react-native/icons/message-circle-question-mark";
+import RefreshCw from "lucide-react-native/icons/refresh-cw";
+import Sparkles from "lucide-react-native/icons/sparkles";
+import Star from "lucide-react-native/icons/star";
 import { useState } from "react";
 import { Platform, Pressable, RefreshControl, View } from "react-native";
 

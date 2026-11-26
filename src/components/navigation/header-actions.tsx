@@ -1,5 +1,6 @@
 import { Link, router } from "expo-router";
-import { Bell, LogOut } from "lucide-react-native";
+import Bell from "lucide-react-native/icons/bell";
+import LogOut from "lucide-react-native/icons/log-out";
 import { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 
@@ -118,7 +119,11 @@ export function HeaderActions({ className }: { className?: string }) {
                       {profile?.display_name ?? "Your profile"}
                     </Text>
                     {profile?.username ? (
-                      <Text variant="muted" className="text-sm" numberOfLines={1}>
+                      <Text
+                        variant="muted"
+                        className="text-sm"
+                        numberOfLines={1}
+                      >
                         @{profile.username}
                       </Text>
                     ) : null}

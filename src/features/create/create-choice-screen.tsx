@@ -1,11 +1,9 @@
 import { Link } from "expo-router";
-import {
-  ArrowRight,
-  Bookmark,
-  MessageCircleQuestion,
-  Star,
-  UsersRound,
-} from "lucide-react-native";
+import ArrowRight from "lucide-react-native/icons/arrow-right";
+import Bookmark from "lucide-react-native/icons/bookmark";
+import MessageCircleQuestion from "lucide-react-native/icons/message-circle-question-mark";
+import Star from "lucide-react-native/icons/star";
+import UsersRound from "lucide-react-native/icons/users-round";
 import { ScrollView, View } from "react-native";
 
 import { Button } from "@/components/ui/button";

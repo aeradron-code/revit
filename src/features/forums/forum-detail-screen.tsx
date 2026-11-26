@@ -1,6 +1,9 @@
 import { ScrollView } from "react-native";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
-import { Globe, Plus, Trash2, Users } from "lucide-react-native";
+import Globe from "lucide-react-native/icons/globe";
+import Plus from "lucide-react-native/icons/plus";
+import Trash2 from "lucide-react-native/icons/trash-2";
+import Users from "lucide-react-native/icons/users";
 import { useState } from "react";
 import { useWindowDimensions, View } from "react-native";
 

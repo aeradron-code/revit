@@ -1,4 +1,4 @@
-import { MoreVertical } from "lucide-react-native";
+import MoreVertical from "lucide-react-native/icons/ellipsis-vertical";
 import { type ElementRef, useRef, useState } from "react";
 import { Modal, Pressable, useWindowDimensions, View } from "react-native";
 

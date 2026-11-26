@@ -1,4 +1,4 @@
-import { ChevronUp } from "lucide-react-native";
+import ChevronUp from "lucide-react-native/icons/chevron-up";
 import { View } from "react-native";
 
 import { Button } from "@/components/ui/button";

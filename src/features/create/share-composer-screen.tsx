@@ -1,7 +1,8 @@
 import type * as ImagePicker from "expo-image-picker";
 import { randomUUID } from "expo-crypto";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { ArrowRight, MapPin } from "lucide-react-native";
+import ArrowRight from "lucide-react-native/icons/arrow-right";
+import MapPin from "lucide-react-native/icons/map-pin";
 import { useEffect, useRef, useState } from "react";
 import { View } from "react-native";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
