@@ -97,6 +97,8 @@ function RootNavigator() {
     profileError,
     clearPasswordRecoveryError,
     retryProfile,
+    retrySession,
+    sessionError,
     session,
   } = useAuth();
   const needsOnboarding = needsProfileCompletion(profile);
@@ -122,6 +124,10 @@ function RootNavigator() {
       }
     }
   }, [isLoading]);
+
+  if (sessionError) {
+    return <SessionUnavailableScreen onRetry={() => void retrySession()} />;
+  }
 
   if (canRenderPublicRoute && pathname === "/") return <PublicLandingScreen />;
 
@@ -321,6 +327,21 @@ function AuthLoadingScreen() {
       <Text variant="muted">
         One moment while we securely restore your account.
       </Text>
+    </View>
+  );
+}
+
+function SessionUnavailableScreen({ onRetry }: { onRetry: () => void }) {
+  return (
+    <View className="flex-1 items-center justify-center gap-3 bg-background px-6">
+      <Text variant="large">Can’t check your session</Text>
+      <Text className="max-w-md text-center" variant="muted">
+        We couldn’t verify whether you’re signed in. Check your connection and
+        try again.
+      </Text>
+      <Button onPress={onRetry}>
+        <Text>Retry</Text>
+      </Button>
     </View>
   );
 }

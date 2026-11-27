@@ -295,7 +295,22 @@ export class SessionStore {
     const encrypted = await this.state.storage.get<string>(RECORD_KEY);
     if (!encrypted) return null;
 
-    const record = await this.decryptRecord(encrypted);
+    // Validate the configured key separately so a missing or malformed key
+    // remains an operational error instead of being mistaken for bad data.
+    const key = await getEncryptionKey(this.env.SESSION_ENCRYPTION_KEY);
+    let record: SessionRecord;
+    try {
+      record = await this.decryptRecord(encrypted, key);
+    } catch {
+      console.warn(
+        "[session-store] Discarding an unreadable persisted session record.",
+      );
+      if (startingRevision === this.stateRevision) {
+        await this.state.storage.delete(RECORD_KEY);
+      }
+      return null;
+    }
+
     if (!this.isValidRecord(record) || record.expires_at <= Date.now()) {
       if (startingRevision === this.stateRevision) {
         await this.state.storage.delete(RECORD_KEY);
@@ -333,12 +348,14 @@ export class SessionStore {
     return `${bytesToBase64(iv)}.${bytesToBase64(new Uint8Array(ciphertext))}`;
   }
 
-  private async decryptRecord(encrypted: string): Promise<SessionRecord> {
+  private async decryptRecord(
+    encrypted: string,
+    key: CryptoKey,
+  ): Promise<SessionRecord> {
     const [encodedIv, encodedCiphertext] = encrypted.split(".");
     if (!encodedIv || !encodedCiphertext) {
       throw new Error("Invalid encrypted session record.");
     }
-    const key = await getEncryptionKey(this.env.SESSION_ENCRYPTION_KEY);
     const plaintext = await crypto.subtle.decrypt(
       {
         name: "AES-GCM",

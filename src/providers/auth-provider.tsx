@@ -16,6 +16,7 @@ import {
   handleAuthCallback,
   type AuthSessionSnapshot,
   isPasswordRecoveryUrl,
+  retryAuthState,
   signOut as signOutRequest,
   subscribeToAuthState,
 } from "@/api/auth";
@@ -30,9 +31,11 @@ type AuthContextValue = {
   isLoading: boolean;
   isPasswordRecovery: boolean;
   passwordRecoveryError: string | null;
+  sessionError: Error | null;
   profile: Profile | null;
   profileError: Error | null;
   retryProfile: () => Promise<void>;
+  retrySession: () => Promise<void>;
   session: AuthSessionSnapshot | null;
   signOut: () => Promise<void>;
   updateProfile: (input: UpdateProfileInput) => Promise<void>;
@@ -54,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [session, setSession] = useState<AuthSessionSnapshot | null>(null);
   const [isSessionLoading, setIsSessionLoading] = useState(true);
+  const [sessionError, setSessionError] = useState<Error | null>(null);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const [passwordRecoveryError, setPasswordRecoveryError] = useState<
     string | null
@@ -67,9 +71,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    const unsubscribe = subscribeToAuthState((event, nextSession) => {
+    const unsubscribe = subscribeToAuthState((event, nextSession, error) => {
       if (!isMounted) return;
 
+      if (error) {
+        setSessionError(error);
+        setIsSessionLoading(false);
+        return;
+      }
+
+      setSessionError(null);
       const nextUserId = nextSession?.user.id ?? null;
       if (
         previousUserId.current !== null &&
@@ -152,6 +163,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await profileQuery.refetch();
   }, [profileQuery.refetch]);
 
+  const retrySession = useCallback(async () => {
+    setSessionError(null);
+    setIsSessionLoading(true);
+    try {
+      await retryAuthState();
+    } catch (error) {
+      setSessionError(
+        error instanceof Error
+          ? error
+          : new Error("Could not load the web auth session."),
+      );
+      setIsSessionLoading(false);
+    }
+  }, []);
+
   const updateProfile = useCallback(
     async (input: UpdateProfileInput) => {
       await profileMutation.mutateAsync(input);
@@ -193,6 +219,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       profileError,
       retryProfile,
+      retrySession,
+      sessionError,
       session,
       signOut,
       updateProfile,
@@ -207,6 +235,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       profileError,
       retryProfile,
+      retrySession,
+      sessionError,
       session,
       signOut,
       updateProfile,

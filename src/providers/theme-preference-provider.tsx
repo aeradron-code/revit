@@ -16,7 +16,8 @@ type ThemePreferenceContextValue = {
   setPreference: (preference: ThemePreference) => void;
 };
 
-const STORAGE_KEY = "revit:theme-preference";
+const WEB_STORAGE_KEY = "revit:theme-preference";
+const NATIVE_STORAGE_KEY = "revit.theme-preference";
 const ThemePreferenceContext =
   createContext<ThemePreferenceContextValue | null>(null);
 
@@ -24,8 +25,8 @@ async function readPreference(): Promise<ThemePreference | null> {
   try {
     const value =
       Platform.OS === "web"
-        ? (globalThis.localStorage?.getItem(STORAGE_KEY) ?? null)
-        : await SecureStore.getItemAsync(STORAGE_KEY);
+        ? (globalThis.localStorage?.getItem(WEB_STORAGE_KEY) ?? null)
+        : await SecureStore.getItemAsync(NATIVE_STORAGE_KEY);
     return value === "light" || value === "dark" ? value : null;
   } catch {
     return null;
@@ -34,10 +35,10 @@ async function readPreference(): Promise<ThemePreference | null> {
 
 async function writePreference(value: ThemePreference) {
   if (Platform.OS === "web") {
-    globalThis.localStorage?.setItem(STORAGE_KEY, value);
+    globalThis.localStorage?.setItem(WEB_STORAGE_KEY, value);
     return;
   }
-  await SecureStore.setItemAsync(STORAGE_KEY, value);
+  await SecureStore.setItemAsync(NATIVE_STORAGE_KEY, value);
 }
 
 export function ThemePreferenceProvider({ children }: { children: ReactNode }) {

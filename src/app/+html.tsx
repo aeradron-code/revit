@@ -43,6 +43,10 @@ export default function RootHtml({
   const description =
     metadata?.description ??
     "Discover finds, share ratings and reviews, and ask your circle for advice.";
+  const needsSessionBootstrap =
+    pathname === "/" ||
+    pathname === "/auth" ||
+    pathname?.startsWith("/auth/") === true;
 
   return (
     <html lang="en" {...htmlAttributes}>
@@ -90,7 +94,7 @@ export default function RootHtml({
       </head>
       <body {...bodyAttributes}>
         {children}
-        {pathname === "/" ? (
+        {needsSessionBootstrap ? (
           <div
             id="revit-session-bootstrap"
             className="session-bootstrap-overlay"
