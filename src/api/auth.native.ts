@@ -18,6 +18,7 @@ import { throwIfAuthError } from "./supabase-errors";
 type NativeAuthCallback = (
   event: AuthChangeEvent,
   session: AuthSessionSnapshot | null,
+  error?: Error,
 ) => void;
 
 export type { AuthCallbackResult, AuthSessionSnapshot } from "./auth.shared";
@@ -36,6 +37,12 @@ export function subscribeToAuthState(callback: NativeAuthCallback) {
     );
   });
   return () => subscription.unsubscribe();
+}
+
+/** Native auth state is managed by Supabase's listener; this keeps the shared API shape. */
+export async function retryAuthState(): Promise<void> {
+  const { error } = await supabase.auth.getSession();
+  throwIfAuthError(error, API_ERROR_MESSAGES.SIGN_IN);
 }
 
 /** Exchange supported password-recovery callbacks without exposing the client to UI. */

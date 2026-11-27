@@ -20,6 +20,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "expo": "~58.0.26",
+    "expo-build-properties": "~58.0.12",
     "expo-constants": "~58.0.16",
     "expo-crypto": "~58.0.8",
     "expo-dev-client": "~58.0.21",
@@ -66,15 +67,16 @@
     "@playwright/test": "^1.63.0",
     "@types/react": "~19.3.0",
     "supabase": "^2.114.0",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "wrangler": "^4.168.0"
   },
   "scripts": {
     "start": "expo start --go",
     "start:dev-client": "expo start --dev-client",
+    "web": "node ./scripts/dev-web.mjs",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
     "check:api-boundary": "node ./scripts/check-api-boundary.mjs",
     "test:api": "node --test scripts/test-api-errors.cjs",
     "lint": "biome lint . && pnpm check:api-boundary",
@@ -84,7 +86,7 @@
     "check": "pnpm lint && pnpm exec tsc --noEmit",
     "web:build": "pnpm exec expo export --platform web",
     "web:preview": "pnpm web:build && eas deploy --alias preview",
-    "android:local": "eas build --platform android --profile preview --local",
+    "android:local": "EAS_LOCAL_BUILD_ARTIFACTS_DIR=./apks eas build --platform android --profile preview --local",
     "android:preview": "eas build --platform android --profile preview",
     "android:prod": "eas build --platform android --profile production"
   },

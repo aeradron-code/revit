@@ -19,6 +19,7 @@ type WebAuthStateResponse = {
 type WebAuthCallback = (
   event: AuthChangeEvent,
   session: AuthSessionSnapshot | null,
+  error?: Error,
 ) => void;
 
 const webAuthSubscribers = new Set<WebAuthCallback>();
@@ -42,11 +43,14 @@ function notifyWebAuthState(
   }
 }
 
-async function readWebAuthState(): Promise<WebAuthStateResponse> {
+async function readWebAuthState(
+  signal?: AbortSignal,
+): Promise<WebAuthStateResponse> {
   const response = await fetch("/api/auth/session", {
     credentials: "same-origin",
     cache: "no-store",
     headers: { Accept: "application/json" },
+    signal,
   });
   if (!response.ok) {
     const error = new Error("Could not load the web auth session.") as Error & {
@@ -56,6 +60,14 @@ async function readWebAuthState(): Promise<WebAuthStateResponse> {
     throw error;
   }
   return (await response.json()) as WebAuthStateResponse;
+}
+
+function readWebAuthStateWithRetry() {
+  return runApiRequest((signal) => readWebAuthState(signal), {
+    message: "Could not load the web auth session.",
+    retries: 1,
+    timeoutMs: 5_000,
+  });
 }
 
 async function postWebAuth<T>(
@@ -106,7 +118,7 @@ function subscribeToWebAuthState(callback: WebAuthCallback) {
   };
   const refresh = async () => {
     try {
-      const state = await readWebAuthState();
+      const state = await readWebAuthStateWithRetry();
       const nextUserId = state.session?.user.id ?? null;
       const event: AuthChangeEvent =
         nextUserId === currentUserId
@@ -128,9 +140,19 @@ function subscribeToWebAuthState(callback: WebAuthCallback) {
   } catch {
     channel = null;
   }
-  void readWebAuthState()
+  void readWebAuthStateWithRetry()
     .then((state) => publish("INITIAL_SESSION", state))
-    .catch(() => publish("INITIAL_SESSION", { session: null }));
+    .catch((error: unknown) => {
+      if (active) {
+        callback(
+          "INITIAL_SESSION",
+          null,
+          error instanceof Error
+            ? error
+            : new Error("Could not load the web auth session."),
+        );
+      }
+    });
 
   return () => {
     active = false;
@@ -144,6 +166,16 @@ function subscribeToWebAuthState(callback: WebAuthCallback) {
 export function subscribeToAuthState(callback: WebAuthCallback) {
   webAuthSubscribers.add(callback);
   return subscribeToWebAuthState(callback);
+}
+
+export async function retryAuthState(): Promise<void> {
+  const state = await readWebAuthStateWithRetry();
+  const event: AuthChangeEvent = state.isPasswordRecovery
+    ? "PASSWORD_RECOVERY"
+    : state.session
+      ? "SIGNED_IN"
+      : "SIGNED_OUT";
+  notifyWebAuthState(event, state.session);
 }
 
 export async function handleAuthCallback(

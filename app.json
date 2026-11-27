@@ -32,7 +32,12 @@
         {
           "backgroundColor": "#070C1B",
           "image": "./assets/app/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 76,
+          "android": {
+            "backgroundColor": "#070C1B",
+            "image": "./assets/app/splash-icon.png",
+            "imageWidth": 100
+          }
         }
       ],
       "expo-secure-store",
@@ -47,7 +52,8 @@
       ],
       "expo-font",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-build-properties"
     ],
     "experiments": {
       "typedRoutes": true,

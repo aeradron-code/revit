@@ -11,7 +11,10 @@
     },
     "preview": {
       "distribution": "internal",
-      "environment": "preview"
+      "environment": "preview",
+      "env": {
+        "ANDROID_BUILD_ARCHS": "arm64-v8a"
+      }
     },
     "production": {
       "autoIncrement": true,
